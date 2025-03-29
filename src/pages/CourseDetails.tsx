@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Share2, Star, Clock, BarChart2, Users, Globe, CheckCircle, PlayCircle, FileText, MessageSquare, Award } from "lucide-react";
 import { allCourses } from "@/data/courseData";
 import { useAuth } from "@/contexts/AuthContext";
+import CourseCard from "@/components/CourseCard";
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -18,7 +18,6 @@ const CourseDetails = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   
-  // Find the course with the matching ID
   const course = allCourses.find((c) => c.id === courseId);
   
   if (!course) {
@@ -39,7 +38,6 @@ const CourseDetails = () => {
     );
   }
   
-  // Mock course sections and lessons
   const courseSections = [
     {
       id: "1",
@@ -87,7 +85,6 @@ const CourseDetails = () => {
     },
   ];
   
-  // Total course content
   const totalLessons = courseSections.reduce((total, section) => total + section.lessons.length, 0);
   const totalHours = courseSections.reduce((total, section) => {
     const durationMatch = section.duration.match(/(\d+)h\s*(\d+)min|(\d+)h|(\d+)\s*min/);
@@ -108,7 +105,6 @@ const CourseDetails = () => {
     return total + hours + (minutes / 60);
   }, 0);
   
-  // Mock reviews
   const reviews = [
     {
       id: "1",
@@ -136,10 +132,8 @@ const CourseDetails = () => {
     },
   ];
   
-  // Calculate average rating
   const averageRating = Math.round(reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length * 10) / 10;
   
-  // Handle enroll button click
   const handleEnroll = () => {
     if (!isAuthenticated) {
       toast({
@@ -158,7 +152,6 @@ const CourseDetails = () => {
     navigate("/dashboard");
   };
   
-  // Handle share button click
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast({
@@ -171,7 +164,6 @@ const CourseDetails = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      {/* Course Header */}
       <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-12">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -300,7 +292,6 @@ const CourseDetails = () => {
         </div>
       </div>
       
-      {/* Course Content */}
       <div className="container px-6 py-12 mx-auto">
         <Tabs defaultValue="curriculum" className="w-full">
           <TabsList className="mb-8">
@@ -600,7 +591,6 @@ const CourseDetails = () => {
         </Tabs>
       </div>
       
-      {/* Related Courses */}
       <div className="bg-gray-50 dark:bg-gray-900 py-12">
         <div className="container px-6 mx-auto">
           <h2 className="text-2xl font-semibold mb-6">Cours similaires</h2>

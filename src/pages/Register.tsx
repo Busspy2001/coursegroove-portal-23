@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Google, Facebook, User, Mail, Lock, CheckCircle } from "lucide-react";
+import { User, Mail, Lock, CheckCircle, Github, Twitter } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -108,18 +108,18 @@ const Register = () => {
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => handleSocialLogin("Google")}
+                  onClick={() => handleSocialLogin("Github")}
                 >
-                  <Google className="mr-2 h-4 w-4" />
-                  Google
+                  <Github className="mr-2 h-4 w-4" />
+                  Github
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => handleSocialLogin("Facebook")}
+                  onClick={() => handleSocialLogin("Twitter")}
                 >
-                  <Facebook className="mr-2 h-4 w-4" />
-                  Facebook
+                  <Twitter className="mr-2 h-4 w-4" />
+                  Twitter
                 </Button>
               </div>
               

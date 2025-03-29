@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Google, Facebook, Mail, Lock } from "lucide-react";
+import { Mail, Lock, Github, Twitter } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -69,18 +69,18 @@ const Login = () => {
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => handleSocialLogin("Google")}
+                  onClick={() => handleSocialLogin("Github")}
                 >
-                  <Google className="mr-2 h-4 w-4" />
-                  Google
+                  <Github className="mr-2 h-4 w-4" />
+                  Github
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => handleSocialLogin("Facebook")}
+                  onClick={() => handleSocialLogin("Twitter")}
                 >
-                  <Facebook className="mr-2 h-4 w-4" />
-                  Facebook
+                  <Twitter className="mr-2 h-4 w-4" />
+                  Twitter
                 </Button>
               </div>
               
