@@ -5,6 +5,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookOpen, Users, DollarSign, BarChart2, FilePlus } from "lucide-react";
 
 const InstructorDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -28,22 +31,161 @@ const InstructorDashboard = () => {
       <Navbar />
       
       <div className="container px-6 py-8 flex-grow">
-        <h1 className="text-3xl font-bold mb-6">Tableau de bord de l'instructeur</h1>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-          <h2 className="text-2xl font-semibold mb-4">Bienvenue dans votre espace instructeur</h2>
-          <p className="text-muted-foreground mb-8">
-            Le tableau de bord de l'instructeur sera bientôt disponible avec toutes les fonctionnalités pour gérer vos cours.
-          </p>
-          <Button onClick={() => navigate("/dashboard")}>
-            Retour au tableau de bord
-          </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Espace instructeur</h1>
+            <p className="text-muted-foreground">
+              Bienvenue, {currentUser?.name} ! Gérez vos cours et vos étudiants.
+            </p>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <Button onClick={() => navigate("/courses/create")} className="flex items-center">
+              <FilePlus className="mr-2 h-5 w-5" />
+              Créer un nouveau cours
+            </Button>
+          </div>
         </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total des cours</p>
+                  <h3 className="text-3xl font-bold mt-1">5</h3>
+                </div>
+                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                  <BookOpen className="h-7 w-7 text-schoolier-blue" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total des étudiants</p>
+                  <h3 className="text-3xl font-bold mt-1">256</h3>
+                </div>
+                <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
+                  <Users className="h-7 w-7 text-schoolier-green" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Revenus ce mois</p>
+                  <h3 className="text-3xl font-bold mt-1">1 274 €</h3>
+                </div>
+                <div className="bg-teal-100 dark:bg-teal-900 p-3 rounded-full">
+                  <DollarSign className="h-7 w-7 text-schoolier-teal" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Note moyenne</p>
+                  <h3 className="text-3xl font-bold mt-1">4.8</h3>
+                </div>
+                <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
+                  <Star className="h-7 w-7 text-yellow-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Tabs defaultValue="courses" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="courses">Mes cours</TabsTrigger>
+            <TabsTrigger value="students">Étudiants</TabsTrigger>
+            <TabsTrigger value="reviews">Avis</TabsTrigger>
+            <TabsTrigger value="earnings">Revenus</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="courses">
+            <div className="space-y-6">
+              <Card>
+                <div className="p-6">
+                  <div className="text-center py-12">
+                    <BookOpen className="h-16 w-16 mx-auto text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-medium">Des fonctionnalités avancées pour les instructeurs arrivent bientôt</h3>
+                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+                      Notre espace instructeur est en cours de développement. Vous pourrez bientôt créer et gérer vos cours, suivre les progrès de vos étudiants et bien plus encore.
+                    </p>
+                    <Button className="mt-6">
+                      En savoir plus
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="students">
+            <div className="space-y-6">
+              <Card>
+                <div className="p-6">
+                  <div className="text-center py-12">
+                    <Users className="h-16 w-16 mx-auto text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-medium">Fonctionnalité à venir</h3>
+                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+                      La gestion des étudiants sera bientôt disponible.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="reviews">
+            <div className="space-y-6">
+              <Card>
+                <div className="p-6">
+                  <div className="text-center py-12">
+                    <BarChart2 className="h-16 w-16 mx-auto text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-medium">Fonctionnalité à venir</h3>
+                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+                      La gestion des avis et des notes sera bientôt disponible.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="earnings">
+            <div className="space-y-6">
+              <Card>
+                <div className="p-6">
+                  <div className="text-center py-12">
+                    <DollarSign className="h-16 w-16 mx-auto text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-medium">Fonctionnalité à venir</h3>
+                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+                      Le suivi des revenus sera bientôt disponible.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
       
       <Footer />
     </div>
   );
 };
+
+import { Star } from "lucide-react"; // Adding missing import
 
 export default InstructorDashboard;
