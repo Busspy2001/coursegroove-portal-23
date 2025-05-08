@@ -34,24 +34,24 @@ const AdminDashboard = () => {
       <Navbar />
       
       <div className="container px-4 py-8 flex-grow">
-        <h1 className="text-3xl font-bold mb-6">Espace Administration</h1>
+        <h1 className="text-3xl font-bold mb-6 font-spartan">Espace Administration</h1>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-4 mb-8">
-              <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+              <TabsTrigger value="dashboard" className="flex items-center space-x-2 font-spartan">
                 <LayoutDashboard className="h-4 w-4" />
                 <span className="hidden md:inline">Tableau de bord</span>
               </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center space-x-2">
+              <TabsTrigger value="users" className="flex items-center space-x-2 font-spartan">
                 <Users className="h-4 w-4" />
                 <span className="hidden md:inline">Utilisateurs</span>
               </TabsTrigger>
-              <TabsTrigger value="moderation" className="flex items-center space-x-2">
+              <TabsTrigger value="moderation" className="flex items-center space-x-2 font-spartan">
                 <Shield className="h-4 w-4" />
                 <span className="hidden md:inline">Modération</span>
               </TabsTrigger>
-              <TabsTrigger value="statistics" className="flex items-center space-x-2">
+              <TabsTrigger value="statistics" className="flex items-center space-x-2 font-spartan">
                 <BarChart className="h-4 w-4" />
                 <span className="hidden md:inline">Statistiques</span>
               </TabsTrigger>

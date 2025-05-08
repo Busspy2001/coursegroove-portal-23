@@ -26,19 +26,19 @@ const AdminGlobalDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Tableau de bord global</h2>
+      <h2 className="section-title">Tableau de bord global</h2>
       
       {/* Key metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-spartan">
               Utilisateurs totaux
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+              <div className="text-2xl font-bold font-spartan">{stats.totalUsers}</div>
               <Users className="h-4 w-4 text-muted-foreground" />
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -49,13 +49,13 @@ const AdminGlobalDashboard = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-spartan">
               Cours disponibles
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{stats.totalCourses}</div>
+              <div className="text-2xl font-bold font-spartan">{stats.totalCourses}</div>
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -66,13 +66,13 @@ const AdminGlobalDashboard = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-spartan">
               Revenus générés
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{stats.totalRevenue}</div>
+              <div className="text-2xl font-bold font-spartan">{stats.totalRevenue}</div>
               <TrendingUp className="h-4 w-4 text-emerald-500" />
             </div>
             <p className="text-xs text-emerald-500 mt-1">
@@ -83,13 +83,13 @@ const AdminGlobalDashboard = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-spartan">
               Note moyenne
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{stats.averageRating}</div>
+              <div className="text-2xl font-bold font-spartan">{stats.averageRating}</div>
               <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -102,7 +102,7 @@ const AdminGlobalDashboard = () => {
       {/* Recent activities */}
       <Card>
         <CardHeader>
-          <CardTitle>Activités récentes</CardTitle>
+          <CardTitle className="font-spartan">Activités récentes</CardTitle>
           <CardDescription>
             Les dernières activités sur la plateforme
           </CardDescription>
@@ -137,22 +137,22 @@ const AdminGlobalDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       {activity.type === "user_registration" && (
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium font-spartan">
                           Nouvel utilisateur: <span className="font-semibold">{activity.name}</span>
                         </p>
                       )}
                       {activity.type === "course_published" && (
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium font-spartan">
                           Nouveau cours: <span className="font-semibold">{activity.name}</span> par {activity.author}
                         </p>
                       )}
                       {activity.type === "course_review" && (
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium font-spartan">
                           Avis sur <span className="font-semibold">{activity.name}</span> ({activity.rating}/5) par {activity.author}
                         </p>
                       )}
                       {activity.type === "payment_received" && (
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium font-spartan">
                           Paiement de <span className="font-semibold">{activity.amount}</span> pour {activity.course}
                         </p>
                       )}

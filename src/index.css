@@ -91,28 +91,87 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+  
+  /* Typography styles using League Spartan for headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-spartan font-bold;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl tracking-tight;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  h4 {
+    @apply text-lg md:text-xl;
+  }
+  
+  /* Use Inter for paragraph text for better readability */
+  p {
+    @apply font-sans leading-relaxed;
+  }
+  
+  /* Navigation and buttons */
+  nav, button, .nav-link {
+    @apply font-spartan;
   }
 }
 
 @layer components {
   .heading-1 {
-    @apply text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl;
+    @apply text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl font-spartan;
   }
 
   .heading-2 {
-    @apply text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl;
+    @apply text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl font-spartan;
   }
 
   .heading-3 {
-    @apply text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl;
+    @apply text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-spartan;
   }
 
   .subheading {
-    @apply text-lg text-muted-foreground md:text-xl;
+    @apply text-lg text-muted-foreground md:text-xl font-sans;
   }
 
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  /* Button variants with Spartan font */
+  .btn-primary {
+    @apply bg-schoolier-blue text-white font-spartan font-semibold px-4 py-2 rounded-lg hover:bg-schoolier-dark-blue transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-schoolier-teal text-white font-spartan font-semibold px-4 py-2 rounded-lg hover:bg-schoolier-dark-teal transition-colors;
+  }
+  
+  .btn-outline {
+    @apply border border-schoolier-blue text-schoolier-blue font-spartan font-semibold px-4 py-2 rounded-lg hover:bg-schoolier-blue/10 transition-colors;
+  }
+  
+  /* Navigation styles */
+  .nav-text {
+    @apply font-spartan font-medium tracking-wide;
+  }
+  
+  /* Card titles */
+  .card-title {
+    @apply font-spartan font-semibold text-lg;
+  }
+  
+  /* Section titles */
+  .section-title {
+    @apply font-spartan font-bold text-2xl md:text-3xl mb-6;
   }
 }
