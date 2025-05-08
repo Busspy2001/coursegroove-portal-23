@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,6 +12,10 @@ import { Loader2 } from "lucide-react";
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
+const MyCourses = lazy(() => import("./pages/MyCourses"));
+const CourseProgress = lazy(() => import("./pages/CourseProgress"));
+const StudentProfile = lazy(() => import("./pages/StudentProfile"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -59,6 +64,10 @@ const App = () => (
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/student" element={<StudentDashboard />} />
+              <Route path="/my-courses" element={<MyCourses />} />
+              <Route path="/my-courses/:courseId" element={<CourseProgress />} />
+              <Route path="/student/profile" element={<StudentProfile />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
               <Route path="/courses/create" element={<CourseCreation />} /> 
