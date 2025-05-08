@@ -75,7 +75,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
   ];
   
   return (
-    <NavigationMenu className="hidden lg:flex">
+    <NavigationMenu className="hidden lg:flex mx-auto">
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger

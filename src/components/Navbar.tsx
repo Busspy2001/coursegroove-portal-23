@@ -65,13 +65,13 @@ const Navbar = () => {
       {/* Main header with logo first */}
       <ScrollHeader>
         <nav className="container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300">
-          {/* Logo and navigation */}
-          <div className="flex items-center space-x-4 lg:space-x-8">
+          {/* Logo */}
+          <div className="flex items-center">
             <NavbarLogo />
-
-            {/* Desktop Navigation */}
-            {!isMobile && <DesktopNav isActive={isActive} />}
           </div>
+
+          {/* Desktop Navigation - centered */}
+          {!isMobile && <DesktopNav isActive={isActive} />}
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
