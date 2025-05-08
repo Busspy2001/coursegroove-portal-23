@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react";
@@ -12,7 +13,7 @@ const Footer = () => {
               <img 
                 src="/lovable-uploads/15fccc6e-df41-4aa0-9708-c5ef28cab8cd.png" 
                 alt="Schoolier Logo" 
-                className="h-25 w-auto"
+                className="h-20 w-auto"
               />
             </div>
             <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">

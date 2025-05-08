@@ -8,7 +8,7 @@ const NavbarLogo = () => {
       <img 
         src="/lovable-uploads/15fccc6e-df41-4aa0-9708-c5ef28cab8cd.png" 
         alt="Schoolier Logo" 
-        className="h-25 w-auto" // Increased from h-16 to h-25
+        className="h-20 w-auto" // Changed from h-25 to h-20
       />
     </Link>
   );
