@@ -41,6 +41,12 @@ export interface CourseLesson {
   is_preview: boolean;
 }
 
+interface Instructor {
+  id: string;
+  full_name: string;
+  avatar_url?: string;
+}
+
 export function useCourseData(courseId?: string) {
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<Course | null>(null);
@@ -59,54 +65,169 @@ export function useCourseData(courseId?: string) {
   const fetchCourseData = async (id: string) => {
     setLoading(true);
     try {
+      // Mock data for development until Supabase tables are created
+      const mockCourse: Course = {
+        id,
+        title: "Introduction to Programming",
+        description: "Learn the basics of programming with this comprehensive course",
+        instructor_id: "123",
+        instructor_name: "John Doe",
+        category: "Programming",
+        level: "débutant",
+        price: 49.99,
+        thumbnail_url: "https://example.com/thumbnail.jpg",
+        duration: "10 hours",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        total_students: 120,
+        average_rating: 4.7,
+        total_reviews: 45
+      };
+
+      const mockSections: CourseSection[] = [
+        {
+          id: "section1",
+          course_id: id,
+          title: "Getting Started",
+          position: 1,
+          duration: "2 hours",
+          lessons: [
+            {
+              id: "lesson1",
+              section_id: "section1",
+              title: "Introduction to the Course",
+              type: "video",
+              content_url: "https://example.com/video1.mp4",
+              duration: "10 min",
+              position: 1,
+              is_preview: true
+            },
+            {
+              id: "lesson2",
+              section_id: "section1",
+              title: "Setting Up Your Environment",
+              type: "document",
+              content_url: "https://example.com/doc1.pdf",
+              duration: "15 min",
+              position: 2,
+              is_preview: false
+            }
+          ]
+        },
+        {
+          id: "section2",
+          course_id: id,
+          title: "Basic Concepts",
+          position: 2,
+          duration: "3 hours",
+          lessons: [
+            {
+              id: "lesson3",
+              section_id: "section2",
+              title: "Variables and Data Types",
+              type: "video",
+              content_url: "https://example.com/video2.mp4",
+              duration: "20 min",
+              position: 1,
+              is_preview: false
+            }
+          ]
+        }
+      ];
+
+      const mockReviews = [
+        {
+          id: "review1",
+          course_id: id,
+          user_id: "user1",
+          rating: 5,
+          comment: "Excellent course, very informative!",
+          created_at: new Date().toISOString(),
+          reviewer_name: "Jane Smith",
+          reviewer_avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=0D9488&color=fff"
+        },
+        {
+          id: "review2",
+          course_id: id,
+          user_id: "user2",
+          rating: 4,
+          comment: "Great content, but could use more examples.",
+          created_at: new Date().toISOString(),
+          reviewer_name: "Mike Johnson",
+          reviewer_avatar: "https://ui-avatars.com/api/?name=Mike+Johnson&background=0D9488&color=fff"
+        }
+      ];
+
+      setCourse(mockCourse);
+      setSections(mockSections);
+      setReviews(mockReviews);
+
+      // Once the Supabase tables are created, use the commented code below:
+      /*
       // Fetch course details
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
-        .select(`
-          *,
-          instructor:instructor_id (
-            id,
-            profiles_unified:profiles_unified!inner (
-              full_name,
-              avatar_url
-            )
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
       if (courseError) throw courseError;
 
+      // Fetch instructor details
+      const { data: instructorData, error: instructorError } = await supabase
+        .from('profiles_unified')
+        .select('full_name, avatar_url')
+        .eq('id', courseData.instructor_id)
+        .single();
+
+      if (instructorError) throw instructorError;
+
       // Fetch course sections and lessons
       const { data: sectionData, error: sectionError } = await supabase
         .from('course_sections')
-        .select(`
-          *,
-          lessons:course_lessons (
-            *
-          )
-        `)
+        .select('*')
         .eq('course_id', id)
         .order('position', { ascending: true });
 
       if (sectionError) throw sectionError;
 
+      for (const section of sectionData) {
+        const { data: lessonsData, error: lessonsError } = await supabase
+          .from('course_lessons')
+          .select('*')
+          .eq('section_id', section.id)
+          .order('position', { ascending: true });
+        
+        if (lessonsError) throw lessonsError;
+        section.lessons = lessonsData;
+      }
+
       // Fetch course reviews
       const { data: reviewData, error: reviewError } = await supabase
         .from('course_reviews')
-        .select(`
-          *,
-          reviewer:user_id (
-            profiles_unified!inner (
-              full_name,
-              avatar_url
-            )
-          )
-        `)
+        .select('*')
         .eq('course_id', id)
         .order('created_at', { ascending: false });
 
       if (reviewError) throw reviewError;
+
+      // Add reviewer information to reviews
+      const enhancedReviews = [];
+      for (const review of reviewData) {
+        const { data: reviewerData, error: reviewerError } = await supabase
+          .from('profiles_unified')
+          .select('full_name, avatar_url')
+          .eq('id', review.user_id)
+          .single();
+        
+        if (!reviewerError && reviewerData) {
+          enhancedReviews.push({
+            ...review,
+            reviewer_name: reviewerData.full_name || 'Anonymous',
+            reviewer_avatar: reviewerData.avatar_url
+          });
+        }
+      }
 
       // Calculate total students
       const { count: studentCount, error: enrollmentError } = await supabase
@@ -116,34 +237,26 @@ export function useCourseData(courseId?: string) {
 
       if (enrollmentError) throw enrollmentError;
 
+      // Calculate average rating
+      const avgRating = reviewData.length > 0 
+        ? reviewData.reduce((sum, review) => sum + review.rating, 0) / reviewData.length
+        : 0;
+      
       // Process the course data
       const processedCourse = {
         ...courseData,
-        instructor_name: courseData.instructor?.profiles_unified?.full_name || 'Unknown Instructor',
-        instructor_avatar: courseData.instructor?.profiles_unified?.avatar_url,
+        instructor_name: instructorData?.full_name || 'Unknown Instructor',
+        instructor_avatar: instructorData?.avatar_url,
         total_students: studentCount || 0,
-        average_rating: reviewData.length > 0 
-          ? reviewData.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewData.length
-          : 0,
+        average_rating: avgRating,
         total_reviews: reviewData.length
       };
       
-      // Sort lessons within sections by position
-      const processedSections = sectionData.map((section: any) => ({
-        ...section,
-        lessons: section.lessons?.sort((a: any, b: any) => a.position - b.position) || []
-      }));
-
-      // Process reviews to include reviewer name and avatar
-      const processedReviews = reviewData.map((review: any) => ({
-        ...review,
-        reviewer_name: review.reviewer?.profiles_unified?.full_name || 'Anonymous',
-        reviewer_avatar: review.reviewer?.profiles_unified?.avatar_url,
-      }));
-
       setCourse(processedCourse);
-      setSections(processedSections);
-      setReviews(processedReviews);
+      setSections(sectionData);
+      setReviews(enhancedReviews);
+      */
+
     } catch (error) {
       console.error('Error fetching course data:', error);
       toast({
@@ -185,21 +298,67 @@ export function useCourseList() {
     setLoading(true);
     
     try {
-      let query = supabase
-        .from('courses')
-        .select(`
-          *,
-          instructor:instructor_id (
-            profiles_unified!inner (
-              full_name,
-              avatar_url
-            )
-          ),
-          enrollments:course_enrollments!course_id (count),
-          reviews:course_reviews!course_id (
-            rating
-          )
-        `, { count: 'exact' });
+      // Mock data for development until Supabase tables are created
+      const mockCourses: Course[] = [
+        {
+          id: "course1",
+          title: "Introduction to Programming",
+          description: "Learn the basics of programming with this comprehensive course",
+          instructor_id: "123",
+          instructor_name: "John Doe",
+          category: "Programming",
+          level: "débutant",
+          price: 49.99,
+          thumbnail_url: "https://example.com/thumbnail1.jpg",
+          duration: "10 hours",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          total_students: 120,
+          average_rating: 4.7,
+          total_reviews: 45
+        },
+        {
+          id: "course2",
+          title: "Advanced Web Development",
+          description: "Master modern web development techniques",
+          instructor_id: "456",
+          instructor_name: "Jane Smith",
+          category: "Web Development",
+          level: "avancé",
+          price: 79.99,
+          thumbnail_url: "https://example.com/thumbnail2.jpg",
+          duration: "15 hours",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          total_students: 85,
+          average_rating: 4.5,
+          total_reviews: 32
+        },
+        {
+          id: "course3",
+          title: "Digital Marketing Fundamentals",
+          description: "Learn the essentials of digital marketing",
+          instructor_id: "789",
+          instructor_name: "Alex Brown",
+          category: "Marketing",
+          level: "intermédiaire",
+          price: 59.99,
+          thumbnail_url: "https://example.com/thumbnail3.jpg",
+          duration: "12 hours",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          total_students: 150,
+          average_rating: 4.8,
+          total_reviews: 60
+        }
+      ];
+      
+      setCourses(mockCourses);
+      setTotalCourses(mockCourses.length);
+
+      // Once the Supabase tables are created, use the commented code below:
+      /*
+      let query = supabase.from('courses').select('*', { count: 'exact' });
       
       // Apply filters
       if (category) query = query.eq('category', category);
@@ -220,26 +379,48 @@ export function useCourseList() {
       
       if (error) throw error;
       
-      // Process the course data
-      const processedCourses = data.map((course) => {
+      // Enhance course data with additional information
+      const enhancedCourses = [];
+      for (const course of data) {
+        // Get instructor information
+        const { data: instructorData, error: instructorError } = await supabase
+          .from('profiles_unified')
+          .select('full_name, avatar_url')
+          .eq('id', course.instructor_id)
+          .single();
+        
+        // Get student count
+        const { count: studentCount, error: countError } = await supabase
+          .from('course_enrollments')
+          .select('id', { count: 'exact', head: true })
+          .eq('course_id', course.id);
+        
+        // Get ratings
+        const { data: reviewsData, error: reviewsError } = await supabase
+          .from('course_reviews')
+          .select('rating')
+          .eq('course_id', course.id);
+        
         // Calculate average rating
-        const ratings = course.reviews.map((review: any) => review.rating);
+        const ratings = reviewsData || [];
         const averageRating = ratings.length > 0 
-          ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) / ratings.length
+          ? ratings.reduce((sum, review) => sum + review.rating, 0) / ratings.length
           : 0;
         
-        return {
+        enhancedCourses.push({
           ...course,
-          instructor_name: course.instructor?.profiles_unified?.full_name || 'Unknown Instructor',
-          instructor_avatar: course.instructor?.profiles_unified?.avatar_url,
-          total_students: course.enrollments?.length || 0,
+          instructor_name: instructorData?.full_name || 'Unknown Instructor',
+          instructor_avatar: instructorData?.avatar_url,
+          total_students: studentCount || 0,
           average_rating: averageRating,
-          total_reviews: course.reviews?.length || 0
-        };
-      });
+          total_reviews: ratings.length || 0
+        });
+      }
       
-      setCourses(processedCourses);
+      setCourses(enhancedCourses);
       if (count !== null) setTotalCourses(count);
+      */
+      
     } catch (error) {
       console.error('Error fetching courses:', error);
       toast({

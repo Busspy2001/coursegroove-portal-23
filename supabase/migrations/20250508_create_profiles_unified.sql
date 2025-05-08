@@ -7,6 +7,18 @@ CREATE TABLE IF NOT EXISTS public.profiles_unified (
   role TEXT DEFAULT 'student' CHECK (role IN ('student', 'instructor', 'admin')),
   avatar_url TEXT,
   bio TEXT,
+  agency_name TEXT,
+  carte_gestion TEXT,
+  first_name TEXT,
+  income TEXT,
+  last_name TEXT,
+  phone TEXT,
+  profession TEXT,
+  property_count TEXT,
+  property_type TEXT,
+  searching_for TEXT,
+  siret TEXT,
+  tenant_score NUMERIC,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
