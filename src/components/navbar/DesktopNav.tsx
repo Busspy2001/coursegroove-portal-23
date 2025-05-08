@@ -27,44 +27,6 @@ interface DesktopNavProps {
 
 const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
   const isMobile = useIsMobile();
-  const [open, setOpen] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const handleMouseEnter = () => {
-    if (isMobile) return;
-    
-    // Clear any existing timeout to prevent menu from closing
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    
-    setOpen(true);
-  };
-  
-  const handleMouseLeave = () => {
-    if (isMobile) return;
-    
-    // Add a small delay before closing to prevent accidental closures
-    timeoutRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 150);
-  };
-  
-  // Clear the timeout when component unmounts
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-  
-  const handleMenuToggle = () => {
-    if (isMobile) {
-      setOpen(!open);
-    }
-  };
   
   return (
     <NavigationMenu className="hidden lg:flex mx-auto">
@@ -76,17 +38,11 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
               isActive("/explore") && "text-schoolier-blue font-medium",
               "data-[state=open]:text-schoolier-blue"
             )}
-            onMouseEnter={handleMouseEnter}
-            onClick={handleMenuToggle}
-            aria-expanded={open}
           >
             Découvrir
           </NavigationMenuTrigger>
           <NavigationMenuContent 
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
             className="w-[960px] overflow-visible rounded-xl shadow-xl bg-white border border-[#f1f5f9] animate-fade-in z-[1000] mt-1"
-            forceMount={open ? true : undefined}
           >
             <DiscoverMenuContent />
           </NavigationMenuContent>
