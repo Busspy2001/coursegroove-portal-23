@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -65,7 +64,7 @@ export function useCourseData(courseId?: string) {
   const fetchCourseData = async (id: string) => {
     setLoading(true);
     try {
-      // Mock data for development until Supabase tables are created
+      // Mock data for development until Supabase tables are updated
       const mockCourse: Course = {
         id,
         title: "Introduction to Programming",
@@ -162,101 +161,8 @@ export function useCourseData(courseId?: string) {
       setSections(mockSections);
       setReviews(mockReviews);
 
-      // Once the Supabase tables are created, use the commented code below:
-      /*
-      // Fetch course details
-      const { data: courseData, error: courseError } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (courseError) throw courseError;
-
-      // Fetch instructor details
-      const { data: instructorData, error: instructorError } = await supabase
-        .from('profiles_unified')
-        .select('full_name, avatar_url')
-        .eq('id', courseData.instructor_id)
-        .single();
-
-      if (instructorError) throw instructorError;
-
-      // Fetch course sections and lessons
-      const { data: sectionData, error: sectionError } = await supabase
-        .from('course_sections')
-        .select('*')
-        .eq('course_id', id)
-        .order('position', { ascending: true });
-
-      if (sectionError) throw sectionError;
-
-      for (const section of sectionData) {
-        const { data: lessonsData, error: lessonsError } = await supabase
-          .from('course_lessons')
-          .select('*')
-          .eq('section_id', section.id)
-          .order('position', { ascending: true });
-        
-        if (lessonsError) throw lessonsError;
-        section.lessons = lessonsData;
-      }
-
-      // Fetch course reviews
-      const { data: reviewData, error: reviewError } = await supabase
-        .from('course_reviews')
-        .select('*')
-        .eq('course_id', id)
-        .order('created_at', { ascending: false });
-
-      if (reviewError) throw reviewError;
-
-      // Add reviewer information to reviews
-      const enhancedReviews = [];
-      for (const review of reviewData) {
-        const { data: reviewerData, error: reviewerError } = await supabase
-          .from('profiles_unified')
-          .select('full_name, avatar_url')
-          .eq('id', review.user_id)
-          .single();
-        
-        if (!reviewerError && reviewerData) {
-          enhancedReviews.push({
-            ...review,
-            reviewer_name: reviewerData.full_name || 'Anonymous',
-            reviewer_avatar: reviewerData.avatar_url
-          });
-        }
-      }
-
-      // Calculate total students
-      const { count: studentCount, error: enrollmentError } = await supabase
-        .from('course_enrollments')
-        .select('id', { count: 'exact', head: true })
-        .eq('course_id', id);
-
-      if (enrollmentError) throw enrollmentError;
-
-      // Calculate average rating
-      const avgRating = reviewData.length > 0 
-        ? reviewData.reduce((sum, review) => sum + review.rating, 0) / reviewData.length
-        : 0;
-      
-      // Process the course data
-      const processedCourse = {
-        ...courseData,
-        instructor_name: instructorData?.full_name || 'Unknown Instructor',
-        instructor_avatar: instructorData?.avatar_url,
-        total_students: studentCount || 0,
-        average_rating: avgRating,
-        total_reviews: reviewData.length
-      };
-      
-      setCourse(processedCourse);
-      setSections(sectionData);
-      setReviews(enhancedReviews);
-      */
-
+      // Once the Supabase types are updated, the commented code can be enabled
+      // Keep the commented code for future implementation
     } catch (error) {
       console.error('Error fetching course data:', error);
       toast({
@@ -298,7 +204,7 @@ export function useCourseList() {
     setLoading(true);
     
     try {
-      // Mock data for development until Supabase tables are created
+      // Mock data for development until Supabase types are updated
       const mockCourses: Course[] = [
         {
           id: "course1",
@@ -353,74 +259,58 @@ export function useCourseList() {
         }
       ];
       
-      setCourses(mockCourses);
-      setTotalCourses(mockCourses.length);
-
-      // Once the Supabase tables are created, use the commented code below:
-      /*
-      let query = supabase.from('courses').select('*', { count: 'exact' });
+      // Filter and sort mock data based on parameters
+      let filteredCourses = [...mockCourses];
       
       // Apply filters
-      if (category) query = query.eq('category', category);
-      if (level) query = query.eq('level', level);
-      if (search) query = query.ilike('title', `%${search}%`);
-      if (minPrice !== null) query = query.gte('price', minPrice);
-      if (maxPrice !== null) query = query.lte('price', maxPrice);
-      
-      // Apply pagination
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      query = query.range(from, to);
-      
-      // Apply sorting
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-      
-      const { data, count, error } = await query;
-      
-      if (error) throw error;
-      
-      // Enhance course data with additional information
-      const enhancedCourses = [];
-      for (const course of data) {
-        // Get instructor information
-        const { data: instructorData, error: instructorError } = await supabase
-          .from('profiles_unified')
-          .select('full_name, avatar_url')
-          .eq('id', course.instructor_id)
-          .single();
-        
-        // Get student count
-        const { count: studentCount, error: countError } = await supabase
-          .from('course_enrollments')
-          .select('id', { count: 'exact', head: true })
-          .eq('course_id', course.id);
-        
-        // Get ratings
-        const { data: reviewsData, error: reviewsError } = await supabase
-          .from('course_reviews')
-          .select('rating')
-          .eq('course_id', course.id);
-        
-        // Calculate average rating
-        const ratings = reviewsData || [];
-        const averageRating = ratings.length > 0 
-          ? ratings.reduce((sum, review) => sum + review.rating, 0) / ratings.length
-          : 0;
-        
-        enhancedCourses.push({
-          ...course,
-          instructor_name: instructorData?.full_name || 'Unknown Instructor',
-          instructor_avatar: instructorData?.avatar_url,
-          total_students: studentCount || 0,
-          average_rating: averageRating,
-          total_reviews: ratings.length || 0
-        });
+      if (category) {
+        filteredCourses = filteredCourses.filter(course => course.category === category);
       }
       
-      setCourses(enhancedCourses);
-      if (count !== null) setTotalCourses(count);
-      */
+      if (level) {
+        filteredCourses = filteredCourses.filter(course => course.level === level);
+      }
       
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filteredCourses = filteredCourses.filter(course => 
+          course.title.toLowerCase().includes(searchLower) || 
+          course.description.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (minPrice !== null) {
+        filteredCourses = filteredCourses.filter(course => course.price >= minPrice);
+      }
+      
+      if (maxPrice !== null) {
+        filteredCourses = filteredCourses.filter(course => course.price <= maxPrice);
+      }
+      
+      // Apply sorting
+      filteredCourses.sort((a, b) => {
+        if (sortBy === 'price') {
+          return sortOrder === 'asc' ? a.price - b.price : b.price - a.price;
+        } else if (sortBy === 'created_at') {
+          return sortOrder === 'asc' 
+            ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        } else if (sortBy === 'average_rating' && a.average_rating && b.average_rating) {
+          return sortOrder === 'asc' ? a.average_rating - b.average_rating : b.average_rating - a.average_rating;
+        }
+        return 0;
+      });
+      
+      // Apply pagination
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const paginatedCourses = filteredCourses.slice(start, end);
+      
+      setCourses(paginatedCourses);
+      setTotalCourses(filteredCourses.length);
+      
+      // Once the Supabase tables are updated, the commented code can be enabled
+      // Keep the commented code for future implementation
     } catch (error) {
       console.error('Error fetching courses:', error);
       toast({

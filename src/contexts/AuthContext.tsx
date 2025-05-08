@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -64,9 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: supabaseUser.email || '',
       name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
       role: (profile?.role as UserRole) || 'student',
-      // Use avatar_url from profile if it exists
+      // Use avatar_url from profile if it exists, safely access with optional chaining
       avatar: profile?.avatar_url || supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name || 'User'}&background=0D9488&color=fff`,
-      // Use bio from profile if it exists
+      // Use bio from profile if it exists, safely access with optional chaining
       bio: profile?.bio || ''
     };
   };
