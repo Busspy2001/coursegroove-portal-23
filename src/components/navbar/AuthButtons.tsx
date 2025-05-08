@@ -11,15 +11,15 @@ const AuthButtons = () => {
       <Button 
         variant="ghost" 
         onClick={() => navigate("/login")}
-        className="hover:bg-schoolier-blue/10 hover:text-schoolier-blue font-spartan"
+        className="hover:bg-schoolier-blue/10 hover:text-schoolier-blue font-spartan text-sm"
       >
         Connexion
       </Button>
       <Button 
         onClick={() => navigate("/register")}
-        className="bg-gradient-to-r from-schoolier-blue to-schoolier-teal hover:opacity-90 transition-opacity font-spartan font-medium"
+        className="bg-gradient-to-r from-schoolier-blue to-schoolier-teal hover:opacity-90 transition-opacity font-spartan font-medium text-sm"
       >
-        Inscription
+        Inscription gratuite
       </Button>
     </>
   );

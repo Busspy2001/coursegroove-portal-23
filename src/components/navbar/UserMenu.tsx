@@ -1,15 +1,18 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Home, Book, Settings } from "lucide-react";
+import { Bell, ChevronDown, Home, Book, Settings, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface User {
   name?: string;
@@ -26,6 +29,30 @@ interface UserMenuProps {
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
   
+  // Function to get role badge color
+  const getRoleBadgeColor = (role?: string) => {
+    switch (role) {
+      case "instructor":
+        return "bg-schoolier-teal hover:bg-schoolier-dark-teal";
+      case "admin":
+        return "bg-schoolier-blue hover:bg-schoolier-dark-blue";
+      default:
+        return "bg-schoolier-gray hover:bg-schoolier-dark-gray";
+    }
+  };
+
+  // Function to get role display name
+  const getRoleDisplayName = (role?: string) => {
+    switch (role) {
+      case "instructor":
+        return "Instructeur";
+      case "admin":
+        return "Admin";
+      default:
+        return "Étudiant";
+    }
+  };
+  
   return (
     <div className="flex items-center space-x-4">
       {/* Notifications */}
@@ -38,7 +65,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80">
           <div className="flex items-center justify-between px-4 py-2 border-b">
-            <span className="font-medium">Notifications</span>
+            <span className="font-medium font-spartan">Notifications</span>
             <Button variant="ghost" size="sm">
               Tout marquer comme lu
             </Button>
@@ -66,13 +93,17 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex items-center space-x-2">
             <div className="flex items-center">
-              <img
-                src={currentUser?.avatar || "https://ui-avatars.com/api/?name=User&background=0D9488&color=fff"}
-                alt="User"
-                className="h-8 w-8 rounded-full object-cover border-2 border-schoolier-teal"
-              />
+              <Avatar className="h-8 w-8 border-2 border-schoolier-teal">
+                <AvatarImage 
+                  src={currentUser?.avatar || "https://ui-avatars.com/api/?name=User&background=0D9488&color=fff"} 
+                  alt={currentUser?.name || "User"}
+                />
+                <AvatarFallback className="bg-schoolier-teal text-white">
+                  {currentUser?.name?.substring(0, 2).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
               <div className="ml-2 text-left hidden lg:block">
-                <p className="text-sm font-medium">{currentUser?.name}</p>
+                <p className="text-sm font-medium font-spartan">{currentUser?.name}</p>
                 <p className="text-xs text-muted-foreground">{currentUser?.email}</p>
               </div>
               <ChevronDown className="h-4 w-4 ml-1" />
@@ -80,18 +111,19 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="flex items-center space-x-2 p-2 border-b lg:hidden">
-            <div>
-              <p className="font-medium">{currentUser?.name}</p>
-              <p className="text-xs text-muted-foreground">{currentUser?.email}</p>
-            </div>
-          </div>
+          <DropdownMenuLabel className="font-spartan flex items-center justify-between">
+            <span>Mon compte</span>
+            <Badge className={`text-xs ${getRoleBadgeColor(currentUser?.role)}`}>
+              {getRoleDisplayName(currentUser?.role)}
+            </Badge>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
             <Home className="mr-2 h-4 w-4" />
             Tableau de bord
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
+            <User className="mr-2 h-4 w-4" />
             Mon profil
           </DropdownMenuItem>
           {currentUser?.role === "instructor" && (
@@ -108,6 +140,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onLogout} className="text-red-500 cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
             Déconnexion
           </DropdownMenuItem>
         </DropdownMenuContent>

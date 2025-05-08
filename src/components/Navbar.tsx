@@ -1,9 +1,10 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Bell, Search, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 // Import components
 import ScrollHeader from "./navbar/ScrollHeader";
@@ -13,6 +14,8 @@ import SearchBar from "./navbar/SearchBar";
 import UserMenu from "./navbar/UserMenu";
 import AuthButtons from "./navbar/AuthButtons";
 import MobileMenu from "./navbar/MobileMenu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
@@ -21,6 +24,7 @@ const Navbar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -35,15 +39,38 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const toggleSearch = () => {
+    setIsSearchExpanded(!isSearchExpanded);
+  };
+
   // Check if the current route matches
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
+  // Close search on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isSearchExpanded) {
+        setIsSearchExpanded(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchExpanded]);
+
   return (
     <ScrollHeader>
-      <nav className="container flex items-center justify-between py-3 px-4 lg:py-1">
-        <div className="flex items-center space-x-4 lg:space-x-8">
+      <nav className={cn(
+        "container flex items-center justify-between py-3 px-4 lg:py-1 transition-all duration-300",
+        isSearchExpanded && "md:justify-center"
+      )}>
+        {/* Logo and navigation */}
+        <div className={cn(
+          "flex items-center space-x-4 lg:space-x-8",
+          isSearchExpanded && "md:hidden"
+        )}>
           <NavbarLogo />
 
           {/* Desktop Navigation */}
@@ -51,12 +78,24 @@ const Navbar = () => {
         </div>
 
         {/* Search bar for desktop */}
-        <div className="hidden md:flex items-center mx-4 flex-1 max-w-xs">
-          <SearchBar />
-        </div>
+        {!isMobile && (
+          <div className={cn(
+            "hidden md:flex items-center mx-4",
+            isSearchExpanded ? "flex-1 max-w-xl" : "flex-1 max-w-xs"
+          )}>
+            <SearchBar 
+              isExpanded={isSearchExpanded}
+              onExpand={() => setIsSearchExpanded(true)}
+              onCollapse={() => setIsSearchExpanded(false)}
+            />
+          </div>
+        )}
 
         {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className={cn(
+          "hidden md:flex items-center space-x-4",
+          isSearchExpanded && "md:hidden"
+        )}>
           {isAuthenticated ? (
             <UserMenu 
               currentUser={currentUser} 
@@ -66,6 +105,20 @@ const Navbar = () => {
             <AuthButtons />
           )}
         </div>
+
+        {/* Mobile Search Button */}
+        {isMobile && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Search">
+                <Search className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="top" className="pt-10">
+              <SearchBar className="w-full" />
+            </SheetContent>
+          </Sheet>
+        )}
 
         {/* Mobile Menu Button */}
         <button
