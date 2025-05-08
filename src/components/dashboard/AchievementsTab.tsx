@@ -1,54 +1,13 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
+import { Achievement } from "@/hooks/use-user-data";
 
-interface Achievement {
-  name: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
+interface AchievementsTabProps {
+  achievements: Achievement[];
 }
 
-const AchievementsTab = () => {
-  const achievements: Achievement[] = [
-    {
-      name: "Première inscription",
-      description: "Vous avez complété votre inscription",
-      icon: "🎉",
-      unlocked: true,
-    },
-    {
-      name: "Premier cours complété",
-      description: "Vous avez terminé votre premier cours",
-      icon: "🏆",
-      unlocked: true,
-    },
-    {
-      name: "Premier certificat",
-      description: "Vous avez obtenu votre premier certificat",
-      icon: "📜",
-      unlocked: true,
-    },
-    {
-      name: "5 cours complétés",
-      description: "Vous avez terminé 5 cours",
-      icon: "🔥",
-      unlocked: false,
-    },
-    {
-      name: "10 heures d'apprentissage",
-      description: "Vous avez passé 10 heures à apprendre",
-      icon: "⏱️",
-      unlocked: true,
-    },
-    {
-      name: "Participation au forum",
-      description: "Vous avez participé aux discussions",
-      icon: "💬",
-      unlocked: false,
-    },
-  ];
-
+const AchievementsTab = ({ achievements }: AchievementsTabProps) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Mes réalisations</h2>

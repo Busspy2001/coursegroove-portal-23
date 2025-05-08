@@ -4,10 +4,14 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { BookOpen, Clock, Award } from "lucide-react";
 
 interface StatCardsProps {
-  enrolledCoursesCount: number;
+  stats: {
+    totalCoursesEnrolled: number;
+    totalHoursLearned: number;
+    certificatesEarned: number;
+  };
 }
 
-const StatCards = ({ enrolledCoursesCount }: StatCardsProps) => {
+const StatCards = ({ stats }: StatCardsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <Card>
@@ -19,7 +23,7 @@ const StatCards = ({ enrolledCoursesCount }: StatCardsProps) => {
           <BookOpen className="h-6 w-6 text-schoolier-blue" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{enrolledCoursesCount}</div>
+          <div className="text-3xl font-bold">{stats.totalCoursesEnrolled}</div>
         </CardContent>
       </Card>
       
@@ -32,7 +36,7 @@ const StatCards = ({ enrolledCoursesCount }: StatCardsProps) => {
           <Clock className="h-6 w-6 text-schoolier-teal" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">12.5h</div>
+          <div className="text-3xl font-bold">{stats.totalHoursLearned}h</div>
         </CardContent>
       </Card>
       
@@ -45,7 +49,7 @@ const StatCards = ({ enrolledCoursesCount }: StatCardsProps) => {
           <Award className="h-6 w-6 text-schoolier-green" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">2</div>
+          <div className="text-3xl font-bold">{stats.certificatesEarned}</div>
         </CardContent>
       </Card>
     </div>

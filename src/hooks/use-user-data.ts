@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { EnrolledCourse } from '@/components/dashboard/CourseCard';
 
 interface UserStats {
   totalCoursesEnrolled: number;
@@ -13,16 +14,11 @@ interface UserStats {
   lastActivityDate: Date | null;
 }
 
-interface UserCourse {
-  id: string;
-  courseId: string;
-  title: string;
-  thumbnail: string;
-  instructorName: string;
-  progress: number;
-  lastAccessed: Date;
-  category: string;
-  completedLessons: string[];
+export interface Achievement {
+  name: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
 }
 
 export function useUserData() {
@@ -36,7 +32,8 @@ export function useUserData() {
     averageProgress: 0,
     lastActivityDate: null
   });
-  const [enrolledCourses, setEnrolledCourses] = useState<UserCourse[]>([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -52,30 +49,64 @@ export function useUserData() {
     
     setLoading(true);
     try {
-      // For now, we'll use mock data until the Supabase types are updated
-      const mockCourses = [
+      // For now, we'll use mock data until the Supabase implementation is complete
+      const mockCourses: EnrolledCourse[] = [
         {
           id: "enroll1",
-          courseId: "course1",
           title: "Introduction à la Programmation",
           thumbnail: "https://example.com/programming.jpg",
-          instructorName: "Jean Dupont",
+          instructor: "Jean Dupont",
           progress: 75,
           lastAccessed: new Date(Date.now() - 86400000), // yesterday
-          category: "Programmation",
-          completedLessons: ["lesson1", "lesson2", "lesson3"]
         },
         {
           id: "enroll2",
-          courseId: "course2",
           title: "Marketing Digital pour Débutants",
           thumbnail: "https://example.com/marketing.jpg",
-          instructorName: "Marie Durand",
+          instructor: "Marie Durand",
           progress: 30,
           lastAccessed: new Date(),
-          category: "Marketing",
-          completedLessons: ["lesson1"]
         }
+      ];
+
+      // Mock achievements
+      const mockAchievements: Achievement[] = [
+        {
+          name: "Première inscription",
+          description: "Vous avez complété votre inscription",
+          icon: "🎉",
+          unlocked: true,
+        },
+        {
+          name: "Premier cours complété",
+          description: "Vous avez terminé votre premier cours",
+          icon: "🏆",
+          unlocked: true,
+        },
+        {
+          name: "Premier certificat",
+          description: "Vous avez obtenu votre premier certificat",
+          icon: "📜",
+          unlocked: true,
+        },
+        {
+          name: "5 cours complétés",
+          description: "Vous avez terminé 5 cours",
+          icon: "🔥",
+          unlocked: false,
+        },
+        {
+          name: "10 heures d'apprentissage",
+          description: "Vous avez passé 10 heures à apprendre",
+          icon: "⏱️",
+          unlocked: true,
+        },
+        {
+          name: "Participation au forum",
+          description: "Vous avez participé aux discussions",
+          icon: "💬",
+          unlocked: false,
+        },
       ];
 
       // Calculate user stats from mock data
@@ -94,6 +125,7 @@ export function useUserData() {
 
       setEnrolledCourses(mockCourses);
       setStats(calculatedStats);
+      setAchievements(mockAchievements);
       
       // Once Supabase types are updated, we can uncomment and use this code:
       /*
@@ -123,18 +155,37 @@ export function useUserData() {
       // Process enrollment data
       const processedCourses = enrollments.map(enrollment => ({
         id: enrollment.id,
-        courseId: enrollment.course_id,
         title: enrollment.course?.title || '',
         thumbnail: enrollment.course?.thumbnail_url || '',
-        instructorName: enrollment.course?.instructor?.profiles_unified?.full_name || 'Unknown Instructor',
+        instructor: enrollment.course?.instructor?.profiles_unified?.full_name || 'Unknown Instructor',
         progress: enrollment.progress || 0,
-        lastAccessed: enrollment.last_accessed_at ? new Date(enrollment.last_accessed_at) : new Date(),
-        category: enrollment.course?.category || '',
-        completedLessons: enrollment.completed_lessons || []
+        lastAccessed: enrollment.last_accessed_at ? new Date(enrollment.last_accessed_at) : new Date()
       }));
 
       // Sort by last accessed
       processedCourses.sort((a, b) => b.lastAccessed.getTime() - a.lastAccessed.getTime());
+      
+      // Also fetch user achievements
+      const { data: achievementsData, error: achievementsError } = await supabase
+        .from('user_achievements')
+        .select(`
+          *,
+          achievement:achievement_id (
+            name,
+            description,
+            icon
+          )
+        `)
+        .eq('user_id', currentUser.id);
+        
+      if (achievementsError) throw achievementsError;
+
+      const processedAchievements = achievementsData.map(item => ({
+        name: item.achievement?.name || '',
+        description: item.achievement?.description || '',
+        icon: item.achievement?.icon || '🏆',
+        unlocked: true
+      }));
 
       // Calculate user stats
       const calculatedStats = {
@@ -151,6 +202,7 @@ export function useUserData() {
       };
 
       setEnrolledCourses(processedCourses);
+      setAchievements(processedAchievements);
       setStats(calculatedStats);
       */
     } catch (error) {
@@ -166,7 +218,7 @@ export function useUserData() {
   };
 
   // Helper function to calculate total hours learned
-  const calculateTotalHours = (courses: UserCourse[], rawEnrollments: any[]): number => {
+  const calculateTotalHours = (courses: EnrolledCourse[], rawEnrollments: any[]): number => {
     // This is a simplified calculation
     // In a real app, you would calculate based on the actual time spent or video duration watched
     let totalHours = 0;
@@ -185,6 +237,7 @@ export function useUserData() {
     loading,
     stats,
     enrolledCourses,
+    achievements,
     refetch: fetchUserData
   };
 }
