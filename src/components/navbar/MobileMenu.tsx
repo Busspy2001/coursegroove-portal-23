@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Globe, Home, MessageSquare, Search, ShoppingCart, User } from "lucide-react";
+import { BookOpen, Globe, Home, MessageSquare, Search, ShoppingCart, User, BookIcon, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "./SearchBar";
 
@@ -138,7 +138,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 className="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-700"
                 onClick={onClose}
               >
-                <Book className="h-5 w-5 mr-3 text-schoolier-blue" />
+                <BookIcon className="h-5 w-5 mr-3 text-schoolier-blue" />
                 <span className="font-spartan">Espace instructeur</span>
               </Link>
             )}
