@@ -5,13 +5,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Users, DollarSign, BarChart2, FilePlus, Star } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BookOpen, Users, DollarSign, BarChart2, FilePlus, Star, Loader2 } from "lucide-react";
+import InstructorCoursesList from "@/components/instructor/InstructorCoursesList";
+import InstructorStats from "@/components/instructor/InstructorStats";
+import InstructorStudents from "@/components/instructor/InstructorStudents";
+import InstructorEarnings from "@/components/instructor/InstructorEarnings";
+import InstructorReviews from "@/components/instructor/InstructorReviews";
+import { useInstructorData } from "@/hooks/use-instructor-data";
 
 const InstructorDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { loading, stats, courses } = useInstructorData();
 
   // Redirect if not authenticated or not an instructor
   React.useEffect(() => {
@@ -24,6 +32,21 @@ const InstructorDashboard = () => {
 
   if (!isAuthenticated || currentUser?.role !== "instructor") {
     return null; // Return nothing during redirect
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container flex-grow flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-10 w-10 text-schoolier-blue animate-spin mb-4" />
+            <p className="text-muted-foreground">Chargement de votre tableau de bord...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -52,7 +75,7 @@ const InstructorDashboard = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total des cours</p>
-                  <h3 className="text-3xl font-bold mt-1">5</h3>
+                  <h3 className="text-3xl font-bold mt-1">{stats.totalCourses}</h3>
                 </div>
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
                   <BookOpen className="h-7 w-7 text-schoolier-blue" />
@@ -66,7 +89,7 @@ const InstructorDashboard = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total des étudiants</p>
-                  <h3 className="text-3xl font-bold mt-1">256</h3>
+                  <h3 className="text-3xl font-bold mt-1">{stats.totalStudents}</h3>
                 </div>
                 <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
                   <Users className="h-7 w-7 text-schoolier-green" />
@@ -80,7 +103,7 @@ const InstructorDashboard = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Revenus ce mois</p>
-                  <h3 className="text-3xl font-bold mt-1">1 274 €</h3>
+                  <h3 className="text-3xl font-bold mt-1">{stats.monthlyRevenue} €</h3>
                 </div>
                 <div className="bg-teal-100 dark:bg-teal-900 p-3 rounded-full">
                   <DollarSign className="h-7 w-7 text-schoolier-teal" />
@@ -94,7 +117,7 @@ const InstructorDashboard = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Note moyenne</p>
-                  <h3 className="text-3xl font-bold mt-1">4.8</h3>
+                  <h3 className="text-3xl font-bold mt-1">{stats.averageRating}</h3>
                 </div>
                 <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
                   <Star className="h-7 w-7 text-yellow-500" />
@@ -110,74 +133,27 @@ const InstructorDashboard = () => {
             <TabsTrigger value="students">Étudiants</TabsTrigger>
             <TabsTrigger value="reviews">Avis</TabsTrigger>
             <TabsTrigger value="earnings">Revenus</TabsTrigger>
+            <TabsTrigger value="stats">Statistiques</TabsTrigger>
           </TabsList>
           
           <TabsContent value="courses">
-            <div className="space-y-6">
-              <Card>
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <BookOpen className="h-16 w-16 mx-auto text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Commencez à créer votre premier cours</h3>
-                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-                      Créez et gérez vos cours, suivez les progrès de vos étudiants et générez des revenus en partageant votre expertise.
-                    </p>
-                    <Button className="mt-6" onClick={() => navigate("/instructor/courses/create")}>
-                      <FilePlus className="h-4 w-4 mr-2" />
-                      Créer un cours
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <InstructorCoursesList courses={courses} />
           </TabsContent>
           
           <TabsContent value="students">
-            <div className="space-y-6">
-              <Card>
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <Users className="h-16 w-16 mx-auto text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Fonctionnalité à venir</h3>
-                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-                      La gestion des étudiants sera bientôt disponible.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <InstructorStudents />
           </TabsContent>
           
           <TabsContent value="reviews">
-            <div className="space-y-6">
-              <Card>
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <BarChart2 className="h-16 w-16 mx-auto text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Fonctionnalité à venir</h3>
-                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-                      La gestion des avis et des notes sera bientôt disponible.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <InstructorReviews />
           </TabsContent>
           
           <TabsContent value="earnings">
-            <div className="space-y-6">
-              <Card>
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <DollarSign className="h-16 w-16 mx-auto text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Fonctionnalité à venir</h3>
-                    <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-                      Le suivi des revenus sera bientôt disponible.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <InstructorEarnings />
+          </TabsContent>
+          
+          <TabsContent value="stats">
+            <InstructorStats />
           </TabsContent>
         </Tabs>
       </div>

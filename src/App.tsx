@@ -23,6 +23,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetails = lazy(() => import("./pages/CourseDetails"));
 const CourseCreation = lazy(() => import("./pages/CourseCreation")); 
+const CourseEditor = lazy(() => import("./pages/CourseEditor"));
 const Profile = lazy(() => import("./pages/Profile"));
 const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -70,10 +71,11 @@ const App = () => (
               <Route path="/student/profile" element={<StudentProfile />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
-              <Route path="/courses/create" element={<CourseCreation />} /> 
+              <Route path="/courses/create" element={<CourseCreation />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/instructor" element={<InstructorDashboard />} />
-              <Route path="/instructor/courses/create" element={<CourseCreation />} /> 
+              <Route path="/instructor/courses/create" element={<CourseEditor />} />
+              <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
