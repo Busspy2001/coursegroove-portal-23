@@ -21,7 +21,7 @@ const ScrollHeader: React.FC<ScrollHeaderProps> = ({ children }) => {
   return (
     <header 
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 py-1", // Added py-1 to reduce vertical padding
+        "sticky top-0 z-50 w-full transition-all duration-300 py-0", // Reduced from py-1 to py-0 for minimum vertical padding
         isScrolled 
           ? "bg-white/80 dark:bg-schoolier-dark/80 backdrop-blur-md shadow-sm" 
           : "bg-white dark:bg-schoolier-dark"
