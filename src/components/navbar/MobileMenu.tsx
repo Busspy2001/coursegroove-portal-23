@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Home, Settings, Book } from "lucide-react";
+import { Home, Settings, Book, BookOpen, User, Info, MessageSquare, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "./SearchBar";
 
@@ -30,108 +30,138 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const navigate = useNavigate();
   
   return (
-    <div className="md:hidden bg-white dark:bg-schoolier-dark border-t animate-fade-in">
+    <div className="md:hidden fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-900 animate-fade-in">
+      {/* Header with close button */}
+      <div className="p-4 border-b flex items-center justify-between">
+        <div className="font-spartan font-bold text-lg">Menu</div>
+        <button 
+          onClick={onClose}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <span className="sr-only">Fermer</span>
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
       {/* Mobile Search */}
       <div className="p-4 border-b">
         <SearchBar />
       </div>
       
-      <div className="flex flex-col space-y-1 p-2">
-        <Link
-          to="/"
-          className={`p-3 rounded-md ${isActive("/") ? "bg-accent" : "hover:bg-muted"}`}
-          onClick={onClose}
-        >
-          Accueil
-        </Link>
-        <Link
-          to="/courses"
-          className={`p-3 rounded-md ${isActive("/courses") ? "bg-accent" : "hover:bg-muted"}`}
-          onClick={onClose}
-        >
-          Cours
-        </Link>
-        <Link
-          to="/about"
-          className={`p-3 rounded-md ${isActive("/about") ? "bg-accent" : "hover:bg-muted"}`}
-          onClick={onClose}
-        >
-          À propos
-        </Link>
-        <Link
-          to="/contact"
-          className={`p-3 rounded-md ${isActive("/contact") ? "bg-accent" : "hover:bg-muted"}`}
-          onClick={onClose}
-        >
-          Contact
-        </Link>
+      {/* Main navigation */}
+      <div className="overflow-y-auto flex-grow">
+        <div className="p-2 space-y-1">
+          <Link
+            to="/"
+            className={`flex items-center p-3 rounded-lg ${isActive("/") 
+              ? "bg-schoolier-blue text-white" 
+              : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+            onClick={onClose}
+          >
+            <Home className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Accueil</span>
+          </Link>
+          <Link
+            to="/courses"
+            className={`flex items-center p-3 rounded-lg ${isActive("/courses") 
+              ? "bg-schoolier-blue text-white" 
+              : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+            onClick={onClose}
+          >
+            <BookOpen className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Cours</span>
+          </Link>
+          <Link
+            to="/about"
+            className={`flex items-center p-3 rounded-lg ${isActive("/about") 
+              ? "bg-schoolier-blue text-white" 
+              : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+            onClick={onClose}
+          >
+            <Info className="h-5 w-5 mr-3" />
+            <span className="font-spartan">À propos</span>
+          </Link>
+          <Link
+            to="/contact"
+            className={`flex items-center p-3 rounded-lg ${isActive("/contact") 
+              ? "bg-schoolier-blue text-white" 
+              : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+            onClick={onClose}
+          >
+            <MessageSquare className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Contact</span>
+          </Link>
+        </div>
       </div>
       
+      {/* User section */}
       {isAuthenticated ? (
-        <div className="border-t p-4">
-          <div className="flex items-center space-x-3 mb-4">
+        <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center space-x-3 mb-4 pb-3 border-b">
             <img
               src={currentUser?.avatar || "https://ui-avatars.com/api/?name=User&background=0D9488&color=fff"}
               alt="User"
-              className="h-10 w-10 rounded-full"
+              className="h-12 w-12 rounded-full"
             />
             <div>
-              <p className="font-medium">{currentUser?.name}</p>
-              <p className="text-xs text-muted-foreground">{currentUser?.email}</p>
+              <p className="font-medium font-spartan">{currentUser?.name}</p>
+              <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
             </div>
           </div>
           
-          <div className="grid gap-2">
+          <div className="space-y-2">
             <Link
               to="/dashboard"
-              className="flex items-center p-2 hover:bg-accent rounded-md"
+              className="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-700"
               onClick={onClose}
             >
-              <Home className="h-4 w-4 mr-2" />
-              Tableau de bord
+              <Home className="h-5 w-5 mr-3 text-schoolier-blue" />
+              <span className="font-spartan">Tableau de bord</span>
             </Link>
             <Link
               to="/profile"
-              className="flex items-center p-2 hover:bg-accent rounded-md"
+              className="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-700"
               onClick={onClose}
             >
-              <Settings className="h-4 w-4 mr-2" />
-              Mon profil
+              <User className="h-5 w-5 mr-3 text-schoolier-blue" />
+              <span className="font-spartan">Mon profil</span>
             </Link>
             {currentUser?.role === "instructor" && (
               <Link
                 to="/instructor"
-                className="flex items-center p-2 hover:bg-accent rounded-md"
+                className="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-700"
                 onClick={onClose}
               >
-                <Book className="h-4 w-4 mr-2" />
-                Espace instructeur
+                <Book className="h-5 w-5 mr-3 text-schoolier-blue" />
+                <span className="font-spartan">Espace instructeur</span>
               </Link>
             )}
             {currentUser?.role === "admin" && (
               <Link
                 to="/admin"
-                className="flex items-center p-2 hover:bg-accent rounded-md"
+                className="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-700"
                 onClick={onClose}
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Administration
+                <Settings className="h-5 w-5 mr-3 text-schoolier-blue" />
+                <span className="font-spartan">Administration</span>
               </Link>
             )}
-            <Button variant="destructive" onClick={onLogout} className="mt-2">
+            <Button variant="destructive" onClick={onLogout} className="w-full mt-4 font-spartan">
               Déconnexion
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col space-y-2 p-4 border-t">
-          <Button onClick={() => { navigate("/login"); onClose(); }}>
+        <div className="border-t p-4 space-y-3 bg-gray-50 dark:bg-gray-800">
+          <Button onClick={() => { navigate("/login"); onClose(); }} className="w-full font-spartan">
             Connexion
           </Button>
           <Button 
             variant="outline" 
             onClick={() => { navigate("/register"); onClose(); }}
-            className="border-schoolier-teal text-schoolier-teal hover:bg-schoolier-teal/10"
+            className="w-full border-schoolier-teal text-schoolier-teal hover:bg-schoolier-teal/10 font-spartan"
           >
             Inscription
           </Button>

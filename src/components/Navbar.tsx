@@ -13,6 +13,7 @@ import SearchBar from "./navbar/SearchBar";
 import UserMenu from "./navbar/UserMenu";
 import AuthButtons from "./navbar/AuthButtons";
 import MobileMenu from "./navbar/MobileMenu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
   const { currentUser, logout, isAuthenticated } = useAuth();
@@ -41,8 +42,8 @@ const Navbar = () => {
 
   return (
     <ScrollHeader>
-      <nav className="container flex items-center justify-between py-1 px-2">
-        <div className="flex items-center space-x-8">
+      <nav className="container flex items-center justify-between py-3 px-4 lg:py-1">
+        <div className="flex items-center space-x-4 lg:space-x-8">
           <NavbarLogo />
 
           {/* Desktop Navigation */}
@@ -69,7 +70,7 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <button
           onClick={toggleMobileMenu}
-          className="md:hidden text-gray-600 dark:text-gray-300 focus:outline-none"
+          className="md:hidden p-2 text-gray-600 dark:text-gray-300 focus:outline-none"
           aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
         >
           {isMobileMenuOpen ? (

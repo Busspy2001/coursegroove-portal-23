@@ -11,23 +11,32 @@ import TestimonialsSection from "@/components/home/TestimonialsSection";
 import InstructorSection from "@/components/home/InstructorSection";
 import GuaranteeSection from "@/components/home/GuaranteeSection";
 import CtaSection from "@/components/home/CtaSection";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <HeroSection />
-      <SearchSection />
-      <BenefitsSection />
-      <CategoriesSection />
-      <FeaturedCoursesSection />
-      <TestimonialsSection />
-      <InstructorSection />
-      <GuaranteeSection />
-      <CtaSection />
+      <div className={`flex-1 ${isMobile ? "pb-16" : ""}`}>
+        <HeroSection />
+        <SearchSection />
+        <BenefitsSection />
+        <CategoriesSection />
+        <FeaturedCoursesSection />
+        <TestimonialsSection />
+        <InstructorSection />
+        <GuaranteeSection />
+        <CtaSection />
+      </div>
 
       <Footer />
+      
+      {/* Mobile Bottom Navigation */}
+      <BottomNavigation />
     </div>
   );
 };
