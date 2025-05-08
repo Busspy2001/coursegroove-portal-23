@@ -16,6 +16,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetails = lazy(() => import("./pages/CourseDetails"));
+const CourseCreation = lazy(() => import("./pages/CourseCreation")); // Added course creation page
 const Profile = lazy(() => import("./pages/Profile"));
 const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -54,8 +55,10 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
+              <Route path="/courses/create" element={<CourseCreation />} /> {/* Added route */}
               <Route path="/profile" element={<Profile />} />
               <Route path="/instructor" element={<InstructorDashboard />} />
+              <Route path="/instructor/courses/create" element={<CourseCreation />} /> {/* Added instructor-specific route */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

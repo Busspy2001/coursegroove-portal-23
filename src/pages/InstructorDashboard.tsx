@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Users, DollarSign, BarChart2, FilePlus } from "lucide-react";
+import { BookOpen, Users, DollarSign, BarChart2, FilePlus, Star } from "lucide-react";
 
 const InstructorDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -39,7 +39,7 @@ const InstructorDashboard = () => {
             </p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Button onClick={() => navigate("/courses/create")} className="flex items-center">
+            <Button onClick={() => navigate("/instructor/courses/create")} className="flex items-center">
               <FilePlus className="mr-2 h-5 w-5" />
               Créer un nouveau cours
             </Button>
@@ -118,12 +118,13 @@ const InstructorDashboard = () => {
                 <div className="p-6">
                   <div className="text-center py-12">
                     <BookOpen className="h-16 w-16 mx-auto text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Des fonctionnalités avancées pour les instructeurs arrivent bientôt</h3>
+                    <h3 className="mt-4 text-lg font-medium">Commencez à créer votre premier cours</h3>
                     <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-                      Notre espace instructeur est en cours de développement. Vous pourrez bientôt créer et gérer vos cours, suivre les progrès de vos étudiants et bien plus encore.
+                      Créez et gérez vos cours, suivez les progrès de vos étudiants et générez des revenus en partageant votre expertise.
                     </p>
-                    <Button className="mt-6">
-                      En savoir plus
+                    <Button className="mt-6" onClick={() => navigate("/instructor/courses/create")}>
+                      <FilePlus className="h-4 w-4 mr-2" />
+                      Créer un cours
                     </Button>
                   </div>
                 </div>
@@ -185,7 +186,5 @@ const InstructorDashboard = () => {
     </div>
   );
 };
-
-import { Star } from "lucide-react"; // Adding missing import
 
 export default InstructorDashboard;
