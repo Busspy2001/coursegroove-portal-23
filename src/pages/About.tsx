@@ -3,9 +3,9 @@ import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Book, Users, Award, Clock, Globe, MessageSquare } from "lucide-react";
+import { CheckCircle, Users, Award, BookOpen, Globe } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const About = () => {
   const navigate = useNavigate();
@@ -15,109 +15,93 @@ const About = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
-        <div className="container px-6 mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">À propos de Schoolier</h1>
-          <p className="text-xl max-w-3xl mx-auto mb-8">
-            La plateforme d'apprentissage en ligne qui transforme l'éducation à travers une expérience pédagogique innovante et accessible
-          </p>
-        </div>
-      </section>
-
-      {/* Mission Section */}
-      <section className="py-16 container px-6 mx-auto">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-center">Notre mission</h2>
-          <p className="text-lg text-muted-foreground mb-8 text-center">
-            Chez Schoolier, nous croyons que l'éducation de qualité devrait être accessible à tous, partout dans le monde.
-          </p>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-12">
-            <p className="text-lg mb-6">
-              Fondée en 2023, Schoolier est née d'une vision simple mais ambitieuse : démocratiser l'accès à une éducation de qualité. Notre plateforme d'apprentissage en ligne permet à chacun de développer ses compétences à son propre rythme, avec des cours dispensés par des experts reconnus dans leur domaine.
+      <section className="bg-gradient-to-r from-blue-50 to-teal-50 dark:from-slate-900 dark:to-slate-800 py-20">
+        <div className="container px-6 mx-auto">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="heading-1 text-schoolier-blue mb-6">À propos de Schoolier</h1>
+            <p className="subheading mb-8">
+              Notre mission est de démocratiser l'accès à l'éducation de qualité pour tous, partout dans le monde.
             </p>
-            <p className="text-lg">
-              Nous travaillons chaque jour pour créer un écosystème éducatif où apprenants et instructeurs peuvent se connecter, partager leurs connaissances et grandir ensemble. Notre objectif est de transformer la façon dont le monde apprend, en rendant l'éducation plus interactive, personnalisée et efficace.
-            </p>
+            <Button 
+              size="lg" 
+              onClick={() => navigate("/register")} 
+              className="bg-schoolier-teal hover:bg-schoolier-teal/90"
+            >
+              Rejoignez-nous
+            </Button>
           </div>
         </div>
+      </section>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-16">
-          <Card className="text-center p-6">
-            <CardContent className="pt-6">
-              <Users className="h-12 w-12 text-schoolier-blue mx-auto mb-4" />
-              <h3 className="text-4xl font-bold mb-2">10K+</h3>
-              <p className="text-muted-foreground">Étudiants actifs</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center p-6">
-            <CardContent className="pt-6">
-              <Book className="h-12 w-12 text-schoolier-teal mx-auto mb-4" />
-              <h3 className="text-4xl font-bold mb-2">200+</h3>
-              <p className="text-muted-foreground">Cours de qualité</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center p-6">
-            <CardContent className="pt-6">
-              <Award className="h-12 w-12 text-schoolier-green mx-auto mb-4" />
-              <h3 className="text-4xl font-bold mb-2">50+</h3>
-              <p className="text-muted-foreground">Instructeurs experts</p>
-            </CardContent>
-          </Card>
+      {/* Our Mission */}
+      <section className="py-16 container px-6 mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="heading-2 text-schoolier-blue mb-6">Notre mission</h2>
+            <p className="text-lg mb-6">
+              Schoolier.com est née d'une conviction : l'apprentissage devrait être accessible à tous, quelle que soit sa situation géographique ou financière.
+            </p>
+            <p className="text-lg mb-6">
+              Nous croyons que le savoir est la clé de l'émancipation personnelle et que chaque individu devrait pouvoir se former à son rythme, selon ses besoins et ses contraintes.
+            </p>
+            <p className="text-lg">
+              Notre plateforme connecte des apprenants passionnés à des formateurs experts, créant ainsi un écosystème d'apprentissage dynamique et bienveillant.
+            </p>
+          </div>
+          <div className="relative">
+            <img
+              src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+              alt="Équipe Schoolier"
+              className="rounded-lg shadow-xl"
+            />
+            <div className="absolute -bottom-5 -right-5 bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4">
+              <p className="font-semibold">Fondé en 2022</p>
+              <p className="text-schoolier-teal">Paris, France</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Values Section */}
+      {/* Key Values */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container px-6 mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-center">Nos valeurs</h2>
-          <p className="text-lg text-muted-foreground mb-12 text-center max-w-3xl mx-auto">
-            Les principes qui guident nos actions et notre développement
+          <h2 className="heading-2 text-center mb-4">Nos valeurs</h2>
+          <p className="subheading text-center mb-12 max-w-3xl mx-auto">
+            Ces principes fondamentaux guident chacune de nos actions et décisions
           </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="bg-white dark:bg-gray-800 p-8 card-hover border border-gray-100 dark:border-gray-700">
-              <Clock className="h-10 w-10 text-schoolier-blue mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Accessibilité</h3>
-              <p className="text-muted-foreground">
-                Nous croyons que l'éducation devrait être accessible à tous, indépendamment de la situation géographique ou financière.
-              </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="border-t-4 border-schoolier-blue card-hover">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-6">
+                  <Users className="h-8 w-8 text-schoolier-blue" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Accessibilité</h3>
+                <p className="text-muted-foreground">
+                  Nous nous engageons à rendre l'éducation accessible au plus grand nombre, en proposant des options gratuites et des tarifs abordables.
+                </p>
+              </CardContent>
             </Card>
-            <Card className="bg-white dark:bg-gray-800 p-8 card-hover border border-gray-100 dark:border-gray-700">
-              <Award className="h-10 w-10 text-schoolier-teal mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Excellence</h3>
-              <p className="text-muted-foreground">
-                Nous nous engageons à fournir des cours de la plus haute qualité, créés par des experts reconnus dans leur domaine.
-              </p>
+            <Card className="border-t-4 border-schoolier-teal card-hover">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center mb-6">
+                  <Award className="h-8 w-8 text-schoolier-teal" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Excellence</h3>
+                <p className="text-muted-foreground">
+                  Nous maintenons des standards élevés pour nos cours, en sélectionnant soigneusement nos formateurs et en évaluant régulièrement la qualité du contenu.
+                </p>
+              </CardContent>
             </Card>
-            <Card className="bg-white dark:bg-gray-800 p-8 card-hover border border-gray-100 dark:border-gray-700">
-              <Globe className="h-10 w-10 text-schoolier-green mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Innovation</h3>
-              <p className="text-muted-foreground">
-                Nous repoussons constamment les limites de la technologie éducative pour améliorer l'expérience d'apprentissage.
-              </p>
-            </Card>
-            <Card className="bg-white dark:bg-gray-800 p-8 card-hover border border-gray-100 dark:border-gray-700">
-              <MessageSquare className="h-10 w-10 text-schoolier-blue mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Communauté</h3>
-              <p className="text-muted-foreground">
-                Nous favorisons un environnement collaboratif où apprenants et instructeurs peuvent échanger et s'entraider.
-              </p>
-            </Card>
-            <Card className="bg-white dark:bg-gray-800 p-8 card-hover border border-gray-100 dark:border-gray-700">
-              <Users className="h-10 w-10 text-schoolier-teal mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Inclusivité</h3>
-              <p className="text-muted-foreground">
-                Nous célébrons la diversité et nous nous efforçons de créer un environnement d'apprentissage inclusif pour tous.
-              </p>
-            </Card>
-            <Card className="bg-white dark:bg-gray-800 p-8 card-hover border border-gray-100 dark:border-gray-700">
-              <Book className="h-10 w-10 text-schoolier-green mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Apprentissage continu</h3>
-              <p className="text-muted-foreground">
-                Nous encourageons l'apprentissage tout au long de la vie et nous nous adaptons constamment aux besoins changeants de nos utilisateurs.
-              </p>
+            <Card className="border-t-4 border-schoolier-green card-hover">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-6">
+                  <Globe className="h-8 w-8 text-schoolier-green" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Diversité</h3>
+                <p className="text-muted-foreground">
+                  Nous célébrons la diversité des perspectives et des expériences, avec des formateurs et des étudiants du monde entier.
+                </p>
+              </CardContent>
             </Card>
           </div>
         </div>
@@ -125,44 +109,97 @@ const About = () => {
 
       {/* Team Section */}
       <section className="py-16 container px-6 mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-center">Notre équipe</h2>
-        <p className="text-lg text-muted-foreground mb-12 text-center max-w-3xl mx-auto">
+        <h2 className="heading-2 text-center mb-4">Notre équipe</h2>
+        <p className="subheading text-center mb-12 max-w-3xl mx-auto">
           Des passionnés d'éducation et de technologie déterminés à transformer l'apprentissage en ligne
         </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { name: "Marie Dubois", role: "Fondatrice & CEO", image: "https://ui-avatars.com/api/?name=Marie+Dubois&background=0D9488&color=fff&size=200" },
-            { name: "Thomas Martin", role: "CTO", image: "https://ui-avatars.com/api/?name=Thomas+Martin&background=0D9488&color=fff&size=200" },
-            { name: "Julie Lefebvre", role: "Directrice Pédagogique", image: "https://ui-avatars.com/api/?name=Julie+Lefebvre&background=0D9488&color=fff&size=200" },
-            { name: "Alexandre Petit", role: "Responsable Marketing", image: "https://ui-avatars.com/api/?name=Alexandre+Petit&background=0D9488&color=fff&size=200" }
+            {
+              name: "Sophie Martin",
+              role: "Co-fondatrice & CEO",
+              image: "https://ui-avatars.com/api/?name=Sophie+Martin&background=0D9488&color=fff",
+              bio: "Ancienne directrice pédagogique, passionnée par l'éducation accessible."
+            },
+            {
+              name: "Thomas Dubois",
+              role: "Co-fondateur & CTO",
+              image: "https://ui-avatars.com/api/?name=Thomas+Dubois&background=0D9488&color=fff",
+              bio: "Ingénieur logiciel avec 15 ans d'expérience dans les EdTech."
+            },
+            {
+              name: "Léa Moreau",
+              role: "Directrice Pédagogique",
+              image: "https://ui-avatars.com/api/?name=Lea+Moreau&background=0D9488&color=fff",
+              bio: "Experte en conception de programmes éducatifs innovants."
+            },
+            {
+              name: "Marc Petit",
+              role: "Directeur Marketing",
+              image: "https://ui-avatars.com/api/?name=Marc+Petit&background=0D9488&color=fff",
+              bio: "Spécialiste en croissance de plateformes digitales éducatives."
+            }
           ].map((member, index) => (
-            <Card key={index} className="overflow-hidden card-hover">
-              <div className="aspect-square">
-                <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-4 text-center">
-                <h3 className="font-semibold text-lg">{member.name}</h3>
-                <p className="text-muted-foreground">{member.role}</p>
-              </div>
+            <Card key={index} className="card-hover">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center text-center">
+                  <img src={member.image} alt={member.name} className="w-24 h-24 rounded-full mb-4" />
+                  <h3 className="font-semibold text-lg">{member.name}</h3>
+                  <p className="text-schoolier-teal mb-2">{member.role}</p>
+                  <p className="text-sm text-muted-foreground">{member.bio}</p>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-50 to-teal-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="container px-6 mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Rejoignez la communauté Schoolier</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Commencez dès aujourd'hui votre parcours d'apprentissage ou partagez vos connaissances en tant qu'instructeur
+      {/* Stats Section */}
+      <section className="py-16 bg-schoolier-blue text-white">
+        <div className="container px-6 mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold mb-2">10,000+</div>
+              <p className="text-blue-100">Étudiants actifs</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">1,500+</div>
+              <p className="text-blue-100">Cours disponibles</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">200+</div>
+              <p className="text-blue-100">Formateurs experts</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">45+</div>
+              <p className="text-blue-100">Pays représentés</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Join Us CTA */}
+      <section className="py-16 container px-6 mx-auto">
+        <div className="bg-gradient-to-r from-blue-50 to-teal-50 dark:from-slate-900 dark:to-slate-800 rounded-xl p-8 md:p-12 text-center">
+          <h2 className="heading-3 mb-4">Rejoignez l'aventure Schoolier</h2>
+          <p className="subheading mb-8 max-w-2xl mx-auto">
+            Que vous soyez étudiant en quête de nouvelles compétences ou expert souhaitant partager votre savoir, Schoolier est fait pour vous.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" onClick={() => navigate("/register")} className="bg-schoolier-teal hover:bg-schoolier-teal/90">
-              S'inscrire gratuitement
+            <Button 
+              size="lg" 
+              onClick={() => navigate("/register")} 
+              className="bg-schoolier-blue hover:bg-schoolier-blue/90"
+            >
+              S'inscrire comme étudiant
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/contact")} className="border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10">
-              Nous contacter
+            <Button 
+              size="lg" 
+              variant="outline" 
+              onClick={() => navigate("/become-instructor")}
+              className="border-schoolier-teal text-schoolier-teal hover:bg-schoolier-teal/10"
+            >
+              Devenir formateur
             </Button>
           </div>
         </div>

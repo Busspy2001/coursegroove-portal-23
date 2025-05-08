@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Search, ArrowLeft, Home, BookOpen } from "lucide-react";
+import { Search, ArrowLeft, Home, BookOpen, HelpCircle } from "lucide-react";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -37,11 +37,11 @@ const NotFound = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Retour
           </Button>
-          <Button onClick={() => navigate("/")} className="flex items-center">
+          <Button onClick={() => navigate("/")} className="bg-schoolier-blue hover:bg-schoolier-blue/90 flex items-center">
             <Home className="mr-2 h-4 w-4" />
             Page d'accueil
           </Button>
-          <Button onClick={() => navigate("/courses")} variant="secondary" className="flex items-center">
+          <Button onClick={() => navigate("/courses")} variant="secondary" className="bg-schoolier-teal hover:bg-schoolier-teal/90 text-white flex items-center">
             <BookOpen className="mr-2 h-4 w-4" />
             Explorer les cours
           </Button>
@@ -55,8 +55,8 @@ const NotFound = () => {
               { title: "Cours en marketing digital", path: "/courses?category=Marketing Digital" },
               { title: "Blog éducatif", path: "/blog" },
               { title: "À propos de Schoolier", path: "/about" },
-              { title: "Contact", path: "/contact" },
-              { title: "FAQ", path: "/faq" }
+              { title: "FAQ / Centre d'aide", path: "/faq" },
+              { title: "Contact", path: "/contact" }
             ].map((link, index) => (
               <Button 
                 key={index} 
@@ -68,6 +68,17 @@ const NotFound = () => {
               </Button>
             ))}
           </div>
+        </div>
+
+        <div className="mt-16 max-w-md">
+          <Button 
+            variant="outline"
+            className="flex items-center"
+            onClick={() => navigate("/faq")}
+          >
+            <HelpCircle className="mr-2 h-4 w-4" />
+            Besoin d'aide ? Consultez notre FAQ
+          </Button>
         </div>
       </div>
       

@@ -16,12 +16,15 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetails = lazy(() => import("./pages/CourseDetails"));
-const CourseCreation = lazy(() => import("./pages/CourseCreation")); // Added course creation page
+const CourseCreation = lazy(() => import("./pages/CourseCreation")); 
 const Profile = lazy(() => import("./pages/Profile"));
 const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Faq = lazy(() => import("./pages/Faq"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,13 +58,16 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
-              <Route path="/courses/create" element={<CourseCreation />} /> {/* Added route */}
+              <Route path="/courses/create" element={<CourseCreation />} /> 
               <Route path="/profile" element={<Profile />} />
               <Route path="/instructor" element={<InstructorDashboard />} />
-              <Route path="/instructor/courses/create" element={<CourseCreation />} /> {/* Added instructor-specific route */}
+              <Route path="/instructor/courses/create" element={<CourseCreation />} /> 
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
