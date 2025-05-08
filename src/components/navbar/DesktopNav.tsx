@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +11,8 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Laptop, Book, ChartBar, Palette } from "lucide-react";
+import { Laptop, Book, ChartBar, Palette, Shield, Network, Cloud, Code } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavItem {
   title: string;
@@ -58,6 +59,10 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+  
+  // Course categories
   const courseCategories = [
     {
       title: "Développement Web",
@@ -84,33 +89,113 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
       icon: <Book className="h-5 w-5 text-schoolier-yellow" />
     },
   ];
+
+  // Certification providers
+  const certificationProviders = [
+    { name: "Microsoft", href: "/certifications/microsoft" },
+    { name: "AWS", href: "/certifications/aws" },
+    { name: "Google Cloud", href: "/certifications/google" },
+    { name: "Cisco", href: "/certifications/cisco" },
+    { name: "CompTIA", href: "/certifications/comptia" },
+  ];
+
+  // Popular topics
+  const popularTopics = [
+    { name: "Certification Cloud", href: "/topics/cloud", icon: <Cloud className="h-4 w-4" /> },
+    { name: "Réseautage", href: "/topics/networking", icon: <Network className="h-4 w-4" /> },
+    { name: "Cybersécurité", href: "/topics/cybersecurity", icon: <Shield className="h-4 w-4" /> },
+    { name: "DevOps", href: "/topics/devops", icon: <Code className="h-4 w-4" /> },
+    { name: "Codage", href: "/topics/coding", icon: <Code className="h-4 w-4" /> },
+  ];
+  
+  const handleOpenChange = (open: boolean) => {
+    if (!isMobile) return; // Only control open state on mobile
+    setOpen(open);
+  };
   
   return (
     <NavigationMenu className="hidden lg:flex mx-auto">
       <NavigationMenuList className="gap-1">
         <NavigationMenuItem>
-          <NavigationMenuTrigger
+          <NavigationMenuTrigger 
             className={cn(
               "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
-              isActive("/explore") &&
-                "text-schoolier-blue font-medium"
+              isActive("/explore") && "text-schoolier-blue font-medium",
+              "data-[state=open]:text-schoolier-blue"
             )}
+            onMouseEnter={() => !isMobile && setOpen(true)}
+            onClick={() => isMobile && setOpen(!open)}
+            aria-expanded={open}
           >
             Découvrir
           </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
-              {courseCategories.map((category) => (
-                <ListItem
-                  key={category.title}
-                  title={category.title}
-                  href={category.href}
-                  icon={category.icon}
-                >
-                  {category.description}
-                </ListItem>
-              ))}
-            </ul>
+          <NavigationMenuContent 
+            onMouseLeave={() => !isMobile && setOpen(false)}
+            className="w-[900px] rounded-xl shadow-2xl bg-white border border-[#f1f5f9] animate-fade-in"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+              {/* Column 1: Course Categories */}
+              <div>
+                <h3 className="font-spartan font-bold text-sm mb-3 text-schoolier-blue">
+                  Parcourir les certifications
+                </h3>
+                <Link to="/certifications" className="block text-sm text-[#64748b] hover:text-schoolier-teal mb-3 transition-colors duration-200">
+                  Préparation aux certifications
+                </Link>
+                <ul className="space-y-2">
+                  {courseCategories.map((category) => (
+                    <li key={category.title}>
+                      <Link
+                        to={category.href}
+                        className="flex items-center text-sm text-[#334155] hover:text-schoolier-blue hover:underline transition-colors duration-200"
+                      >
+                        {category.icon && <span className="mr-2">{category.icon}</span>}
+                        {category.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Column 2: Certification Providers */}
+              <div>
+                <h3 className="font-spartan font-bold text-sm mb-3 text-[#334155]">
+                  Émetteurs populaires
+                </h3>
+                <ul className="space-y-2">
+                  {certificationProviders.map((provider) => (
+                    <li key={provider.name}>
+                      <Link
+                        to={provider.href}
+                        className="text-sm text-[#64748b] hover:text-schoolier-blue transition-colors duration-200"
+                      >
+                        {provider.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Column 3: Popular Topics */}
+              <div>
+                <h3 className="font-spartan font-bold text-sm mb-3 text-[#334155]">
+                  Sujets populaires
+                </h3>
+                <ul className="space-y-2">
+                  {popularTopics.map((topic) => (
+                    <li key={topic.name}>
+                      <Link
+                        to={topic.href}
+                        className="flex items-center text-sm text-[#64748b] hover:text-schoolier-teal transition-colors duration-200"
+                      >
+                        {topic.icon && <span className="mr-2">{topic.icon}</span>}
+                        {topic.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
 

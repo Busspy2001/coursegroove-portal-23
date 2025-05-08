@@ -17,6 +17,7 @@ import MobileMenu from "./navbar/MobileMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+
 const Navbar = () => {
   const {
     currentUser,
@@ -28,16 +29,20 @@ const Navbar = () => {
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  
   const handleLogout = async () => {
     await logout();
     navigate("/");
   };
+  
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+  
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+  
   const toggleSearch = () => {
     setIsSearchExpanded(!isSearchExpanded);
   };
@@ -57,6 +62,7 @@ const Navbar = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isSearchExpanded]);
+  
   return <header className="relative z-50 w-full">
       {/* Main header with logo first */}
       <ScrollHeader>
@@ -103,4 +109,5 @@ const Navbar = () => {
       {!isMobile}
     </header>;
 };
+
 export default Navbar;
