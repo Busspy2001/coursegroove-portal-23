@@ -60,15 +60,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
     }
     
+    // Use type assertion to handle the fields not detected in the TypeScript types
+    const profileWithTypes = profile as (typeof profile & { avatar_url?: string; bio?: string });
+    
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
       role: (profile?.role as UserRole) || 'student',
-      // Safely access avatar_url which might be missing in the type definition
-      avatar: profile?.avatar_url || supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name || 'User'}&background=0D9488&color=fff`,
-      // Safely access bio which might be missing in the type definition
-      bio: profile?.bio || ''
+      avatar: profileWithTypes?.avatar_url || supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name || 'User'}&background=0D9488&color=fff`,
+      bio: profileWithTypes?.bio || ''
     };
   };
 
