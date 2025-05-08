@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Home, Settings, Book, BookOpen, User, Info, MessageSquare, Search } from "lucide-react";
+import { BookOpen, Globe, Home, MessageSquare, Search, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "./SearchBar";
 
@@ -54,45 +53,50 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       <div className="overflow-y-auto flex-grow">
         <div className="p-2 space-y-1">
           <Link
-            to="/"
-            className={`flex items-center p-3 rounded-lg ${isActive("/") 
+            to="/explore"
+            className={`flex items-center p-3 rounded-lg ${isActive("/explore") 
               ? "bg-schoolier-blue text-white" 
               : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             onClick={onClose}
           >
-            <Home className="h-5 w-5 mr-3" />
-            <span className="font-spartan">Accueil</span>
+            <Search className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Découvrir</span>
           </Link>
           <Link
-            to="/courses"
-            className={`flex items-center p-3 rounded-lg ${isActive("/courses") 
+            to="/business"
+            className={`flex items-center p-3 rounded-lg ${isActive("/business") 
               ? "bg-schoolier-blue text-white" 
               : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             onClick={onClose}
           >
             <BookOpen className="h-5 w-5 mr-3" />
-            <span className="font-spartan">Cours</span>
+            <span className="font-spartan">Schoolier Business</span>
           </Link>
           <Link
-            to="/about"
-            className={`flex items-center p-3 rounded-lg ${isActive("/about") 
+            to="/teach"
+            className={`flex items-center p-3 rounded-lg ${isActive("/teach") 
               ? "bg-schoolier-blue text-white" 
               : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             onClick={onClose}
           >
-            <Info className="h-5 w-5 mr-3" />
-            <span className="font-spartan">À propos</span>
+            <User className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Enseigner sur Schoolier</span>
           </Link>
           <Link
-            to="/contact"
-            className={`flex items-center p-3 rounded-lg ${isActive("/contact") 
+            to="/cart"
+            className={`flex items-center p-3 rounded-lg ${isActive("/cart") 
               ? "bg-schoolier-blue text-white" 
               : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
             onClick={onClose}
           >
-            <MessageSquare className="h-5 w-5 mr-3" />
-            <span className="font-spartan">Contact</span>
+            <ShoppingCart className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Panier</span>
           </Link>
+          <div className="h-px my-2 bg-gray-200 dark:bg-gray-700"></div>
+          <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <Globe className="h-5 w-5 mr-3" />
+            <span className="font-spartan">Langue</span>
+          </div>
         </div>
       </div>
       
@@ -155,15 +159,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         </div>
       ) : (
         <div className="border-t p-4 space-y-3 bg-gray-50 dark:bg-gray-800">
-          <Button onClick={() => { navigate("/login"); onClose(); }} className="w-full font-spartan">
-            Connexion
+          <Button onClick={() => { navigate("/login"); onClose(); }} 
+                  className="w-full font-spartan border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10" 
+                  variant="outline">
+            Se connecter
           </Button>
           <Button 
-            variant="outline" 
+            variant="default" 
             onClick={() => { navigate("/register"); onClose(); }}
-            className="w-full border-schoolier-teal text-schoolier-teal hover:bg-schoolier-teal/10 font-spartan"
+            className="w-full bg-schoolier-blue hover:bg-schoolier-dark-blue font-spartan"
           >
-            Inscription
+            S'inscrire
           </Button>
         </div>
       )}

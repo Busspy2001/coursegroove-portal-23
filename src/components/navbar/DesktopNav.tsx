@@ -11,6 +11,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { ChevronDown } from "lucide-react";
 
 interface NavItem {
   title: string;
@@ -74,30 +75,17 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
   ];
   
   return (
-    <NavigationMenu className="hidden md:flex">
+    <NavigationMenu className="hidden lg:flex">
       <NavigationMenuList>
-        <NavigationMenuItem>
-          <Link to="/">
-            <NavigationMenuLink
-              className={cn(
-                navigationMenuTriggerStyle(),
-                isActive("/") &&
-                  "bg-accent text-accent-foreground font-medium"
-              )}
-            >
-              Accueil
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-
         <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(
-              isActive("/courses") &&
-                "bg-accent text-accent-foreground font-medium"
+              "font-spartan text-[#334155] hover:text-[#044289] transition-colors",
+              isActive("/explore") &&
+                "text-schoolier-blue font-medium"
             )}
           >
-            Cours
+            Découvrir
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
@@ -115,29 +103,31 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <Link to="/about">
+          <Link to="/business">
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
-                isActive("/about") &&
-                  "bg-accent text-accent-foreground font-medium"
+                "font-spartan text-[#334155] hover:text-[#044289] transition-colors",
+                isActive("/business") &&
+                  "text-schoolier-blue font-medium"
               )}
             >
-              À propos
+              Schoolier Business
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
         
         <NavigationMenuItem>
-          <Link to="/contact">
+          <Link to="/teach">
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
-                isActive("/contact") &&
-                  "bg-accent text-accent-foreground font-medium"
+                "font-spartan text-[#334155] hover:text-[#044289] transition-colors",
+                isActive("/teach") &&
+                  "text-schoolier-blue font-medium"
               )}
             >
-              Contact
+              Enseigner sur Schoolier
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

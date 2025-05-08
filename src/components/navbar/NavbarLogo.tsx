@@ -11,10 +11,13 @@ const NavbarLogo = () => {
           src="/lovable-uploads/15fccc6e-df41-4aa0-9708-c5ef28cab8cd.png" 
           alt="Schoolier Logo" 
           className={cn(
-            "h-20 w-auto transform transition-transform duration-300 group-hover:scale-105",
+            "h-10 w-auto transform transition-transform duration-300 group-hover:scale-105",
           )}
         />
       </div>
+      <span className="font-spartan font-bold text-2xl text-schoolier-blue hidden sm:inline-block">
+        Schoolier
+      </span>
     </Link>
   );
 };

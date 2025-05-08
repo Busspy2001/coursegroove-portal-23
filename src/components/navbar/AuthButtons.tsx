@@ -2,26 +2,66 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ShoppingCart, Globe } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AuthButtons = () => {
   const navigate = useNavigate();
   
   return (
-    <>
-      <Button 
-        variant="ghost" 
-        onClick={() => navigate("/login")}
-        className="hover:bg-schoolier-blue/10 hover:text-schoolier-blue font-spartan text-sm"
+    <div className="flex items-center space-x-2">
+      {/* Language Selector */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="hidden sm:flex hover:bg-schoolier-blue/10 hover:text-schoolier-blue"
+          >
+            <Globe className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem className="cursor-pointer">Français</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">English</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">Español</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Shopping Cart */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate("/cart")}
+        className="hover:bg-schoolier-blue/10 hover:text-schoolier-blue relative"
+        aria-label="Panier"
       >
-        Connexion
+        <ShoppingCart className="h-5 w-5" />
+        <span className="absolute -top-1 -right-1 h-4 w-4 text-xs flex items-center justify-center bg-schoolier-red text-white rounded-full">
+          0
+        </span>
+      </Button>
+
+      {/* Auth Buttons */}
+      <Button 
+        variant="outline" 
+        onClick={() => navigate("/login")}
+        className="hidden sm:flex border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10 font-spartan text-sm"
+      >
+        Se connecter
       </Button>
       <Button 
         onClick={() => navigate("/register")}
-        className="bg-gradient-to-r from-schoolier-blue to-schoolier-teal hover:opacity-90 transition-opacity font-spartan font-medium text-sm"
+        className="bg-schoolier-blue hover:bg-schoolier-dark-blue transition-colors font-spartan font-medium text-sm"
       >
-        Inscription gratuite
+        S'inscrire
       </Button>
-    </>
+    </div>
   );
 };
 

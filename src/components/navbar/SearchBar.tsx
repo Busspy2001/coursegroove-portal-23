@@ -34,11 +34,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         ref={inputRef}
         type="search"
         className={cn(
-          "bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg block w-full ps-10 p-2",
+          "bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm font-sans rounded-full block w-full ps-10 p-2",
           "focus:ring-schoolier-blue focus:border-schoolier-blue transition-all duration-300",
           isExpanded ? "shadow-md" : ""
         )}
-        placeholder={isExpanded ? "Rechercher un cours, une catégorie, un instructeur..." : "Rechercher un cours..."}
+        placeholder={isExpanded ? "Trouvez votre prochain cours par compétence, sujet ou formateur" : "Rechercher un cours..."}
         onFocus={onExpand}
         onClick={onExpand}
       />

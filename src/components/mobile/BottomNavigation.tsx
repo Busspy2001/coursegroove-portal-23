@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, Search, User } from "lucide-react";
+import { Home, BookOpen, Search, User, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -18,37 +18,37 @@ const BottomNavigation = () => {
           to="/"
           className={cn(
             "flex flex-col items-center justify-center w-full h-full",
-            isActive("/") ? "text-schoolier-blue" : "text-gray-500"
+            isActive("/") ? "text-schoolier-blue" : "text-[#64748b]"
           )}
         >
           <Home className="h-5 w-5" />
           <span className="text-xs mt-1 font-spartan">Accueil</span>
         </Link>
         <Link
-          to="/courses"
+          to="/explore"
           className={cn(
             "flex flex-col items-center justify-center w-full h-full",
-            isActive("/courses") ? "text-schoolier-blue" : "text-gray-500"
-          )}
-        >
-          <BookOpen className="h-5 w-5" />
-          <span className="text-xs mt-1 font-spartan">Cours</span>
-        </Link>
-        <Link
-          to="/search"
-          className={cn(
-            "flex flex-col items-center justify-center w-full h-full",
-            isActive("/search") ? "text-schoolier-blue" : "text-gray-500"
+            isActive("/explore") ? "text-schoolier-blue" : "text-[#64748b]"
           )}
         >
           <Search className="h-5 w-5" />
-          <span className="text-xs mt-1 font-spartan">Recherche</span>
+          <span className="text-xs mt-1 font-spartan">Découvrir</span>
+        </Link>
+        <Link
+          to="/cart"
+          className={cn(
+            "flex flex-col items-center justify-center w-full h-full",
+            isActive("/cart") ? "text-schoolier-blue" : "text-[#64748b]"
+          )}
+        >
+          <ShoppingCart className="h-5 w-5" />
+          <span className="text-xs mt-1 font-spartan">Panier</span>
         </Link>
         <Link
           to={isAuthenticated ? "/profile" : "/login"}
           className={cn(
             "flex flex-col items-center justify-center w-full h-full",
-            (isActive("/profile") || isActive("/login")) ? "text-schoolier-blue" : "text-gray-500"
+            (isActive("/profile") || isActive("/login")) ? "text-schoolier-blue" : "text-[#64748b]"
           )}
         >
           <User className="h-5 w-5" />

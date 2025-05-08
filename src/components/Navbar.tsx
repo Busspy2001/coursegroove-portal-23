@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Bell, Search, ChevronDown } from "lucide-react";
+import { Menu, X, Bell, Search, Globe } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -14,9 +14,9 @@ import SearchBar from "./navbar/SearchBar";
 import UserMenu from "./navbar/UserMenu";
 import AuthButtons from "./navbar/AuthButtons";
 import MobileMenu from "./navbar/MobileMenu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const Navbar = () => {
   const { currentUser, logout, isAuthenticated } = useAuth();
@@ -63,7 +63,7 @@ const Navbar = () => {
   return (
     <ScrollHeader>
       <nav className={cn(
-        "container flex items-center justify-between py-3 px-4 lg:py-1 transition-all duration-300",
+        "container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300",
         isSearchExpanded && "md:justify-center"
       )}>
         {/* Logo and navigation */}
@@ -81,7 +81,7 @@ const Navbar = () => {
         {!isMobile && (
           <div className={cn(
             "hidden md:flex items-center mx-4",
-            isSearchExpanded ? "flex-1 max-w-xl" : "flex-1 max-w-xs"
+            isSearchExpanded ? "flex-1 max-w-2xl" : "flex-1 max-w-xs"
           )}>
             <SearchBar 
               isExpanded={isSearchExpanded}
@@ -144,6 +144,9 @@ const Navbar = () => {
           onClose={closeMobileMenu}
         />
       )}
+      
+      {/* Optional Navigation Separator */}
+      <Separator className="hidden md:block" />
     </ScrollHeader>
   );
 };
