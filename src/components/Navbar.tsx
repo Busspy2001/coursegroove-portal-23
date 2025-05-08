@@ -61,93 +61,88 @@ const Navbar = () => {
   }, [isSearchExpanded]);
 
   return (
-    <ScrollHeader>
-      <nav className={cn(
-        "container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300",
-        isSearchExpanded && "md:justify-center"
-      )}>
-        {/* Logo and navigation */}
-        <div className={cn(
-          "flex items-center space-x-4 lg:space-x-8",
-          isSearchExpanded && "md:hidden"
-        )}>
-          <NavbarLogo />
-
-          {/* Desktop Navigation */}
-          {!isMobile && <DesktopNav isActive={isActive} />}
-        </div>
-
-        {/* Search bar for desktop */}
-        {!isMobile && (
-          <div className={cn(
-            "hidden md:flex items-center mx-4",
-            isSearchExpanded ? "flex-1 max-w-2xl" : "flex-1 max-w-xs"
-          )}>
-            <SearchBar 
-              isExpanded={isSearchExpanded}
-              onExpand={() => setIsSearchExpanded(true)}
-              onCollapse={() => setIsSearchExpanded(false)}
-            />
+    <>
+      {/* Search bar positioned above header */}
+      {!isMobile && (
+        <div className="bg-white dark:bg-schoolier-dark py-2 px-4 border-b">
+          <div className="container mx-auto">
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl">
+                <SearchBar 
+                  isExpanded={true}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* Desktop Auth Buttons */}
-        <div className={cn(
-          "hidden md:flex items-center space-x-4",
-          isSearchExpanded && "md:hidden"
-        )}>
-          {isAuthenticated ? (
-            <UserMenu 
-              currentUser={currentUser} 
-              onLogout={handleLogout}
-            />
-          ) : (
-            <AuthButtons />
-          )}
         </div>
-
-        {/* Mobile Search Button */}
-        {isMobile && (
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Search">
-                <Search className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="top" className="pt-10">
-              <SearchBar className="w-full" />
-            </SheetContent>
-          </Sheet>
-        )}
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={toggleMobileMenu}
-          className="md:hidden p-2 text-gray-600 dark:text-gray-300 focus:outline-none"
-          aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-        >
-          {isMobileMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
-        </button>
-      </nav>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <MobileMenu
-          isAuthenticated={isAuthenticated}
-          currentUser={currentUser}
-          isActive={isActive}
-          onLogout={handleLogout}
-          onClose={closeMobileMenu}
-        />
       )}
       
-      {/* Optional Navigation Separator */}
-      <Separator className="hidden md:block" />
-    </ScrollHeader>
+      <ScrollHeader>
+        <nav className="container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300">
+          {/* Logo and navigation */}
+          <div className="flex items-center space-x-4 lg:space-x-8">
+            <NavbarLogo />
+
+            {/* Desktop Navigation */}
+            {!isMobile && <DesktopNav isActive={isActive} />}
+          </div>
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <UserMenu 
+                currentUser={currentUser} 
+                onLogout={handleLogout}
+              />
+            ) : (
+              <AuthButtons />
+            )}
+          </div>
+
+          {/* Mobile Search Button */}
+          {isMobile && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden" aria-label="Search">
+                  <Search className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="top" className="pt-10">
+                <SearchBar className="w-full" />
+              </SheetContent>
+            </Sheet>
+          )}
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMobileMenu}
+            className="md:hidden p-2 text-gray-600 dark:text-gray-300 focus:outline-none"
+            aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
+        </nav>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <MobileMenu
+            isAuthenticated={isAuthenticated}
+            currentUser={currentUser}
+            isActive={isActive}
+            onLogout={handleLogout}
+            onClose={closeMobileMenu}
+          />
+        )}
+        
+        {/* Optional Navigation Separator */}
+        <Separator className="hidden md:block" />
+      </ScrollHeader>
+    </>
   );
 };
 
