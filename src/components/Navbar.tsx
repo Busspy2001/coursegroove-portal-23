@@ -61,7 +61,7 @@ const Navbar = () => {
   }, [isSearchExpanded]);
 
   return (
-    <>
+    <header className="relative z-50 w-full">
       {/* Search bar positioned above header */}
       {!isMobile && (
         <div className="bg-white dark:bg-schoolier-dark py-2 px-4 border-b">
@@ -142,7 +142,7 @@ const Navbar = () => {
         {/* Optional Navigation Separator */}
         <Separator className="hidden md:block" />
       </ScrollHeader>
-    </>
+    </header>
   );
 };
 
