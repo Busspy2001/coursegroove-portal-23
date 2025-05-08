@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Bell, Search, Globe } from "lucide-react";
@@ -17,28 +16,27 @@ import MobileMenu from "./navbar/MobileMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-
 const Navbar = () => {
-  const { currentUser, logout, isAuthenticated } = useAuth();
+  const {
+    currentUser,
+    logout,
+    isAuthenticated
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
   const handleLogout = async () => {
     await logout();
     navigate("/");
   };
-
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
-
   const toggleSearch = () => {
     setIsSearchExpanded(!isSearchExpanded);
   };
@@ -55,18 +53,15 @@ const Navbar = () => {
         setIsSearchExpanded(false);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isSearchExpanded]);
-
-  return (
-    <header className="relative z-50 w-full">
+  return <header className="relative z-50 w-full">
       {/* Main header with logo first */}
       <ScrollHeader>
-        <nav className="container flex items-center justify-between py-0 px-4 transition-all duration-300">
-          {/* Logo with increased vertical space */}
-          <div className="flex-shrink-0 w-40 md:w-48 px-2 py-0 mx-auto lg:mx-0">
+        <nav className="container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300">
+          {/* Logo */}
+          <div className="flex-shrink-0 mx-auto lg:mx-0">
             <NavbarLogo />
           </div>
 
@@ -75,19 +70,11 @@ const Navbar = () => {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated ? (
-              <UserMenu 
-                currentUser={currentUser} 
-                onLogout={handleLogout}
-              />
-            ) : (
-              <AuthButtons />
-            )}
+            {isAuthenticated ? <UserMenu currentUser={currentUser} onLogout={handleLogout} /> : <AuthButtons />}
           </div>
 
           {/* Mobile Search Button */}
-          {isMobile && (
-            <Sheet>
+          {isMobile && <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden" aria-label="Search">
                   <Search className="h-5 w-5" />
@@ -96,55 +83,23 @@ const Navbar = () => {
               <SheetContent side="top" className="pt-10">
                 <SearchBar className="w-full" />
               </SheetContent>
-            </Sheet>
-          )}
+            </Sheet>}
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="md:hidden p-2 text-gray-600 dark:text-gray-300 focus:outline-none"
-            aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+          <button onClick={toggleMobileMenu} className="md:hidden p-2 text-gray-600 dark:text-gray-300 focus:outline-none" aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}>
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </nav>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <MobileMenu
-            isAuthenticated={isAuthenticated}
-            currentUser={currentUser}
-            isActive={isActive}
-            onLogout={handleLogout}
-            onClose={closeMobileMenu}
-          />
-        )}
+        {isMobileMenuOpen && <MobileMenu isAuthenticated={isAuthenticated} currentUser={currentUser} isActive={isActive} onLogout={handleLogout} onClose={closeMobileMenu} />}
         
         {/* Optional Navigation Separator */}
         <Separator className="hidden md:block" />
       </ScrollHeader>
 
       {/* Search bar positioned below main header */}
-      {!isMobile && (
-        <div className="bg-white dark:bg-schoolier-dark py-2 px-4 border-b">
-          <div className="container mx-auto">
-            <div className="flex justify-center">
-              <div className="w-full max-w-2xl">
-                <SearchBar 
-                  isExpanded={true}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
-  );
+      {!isMobile}
+    </header>;
 };
-
 export default Navbar;
