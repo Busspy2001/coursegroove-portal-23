@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -6,7 +5,6 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
@@ -86,7 +84,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             className="w-[960px] overflow-visible rounded-xl shadow-xl bg-white border border-[#f1f5f9] animate-fade-in z-[1000] mt-1"
-            forceMount={open}
+            forceMount={open ? true : undefined}
           >
             <DiscoverMenuContent />
           </NavigationMenuContent>
