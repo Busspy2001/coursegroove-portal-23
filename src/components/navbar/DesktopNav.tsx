@@ -11,12 +11,13 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { ChevronDown } from "lucide-react";
+import { Laptop, Book, ChartBar, Palette } from "lucide-react";
 
 interface NavItem {
   title: string;
   description: string;
   href: string;
+  icon: React.ReactNode;
 }
 
 interface DesktopNavProps {
@@ -34,15 +35,18 @@ const ListItem = React.forwardRef<
         <a
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "flex select-none space-x-3 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
+          <div className="mt-1">{props.icon}</div>
+          <div>
+            <div className="text-sm font-medium leading-none mb-1">{title}</div>
+            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+              {children}
+            </p>
+          </div>
         </a>
       </NavigationMenuLink>
     </li>
@@ -56,31 +60,35 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
       title: "Développement Web",
       description: "HTML, CSS, JavaScript et frameworks modernes",
       href: "/courses?category=web",
+      icon: <Laptop className="h-5 w-5 text-schoolier-blue" />
     },
     {
       title: "Data Science",
       description: "Python, R et analyse de données",
       href: "/courses?category=data",
+      icon: <ChartBar className="h-5 w-5 text-schoolier-teal" />
     },
     {
       title: "Design & UX",
       description: "Figma, Adobe XD et principes de design",
       href: "/courses?category=design",
+      icon: <Palette className="h-5 w-5 text-schoolier-green" />
     },
     {
       title: "Marketing Digital",
       description: "SEO, SEM, médias sociaux et stratégie de contenu",
       href: "/courses?category=marketing",
+      icon: <Book className="h-5 w-5 text-schoolier-yellow" />
     },
   ];
   
   return (
     <NavigationMenu className="hidden lg:flex mx-auto">
-      <NavigationMenuList>
+      <NavigationMenuList className="gap-1">
         <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(
-              "font-spartan text-[#334155] hover:text-[#044289] transition-colors",
+              "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
               isActive("/explore") &&
                 "text-schoolier-blue font-medium"
             )}
@@ -94,6 +102,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
                   key={category.title}
                   title={category.title}
                   href={category.href}
+                  icon={category.icon}
                 >
                   {category.description}
                 </ListItem>
@@ -107,7 +116,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
-                "font-spartan text-[#334155] hover:text-[#044289] transition-colors",
+                "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
                 isActive("/business") &&
                   "text-schoolier-blue font-medium"
               )}
@@ -122,7 +131,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
-                "font-spartan text-[#334155] hover:text-[#044289] transition-colors",
+                "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
                 isActive("/teach") &&
                   "text-schoolier-blue font-medium"
               )}

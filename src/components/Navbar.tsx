@@ -65,8 +65,8 @@ const Navbar = () => {
       {/* Main header with logo first */}
       <ScrollHeader>
         <nav className="container flex items-center justify-between py-0 px-4 transition-all duration-300">
-          {/* Logo */}
-          <div className="flex-shrink-0 mx-auto lg:mx-0 py-px">
+          {/* Logo with increased vertical space */}
+          <div className="flex-shrink-0 w-40 md:w-48 px-2 py-0 mx-auto lg:mx-0">
             <NavbarLogo />
           </div>
 
