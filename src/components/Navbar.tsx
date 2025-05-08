@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import {
   Bell,
   Home,
   Settings,
+  Book,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {

@@ -18,6 +18,7 @@ export interface Achievement {
   name: string;
   description: string;
   icon: string;
+  iconUrl?: string; // Added optional iconUrl property
   unlocked: boolean;
 }
 
