@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Book, Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react";
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -10,8 +10,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <div className="flex items-center space-x-2">
-              <Book className="h-6 w-6 text-schoolier-teal" />
-              <span className="text-xl font-bold text-schoolier-blue">Schoolier</span>
+              <img 
+                src="/lovable-uploads/15fccc6e-df41-4aa0-9708-c5ef28cab8cd.png" 
+                alt="Schoolier Logo" 
+                className="h-10 w-auto"
+              />
             </div>
             <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
               Une plateforme e-learning innovante pour apprendre à votre rythme

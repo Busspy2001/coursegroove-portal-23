@@ -6,7 +6,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   Menu,
   X,
-  Book,
   Search,
   ChevronDown,
   Bell,
@@ -128,10 +127,11 @@ const Navbar = () => {
       <nav className="container flex items-center justify-between p-4">
         <div className="flex items-center space-x-8">
           <Link to="/" className="flex items-center space-x-2">
-            <Book className="h-8 w-8 text-schoolier-teal" />
-            <span className="text-xl font-bold bg-gradient-to-r from-schoolier-blue to-schoolier-teal bg-clip-text text-transparent">
-              Schoolier
-            </span>
+            <img 
+              src="/lovable-uploads/15fccc6e-df41-4aa0-9708-c5ef28cab8cd.png" 
+              alt="Schoolier Logo" 
+              className="h-10 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
