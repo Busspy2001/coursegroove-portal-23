@@ -64,9 +64,9 @@ const Navbar = () => {
     <header className="relative z-50 w-full">
       {/* Main header with logo first */}
       <ScrollHeader>
-        <nav className="container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300">
+        <nav className="container flex items-center justify-between py-0 px-4 transition-all duration-300">
           {/* Logo */}
-          <div className="flex-shrink-0 mx-auto lg:mx-0">
+          <div className="flex-shrink-0 mx-auto lg:mx-0 py-px">
             <NavbarLogo />
           </div>
 
