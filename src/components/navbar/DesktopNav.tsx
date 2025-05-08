@@ -24,11 +24,14 @@ interface DesktopNavProps {
   isActive: (path: string) => boolean;
 }
 
-// ListItem component for dropdown menu items
+// ListItem component for dropdown menu items with icon support
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"a"> & {
+    title: string;
+    icon?: React.ReactNode; // Add icon as an optional prop
+  }
+>(({ className, title, children, icon, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -40,7 +43,7 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="mt-1">{props.icon}</div>
+          {icon && <div className="mt-1">{icon}</div>}
           <div>
             <div className="text-sm font-medium leading-none mb-1">{title}</div>
             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
