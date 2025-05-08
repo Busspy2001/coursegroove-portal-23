@@ -57,7 +57,7 @@ const StudentProfile = () => {
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center">
                   <Avatar className="h-24 w-24 mb-4">
-                    <AvatarImage src={currentUser?.avatar_url} />
+                    <AvatarImage src={currentUser?.avatar} />
                     <AvatarFallback className="bg-schoolier-teal text-white text-xl">
                       {currentUser?.name?.charAt(0) || "U"}
                     </AvatarFallback>
