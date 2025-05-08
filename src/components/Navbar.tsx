@@ -62,22 +62,7 @@ const Navbar = () => {
 
   return (
     <header className="relative z-50 w-full">
-      {/* Search bar positioned above header */}
-      {!isMobile && (
-        <div className="bg-white dark:bg-schoolier-dark py-2 px-4 border-b">
-          <div className="container mx-auto">
-            <div className="flex justify-center">
-              <div className="w-full max-w-2xl">
-                <SearchBar 
-                  isExpanded={true}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
+      {/* Main header with logo first */}
       <ScrollHeader>
         <nav className="container flex items-center justify-between py-3 px-4 lg:py-2 transition-all duration-300">
           {/* Logo and navigation */}
@@ -142,6 +127,22 @@ const Navbar = () => {
         {/* Optional Navigation Separator */}
         <Separator className="hidden md:block" />
       </ScrollHeader>
+
+      {/* Search bar positioned below main header */}
+      {!isMobile && (
+        <div className="bg-white dark:bg-schoolier-dark py-2 px-4 border-b">
+          <div className="container mx-auto">
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl">
+                <SearchBar 
+                  isExpanded={true}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
