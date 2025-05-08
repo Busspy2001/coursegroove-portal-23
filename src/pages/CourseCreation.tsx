@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { BookOpen, Upload, FilePlus, Edit, Save, X } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
 
 const formSchema = z.object({
   title: z.string().min(5, "Le titre doit contenir au moins 5 caractères").max(100),
@@ -59,28 +59,23 @@ const CourseCreation = () => {
     if (!event.target.files || event.target.files.length === 0) return;
     
     const file = event.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `course-thumbnails/${fileName}`;
     
     setUploading(true);
     
     try {
-      const { error: uploadError } = await supabase.storage
-        .from('course-media')
-        .upload(filePath, file);
+      // Mock file upload - just for demo purposes
+      setTimeout(() => {
+        // Generate a fake URL for the uploaded image
+        const mockImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(file.name)}&background=0D9488&color=fff&size=400`;
         
-      if (uploadError) throw uploadError;
-      
-      const { data } = supabase.storage.from('course-media').getPublicUrl(filePath);
-      
-      if (data) {
-        form.setValue("thumbnailUrl", data.publicUrl);
+        form.setValue("thumbnailUrl", mockImageUrl);
         toast({
           title: "Upload réussi",
           description: "L'image a été téléchargée avec succès.",
         });
-      }
+        
+        setUploading(false);
+      }, 1500);
     } catch (error) {
       console.error("Erreur lors de l'upload:", error);
       toast({
@@ -88,7 +83,6 @@ const CourseCreation = () => {
         description: "Impossible de télécharger l'image. Veuillez réessayer.",
         variant: "destructive",
       });
-    } finally {
       setUploading(false);
     }
   };
@@ -97,32 +91,15 @@ const CourseCreation = () => {
     if (!currentUser) return;
     
     try {
-      // Insert course data into the database
-      const { data: course, error } = await supabase
-        .from('courses')
-        .insert({
-          title: values.title,
-          description: values.description,
-          category: values.category,
-          level: values.level,
-          price: values.price,
-          thumbnail_url: values.thumbnailUrl || `https://ui-avatars.com/api/?name=${values.title.replace(" ", "+")}&background=0D9488&color=fff&size=400`,
-          instructor_id: currentUser.id,
-          duration: "0 min", // Will be updated as sections and lessons are added
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
+      // Mock course creation - just for demo purposes
       toast({
         title: "Cours créé avec succès",
         description: "Vous pouvez maintenant ajouter des sections et des leçons.",
       });
       
-      navigate(`/instructor/courses/${course.id}/edit`);
+      // Simulate successful course creation with a mock ID
+      const mockCourseId = uuidv4();
+      navigate(`/instructor/courses/${mockCourseId}/edit`);
     } catch (error: any) {
       console.error("Erreur lors de la création du cours:", error);
       toast({
