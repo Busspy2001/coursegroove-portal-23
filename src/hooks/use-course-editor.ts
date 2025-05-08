@@ -9,6 +9,7 @@ export interface CourseSection {
   id: string;
   title: string;
   position: number;
+  description?: string;
   lessons: CourseLesson[];
 }
 
@@ -22,12 +23,12 @@ export interface CourseLesson {
   is_preview: boolean;
 }
 
-interface Course {
+export interface Course {
   id?: string;
   title: string;
   description: string;
   price: number;
-  level: string;
+  level: "débutant" | "intermédiaire" | "avancé";
   category: string;
   thumbnail_url?: string;
   status?: 'draft' | 'published' | 'archived';

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, Move, Trash, Edit, Check, X, Video, FileText, HelpCircle } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
+import { CourseSection } from "@/hooks/use-course-editor";
 
 const sectionSchema = z.object({
   title: z.string().min(2, "Le titre doit contenir au moins 2 caractères").max(100),
@@ -19,17 +21,17 @@ const sectionSchema = z.object({
 
 interface CourseSectionManagerProps {
   courseId: string;
+  initialSections?: CourseSection[];
+  onSave?: (sections: CourseSection[]) => Promise<void>;
   onSectionsChange?: (sections: CourseSection[]) => void;
 }
 
-interface CourseSection {
-  id: string;
-  title: string;
-  description?: string;
-  position: number;
-}
-
-const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, onSectionsChange }) => {
+const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ 
+  courseId, 
+  initialSections = [],
+  onSave,
+  onSectionsChange 
+}) => {
   const [sections, setSections] = useState<CourseSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -44,8 +46,15 @@ const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, o
     },
   });
 
-  // Mock data fetching from Supabase until types are updated
+  // Use initialSections if provided
   useEffect(() => {
+    if (initialSections && initialSections.length > 0) {
+      setSections(initialSections);
+      setLoading(false);
+      return;
+    }
+
+    // Only fetch sections if no initialSections were provided
     const fetchSections = async () => {
       if (!courseId) return;
       
@@ -60,12 +69,14 @@ const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, o
             title: "Introduction au cours",
             description: "Présentation générale et objectifs",
             position: 1,
+            lessons: []
           },
           {
             id: "section-2",
             title: "Les bases",
             description: "Concepts fondamentaux",
             position: 2,
+            lessons: []
           }
         ];
 
@@ -92,7 +103,7 @@ const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, o
     };
 
     fetchSections();
-  }, [courseId, onSectionsChange]);
+  }, [courseId, initialSections, onSectionsChange]);
 
   // Reset form when dialog closes or section changes
   useEffect(() => {
@@ -148,6 +159,7 @@ const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, o
           title: values.title,
           description: values.description,
           position: newPosition,
+          lessons: []
         };
         
         toast({
@@ -157,17 +169,19 @@ const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, o
       }
 
       // Update sections state
-      if (editingSectionId) {
-        setSections(sections.map(s => s.id === editingSectionId ? result : s));
-      } else {
-        setSections([...sections, result]);
-      }
+      const updatedSections = editingSectionId 
+        ? sections.map(s => s.id === editingSectionId ? result : s)
+        : [...sections, result];
+        
+      setSections(updatedSections);
       
       if (onSectionsChange) {
-        onSectionsChange(editingSectionId 
-          ? sections.map(s => s.id === editingSectionId ? result : s)
-          : [...sections, result]
-        );
+        onSectionsChange(updatedSections);
+      }
+      
+      // Call onSave if provided
+      if (onSave) {
+        await onSave(updatedSections);
       }
 
       // Close dialog and reset form
@@ -189,13 +203,17 @@ const CourseSectionManager: React.FC<CourseSectionManagerProps> = ({ courseId, o
     }
     
     try {
-      // Mock delete operation
       // Remove section from local state
       const updatedSections = sections.filter(s => s.id !== sectionId);
       setSections(updatedSections);
       
       if (onSectionsChange) {
         onSectionsChange(updatedSections);
+      }
+      
+      // Call onSave if provided
+      if (onSave) {
+        await onSave(updatedSections);
       }
       
       toast({

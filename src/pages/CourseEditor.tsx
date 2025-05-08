@@ -41,7 +41,7 @@ import CourseSectionManager from "@/components/CourseSectionManager";
 import { useToast } from "@/hooks/use-toast";
 import { useCourseEditor } from "@/hooks/use-course-editor";
 
-// Form validation schema
+// Form validation schema for specifically typed level values
 const courseSchema = z.object({
   title: z
     .string()
@@ -57,6 +57,9 @@ const courseSchema = z.object({
   level: z.enum(["débutant", "intermédiaire", "avancé"]),
   category: z.string().min(1, { message: "Veuillez sélectionner une catégorie" }),
 });
+
+// Extract the inferred type from the schema
+type CourseFormValues = z.infer<typeof courseSchema>;
 
 const CourseEditor = () => {
   const { courseId } = useParams();
@@ -76,8 +79,8 @@ const CourseEditor = () => {
     uploadThumbnail,
   } = useCourseEditor(courseId);
 
-  // Form setup
-  const form = useForm<z.infer<typeof courseSchema>>({
+  // Form setup with proper type
+  const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
       title: "",
@@ -95,7 +98,7 @@ const CourseEditor = () => {
         title: course.title,
         description: course.description,
         price: course.price,
-        level: course.level,
+        level: course.level as "débutant" | "intermédiaire" | "avancé",
         category: course.category,
       });
       setThumbnailUrl(course.thumbnail_url);
@@ -111,10 +114,20 @@ const CourseEditor = () => {
     }
   }, [isAuthenticated, currentUser, navigate]);
 
-  // Handle form submission
-  const onSubmit = async (values: z.infer<typeof courseSchema>) => {
+  // Handle form submission with proper types
+  const onSubmit = async (values: CourseFormValues) => {
     try {
-      await saveCourse(values);
+      await saveCourse({
+        id: course?.id,
+        title: values.title,
+        description: values.description,
+        price: values.price,
+        level: values.level,
+        category: values.category,
+        thumbnail_url: thumbnailUrl || undefined,
+        status: course?.status || 'draft'
+      });
+      
       toast({
         title: isEditing ? "Cours mis à jour" : "Cours créé",
         description: isEditing 
