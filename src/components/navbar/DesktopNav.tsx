@@ -133,24 +133,24 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
             onMouseLeave={() => !isMobile && setOpen(false)}
             className="w-[900px] rounded-xl shadow-2xl bg-white border border-[#f1f5f9] animate-fade-in"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-white bg-opacity-95 backdrop-blur-sm">
               {/* Column 1: Course Categories */}
-              <div>
-                <h3 className="font-spartan font-bold text-sm mb-3 text-schoolier-blue">
+              <div className="space-y-4 p-4 rounded-lg hover:bg-[#f8fafc] transition-colors duration-200">
+                <h3 className="font-spartan font-bold text-sm mb-4 text-schoolier-blue border-b pb-2 border-schoolier-light-gray">
                   Parcourir les certifications
                 </h3>
-                <Link to="/certifications" className="block text-sm text-[#64748b] hover:text-schoolier-teal mb-3 transition-colors duration-200">
+                <Link to="/certifications" className="block text-sm text-[#64748b] hover:text-schoolier-teal mb-4 transition-colors duration-200 font-medium">
                   Préparation aux certifications
                 </Link>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {courseCategories.map((category) => (
-                    <li key={category.title}>
+                    <li key={category.title} className="group">
                       <Link
                         to={category.href}
-                        className="flex items-center text-sm text-[#334155] hover:text-schoolier-blue hover:underline transition-colors duration-200"
+                        className="flex items-center text-sm text-[#334155] hover:text-schoolier-blue transition-all duration-200 group-hover:translate-x-1"
                       >
-                        {category.icon && <span className="mr-2">{category.icon}</span>}
-                        {category.title}
+                        {category.icon && <span className="mr-3 flex items-center justify-center w-7 h-7 bg-[#f1f5f9] rounded-md group-hover:bg-[#e2e8f0]">{category.icon}</span>}
+                        <span className="font-medium">{category.title}</span>
                       </Link>
                     </li>
                   ))}
@@ -158,16 +158,16 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
               </div>
 
               {/* Column 2: Certification Providers */}
-              <div>
-                <h3 className="font-spartan font-bold text-sm mb-3 text-[#334155]">
+              <div className="space-y-4 p-4 rounded-lg hover:bg-[#f8fafc] transition-colors duration-200">
+                <h3 className="font-spartan font-bold text-sm mb-4 text-[#334155] border-b pb-2 border-schoolier-light-gray">
                   Émetteurs populaires
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {certificationProviders.map((provider) => (
-                    <li key={provider.name}>
+                    <li key={provider.name} className="group">
                       <Link
                         to={provider.href}
-                        className="text-sm text-[#64748b] hover:text-schoolier-blue transition-colors duration-200"
+                        className="flex text-sm text-[#64748b] hover:text-schoolier-blue transition-all duration-200 font-medium group-hover:translate-x-1"
                       >
                         {provider.name}
                       </Link>
@@ -177,19 +177,19 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
               </div>
 
               {/* Column 3: Popular Topics */}
-              <div>
-                <h3 className="font-spartan font-bold text-sm mb-3 text-[#334155]">
+              <div className="space-y-4 p-4 rounded-lg hover:bg-[#f8fafc] transition-colors duration-200">
+                <h3 className="font-spartan font-bold text-sm mb-4 text-[#334155] border-b pb-2 border-schoolier-light-gray">
                   Sujets populaires
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {popularTopics.map((topic) => (
-                    <li key={topic.name}>
+                    <li key={topic.name} className="group">
                       <Link
                         to={topic.href}
-                        className="flex items-center text-sm text-[#64748b] hover:text-schoolier-teal transition-colors duration-200"
+                        className="flex items-center text-sm text-[#64748b] hover:text-schoolier-teal transition-all duration-200 group-hover:translate-x-1"
                       >
-                        {topic.icon && <span className="mr-2">{topic.icon}</span>}
-                        {topic.name}
+                        {topic.icon && <span className="mr-3 flex items-center justify-center w-6 h-6 bg-[#f1f5f9] rounded-md group-hover:bg-[#e2e8f0]">{topic.icon}</span>}
+                        <span className="font-medium">{topic.name}</span>
                       </Link>
                     </li>
                   ))}
