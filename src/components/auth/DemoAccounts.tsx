@@ -42,63 +42,79 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
   const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
 
-  // Completely rewritten function to avoid TypeScript recursion issues
+  // Completely rewritten function with simplified logic to avoid TypeScript recursion issues
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
       setCreatingAccount(account.email);
       
-      // Check if the user already exists in profiles
-      const profileQuery = await supabase
-        .from('profiles_unified')
-        .select('id')
-        .eq('email', account.email)
-        .single();
+      // First check if user exists by email in auth
+      const { data: authData } = await supabase.auth.signInWithPassword({
+        email: account.email,
+        password: account.password
+      });
       
-      // If we found a profile, the account exists
-      if (profileQuery.data) {
+      // If we can sign in, the account exists
+      if (authData.user) {
+        console.log("Account exists, authenticated successfully");
         return true;
       }
+    } catch (authError) {
+      console.log("Auth check error (expected if new account):", authError);
       
-      // If error is not "not found", something else happened
-      if (profileQuery.error && !profileQuery.error.message.includes("No rows found")) {
-        console.error("Profile check error:", profileQuery.error);
+      // If auth error is not about invalid credentials, it's another issue
+      if (!String(authError).includes("Invalid login credentials")) {
+        console.error("Unexpected auth error:", authError);
         return false;
       }
       
-      // Account doesn't exist, try to register it
-      await register(account.name, account.email, account.password);
-      
-      // If not a student, update the role
-      if (account.role !== 'student') {
-        const authUserQuery = await supabase.auth.getUser();
+      // Auth failed - account might not exist, try to register it
+      try {
+        console.log("Attempting to register account:", account.email);
+        await register(account.name, account.email, account.password);
         
-        if (authUserQuery.data?.user?.id) {
-          await supabase
-            .from('profiles_unified')
-            .update({ role: account.role })
-            .eq('id', authUserQuery.data.user.id);
+        // If not a student, update the role (register creates with student role by default)
+        if (account.role !== 'student') {
+          // Wait a moment for auth to complete
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Get the current user
+          const { data: userData } = await supabase.auth.getUser();
+          
+          if (userData?.user?.id) {
+            console.log("Updating role for new user:", account.role);
+            const { error: updateError } = await supabase
+              .from('profiles_unified')
+              .update({ role: account.role })
+              .eq('id', userData.user.id);
+              
+            if (updateError) {
+              console.error("Failed to update role:", updateError);
+            }
+          }
         }
-      }
-
-      toast({
-        title: "Compte démo créé",
-        description: `Le compte démo ${account.name} a été créé avec succès.`,
-      });
-      
-      return true;
-    } catch (error) {
-      console.error("Error handling account:", error);
-      
-      // Check for already registered error messages
-      const errorMessage = String(error);
-      if (errorMessage.includes("already registered") || errorMessage.includes("already exists")) {
+        
+        toast({
+          title: "Compte démo créé",
+          description: `Le compte démo ${account.name} a été créé avec succès.`,
+        });
+        
         return true;
+      } catch (registerError) {
+        console.error("Registration error:", registerError);
+        
+        // If error indicates user already exists, that's actually good
+        if (String(registerError).includes("already registered") || 
+            String(registerError).includes("already exists")) {
+          return true;
+        }
+        
+        return false;
       }
-      
-      return false;
     } finally {
       setCreatingAccount(null);
     }
+    
+    return false;
   };
 
   const handleDemoLogin = async (account: DemoAccount) => {

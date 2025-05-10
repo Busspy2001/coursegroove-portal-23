@@ -7,33 +7,92 @@ import { User, UserRole } from "./types";
 export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promise<User | null> => {
   if (!supabaseUser) return null;
   
-  // Get user profile from the profiles_unified table
-  const { data: profile, error } = await supabase
-    .from('profiles_unified')
-    .select('*')
-    .eq('id', supabaseUser.id)
-    .single();
-  
-  if (error) {
-    console.error("Error fetching user profile:", error);
+  try {
+    // Get user profile from the profiles_unified table
+    const { data: profile, error } = await supabase
+      .from('profiles_unified')
+      .select('*')
+      .eq('id', supabaseUser.id)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching user profile:", error);
+      
+      // If profile doesn't exist, try to create it
+      if (error.message.includes("No rows found")) {
+        try {
+          // Extract name from user metadata
+          const name = supabaseUser.user_metadata?.name || 'User';
+          const email = supabaseUser.email || '';
+          
+          // Create a default profile
+          await supabase.from('profiles_unified').insert({
+            id: supabaseUser.id,
+            full_name: name,
+            email: email,
+            role: 'student',
+            avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+            created_at: new Date().toISOString()
+          });
+          
+          console.log("Created missing profile for user:", supabaseUser.id);
+          
+          // Try fetching the profile again
+          const { data: newProfile, error: newError } = await supabase
+            .from('profiles_unified')
+            .select('*')
+            .eq('id', supabaseUser.id)
+            .single();
+            
+          if (newError) {
+            throw newError;
+          }
+          
+          // Use the newly created profile
+          return {
+            id: supabaseUser.id,
+            email: supabaseUser.email || '',
+            name: newProfile?.full_name || name,
+            role: (newProfile?.role as UserRole) || 'student',
+            avatar: newProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+            bio: newProfile?.bio || ''
+          };
+        } catch (createError) {
+          console.error("Failed to create missing profile:", createError);
+        }
+      }
+      
+      // Return a default user object if we couldn't get or create a profile
+      return {
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        name: supabaseUser.user_metadata?.name || 'User',
+        role: 'student', // Default role
+        avatar: supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`
+      };
+    }
+    
+    // Use type assertion to handle the fields not detected in the TypeScript types
+    const profileWithTypes = profile as (typeof profile & { avatar_url?: string; bio?: string });
+    
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
+      role: (profile?.role as UserRole) || 'student',
+      avatar: profileWithTypes?.avatar_url || supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=0D9488&color=fff`,
+      bio: profileWithTypes?.bio || ''
+    };
+  } catch (error) {
+    console.error("Error in mapSupabaseUser:", error);
+    
+    // Return a default user object if all else fails
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name || 'User',
-      role: 'student', // Default role
-      avatar: supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${supabaseUser.user_metadata?.name || 'User'}&background=0D9488&color=fff`
+      role: 'student',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`
     };
   }
-  
-  // Use type assertion to handle the fields not detected in the TypeScript types
-  const profileWithTypes = profile as (typeof profile & { avatar_url?: string; bio?: string });
-  
-  return {
-    id: supabaseUser.id,
-    email: supabaseUser.email || '',
-    name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
-    role: (profile?.role as UserRole) || 'student',
-    avatar: profileWithTypes?.avatar_url || supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name || 'User'}&background=0D9488&color=fff`,
-    bio: profileWithTypes?.bio || ''
-  };
 };

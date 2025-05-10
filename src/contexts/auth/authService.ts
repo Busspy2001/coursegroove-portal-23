@@ -56,15 +56,25 @@ export const authService = {
         throw new Error("Registration failed");
       }
       
-      // Create a profile in the profiles_unified table
-      await supabase.from('profiles_unified').insert({
-        id: data.user.id,
-        full_name: name,
-        email: email,
-        role: 'student',
-        avatar_url: `https://ui-avatars.com/api/?name=${name.replace(" ", "+")}&background=0D9488&color=fff`,
-        created_at: new Date().toISOString()
-      });
+      try {
+        // Create a profile in the profiles_unified table
+        const { error: profileError } = await supabase.from('profiles_unified').insert({
+          id: data.user.id,
+          full_name: name,
+          email: email,
+          role: 'student',
+          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+          created_at: new Date().toISOString()
+        });
+        
+        if (profileError) {
+          console.error("Profile creation error:", profileError);
+          // Don't throw - we'll proceed anyway as the auth user was created
+        }
+      } catch (profileInsertError) {
+        console.error("Error during profile insertion:", profileInsertError);
+        // Continue as the auth user was created successfully
+      }
       
       const mappedUser = await mapSupabaseUser(data.user);
       
