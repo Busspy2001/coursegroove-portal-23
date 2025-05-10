@@ -9,7 +9,44 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { Book, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { 
+  Book, 
+  Eye, 
+  EyeOff, 
+  Lock, 
+  Mail, 
+  User, 
+  ChevronDown, 
+  ChevronUp 
+} from "lucide-react";
+
+interface DemoAccount {
+  email: string;
+  password: string;
+  role: string;
+  name: string;
+}
+
+const demoAccounts: DemoAccount[] = [
+  {
+    email: "student@schoolier.com",
+    password: "password123",
+    role: "student",
+    name: "Etudiant Démo"
+  },
+  {
+    email: "instructor@schoolier.com",
+    password: "password123",
+    role: "instructor",
+    name: "Professeur Démo"
+  },
+  {
+    email: "admin@schoolier.com",
+    password: "password123",
+    role: "admin",
+    name: "Administrateur Démo"
+  }
+];
 
 const Login = () => {
   const { login } = useAuth();
@@ -20,6 +57,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +73,27 @@ const Login = () => {
       toast({
         title: "Erreur de connexion",
         description: "Vérifiez vos identifiants et réessayez.",
+        variant: "destructive",
+      });
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (account: DemoAccount) => {
+    setIsLoading(true);
+    try {
+      await login(account.email, account.password);
+      toast({
+        title: "Connexion démo réussie !",
+        description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        title: "Erreur de connexion démo",
+        description: "Impossible de se connecter au compte démo. Veuillez réessayer.",
         variant: "destructive",
       });
       console.error(error);
@@ -128,6 +187,43 @@ const Login = () => {
                     </Button>
                   </div>
                 </form>
+
+                {/* Demo Account Selector */}
+                <div className="mt-6">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full flex items-center justify-between"
+                    onClick={() => setShowDemoAccounts(!showDemoAccounts)}
+                  >
+                    <span>Accès aux comptes démo</span>
+                    {showDemoAccounts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                  
+                  {showDemoAccounts && (
+                    <div className="mt-3 space-y-2 p-3 border rounded-md bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Sélectionnez un compte de démonstration pour tester la plateforme:
+                      </p>
+                      {demoAccounts.map((account, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 border rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <div>
+                            <p className="text-sm font-medium">{account.name}</p>
+                            <p className="text-xs text-muted-foreground">{account.email}</p>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleDemoLogin(account)}
+                            disabled={isLoading}
+                            variant="secondary"
+                          >
+                            Utiliser
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
