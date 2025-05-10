@@ -57,16 +57,18 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
       
       // Create the user if it doesn't exist
       setCreatingAccount(account.email);
+      
+      // Register the new user
       await register(account.name, account.email, account.password);
       
       // After creating the user, update their role directly if needed
       if (account.role !== 'student') {
-        const { data: user } = await supabase.auth.getUser();
-        if (user?.user?.id) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user?.id) {
           await supabase
             .from('profiles_unified')
             .update({ role: account.role })
-            .eq('id', user.user.id);
+            .eq('id', userData.user.id);
         }
       }
 
