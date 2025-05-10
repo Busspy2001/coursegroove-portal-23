@@ -12,7 +12,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
     // Get user profile from the profiles_unified table
     // Using generic any type to bypass TypeScript errors since we can't modify the types.ts file
     const { data: profile, error } = await supabase
-      .from('profiles_unified' as any)
+      .from('profiles_unified')
       .select('*')
       .eq('id', supabaseUser.id)
       .single() as { data: ProfilesUnified | null, error: any };
@@ -29,20 +29,20 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           
           // Create a default profile
           await supabase
-            .from('profiles_unified' as any)
+            .from('profiles_unified')
             .insert({
               id: supabaseUser.id,
               full_name: name,
               email: email,
               role: 'student',
               created_at: new Date().toISOString()
-            });
+            } as any);
           
           console.log("Created missing profile for user:", supabaseUser.id);
           
           // Try fetching the profile again
           const { data: newProfile, error: newError } = await supabase
-            .from('profiles_unified' as any)
+            .from('profiles_unified')
             .select('*')
             .eq('id', supabaseUser.id)
             .single() as { data: ProfilesUnified | null, error: any };
