@@ -1,9 +1,11 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface DemoAccount {
   email: string;
@@ -34,13 +36,75 @@ export const demoAccounts: DemoAccount[] = [
 ];
 
 export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
+  const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
+
+  const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
+    try {
+      // Check if the user already exists
+      const { data } = await supabase
+        .from('profiles_unified')
+        .select('id')
+        .eq('email', account.email)
+        .single();
+      
+      if (data) {
+        return true; // User exists
+      }
+      
+      // Create the user if it doesn't exist
+      setCreatingAccount(account.email);
+      await register(account.name, account.email, account.password);
+      
+      // After creating the user, update their role directly if needed
+      if (account.role !== 'student') {
+        const { data: user } = await supabase.auth.getUser();
+        if (user?.user?.id) {
+          await supabase
+            .from('profiles_unified')
+            .update({ role: account.role })
+            .eq('id', user.user.id);
+        }
+      }
+
+      toast({
+        title: "Compte démo créé",
+        description: `Le compte démo ${account.name} a été créé avec succès.`,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error ensuring demo account exists:", error);
+      // If we get a "User already registered" error, we can continue with login
+      // The error message might be different depending on the version of Supabase
+      const errorMessage = String(error);
+      if (errorMessage.includes("already registered") || errorMessage.includes("already exists")) {
+        return true;
+      }
+      return false;
+    } finally {
+      setCreatingAccount(null);
+    }
+  };
 
   const handleDemoLogin = async (account: DemoAccount) => {
     try {
+      // First ensure the account exists
+      const accountExists = await ensureAccountExists(account);
+      
+      if (!accountExists) {
+        toast({
+          title: "Erreur de configuration",
+          description: "Impossible de créer le compte démo. Veuillez réessayer.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Then login with the account
       await login(account.email, account.password);
       toast({
         title: "Connexion démo réussie !",
@@ -48,12 +112,12 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
       });
       navigate("/dashboard");
     } catch (error) {
+      console.error("Demo login error:", error);
       toast({
         title: "Erreur de connexion démo",
         description: "Impossible de se connecter au compte démo. Veuillez réessayer.",
         variant: "destructive",
       });
-      console.error(error);
     }
   };
 
@@ -83,10 +147,10 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
               <Button 
                 size="sm" 
                 onClick={() => handleDemoLogin(account)}
-                disabled={isLoading}
+                disabled={isLoading || creatingAccount !== null}
                 variant="secondary"
               >
-                Utiliser
+                {creatingAccount === account.email ? "Création..." : "Utiliser"}
               </Button>
             </div>
           ))}
