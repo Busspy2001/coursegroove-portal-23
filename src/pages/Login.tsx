@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -67,7 +68,7 @@ const Login = () => {
                 <form onSubmit={handleLogin}>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Adresse email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                         <Input
@@ -116,7 +117,7 @@ const Login = () => {
                       />
                       <Label htmlFor="remember">Se souvenir de moi</Label>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full bg-schoolier-teal hover:bg-schoolier-dark-teal" disabled={isLoading}>
                       {isLoading ? "Connexion en cours..." : "Se connecter"}
                     </Button>
                   </div>

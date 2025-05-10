@@ -32,9 +32,10 @@ const AuthButtons = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem className="cursor-pointer">Français</DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer font-medium">Français</DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">English</DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">Español</DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">Deutsch</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
