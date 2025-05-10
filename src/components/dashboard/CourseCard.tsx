@@ -1,19 +1,10 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { PlayCircle, Clock } from "lucide-react";
-
-export interface EnrolledCourse {
-  id: string;
-  title: string;
-  instructor: string;
-  thumbnail: string;
-  progress: number;
-  lastAccessed: Date;
-}
+import { EnrolledCourse } from "@/types/user-data";
 
 interface CourseCardProps {
   course: EnrolledCourse;

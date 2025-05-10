@@ -1,23 +1,14 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MyCoursesTab from "./MyCoursesTab";
 import AchievementsTab from "./AchievementsTab";
 import StatsTab from "./StatsTab";
-import { EnrolledCourse } from "./CourseCard";
-import { Achievement } from "@/hooks/use-user-data";
+import { EnrolledCourse, Achievement, UserStats } from "@/types/user-data";
 
 interface DashboardTabsProps {
   enrolledCourses: EnrolledCourse[];
   achievements: Achievement[];
-  stats: {
-    totalCoursesEnrolled: number;
-    totalCoursesCompleted: number;
-    totalHoursLearned: number;
-    certificatesEarned: number;
-    averageProgress: number;
-    lastActivityDate: Date | null;
-  };
+  stats: UserStats;
 }
 
 const DashboardTabs = ({ enrolledCourses, achievements, stats }: DashboardTabsProps) => {

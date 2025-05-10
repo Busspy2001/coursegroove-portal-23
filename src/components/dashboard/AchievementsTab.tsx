@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Achievement } from "@/hooks/use-user-data";
+import { Achievement } from "@/types/user-data";
 
 interface AchievementsTabProps {
   achievements: Achievement[];
