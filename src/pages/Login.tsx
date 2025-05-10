@@ -43,6 +43,10 @@ const Login = () => {
     }
   };
 
+  const handleRegisterClick = () => {
+    navigate("/register");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl w-full flex">
@@ -51,7 +55,7 @@ const Login = () => {
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Connexion</TabsTrigger>
-              <TabsTrigger value="register" onClick={() => navigate("/register")}>Inscription</TabsTrigger>
+              <TabsTrigger value="register" onClick={handleRegisterClick}>Inscription</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <CardHeader>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,6 +62,10 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login");
   };
 
   // Password strength checker
@@ -147,7 +150,7 @@ const Register = () => {
         <Card className="w-full md:w-1/2 shadow-2xl">
           <Tabs defaultValue="register" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login" onClick={() => navigate("/login")}>Connexion</TabsTrigger>
+              <TabsTrigger value="login" onClick={handleLoginClick}>Connexion</TabsTrigger>
               <TabsTrigger value="register">Inscription</TabsTrigger>
             </TabsList>
             <TabsContent value="register">
