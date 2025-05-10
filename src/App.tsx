@@ -33,6 +33,13 @@ const Faq = lazy(() => import("./pages/Faq"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 
+// Nouvelles pages du tableau de bord étudiant
+const Certifications = lazy(() => import("./pages/Certifications"));
+const Favorites = lazy(() => import("./pages/Favorites"));
+const Progress = lazy(() => import("./pages/Progress"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Settings = lazy(() => import("./pages/Settings"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -82,6 +89,14 @@ const App = () => (
               <Route path="/faq" element={<Faq />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              
+              {/* Nouvelles routes pour le tableau de bord étudiant */}
+              <Route path="/certifications" element={<Certifications />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/progress" element={<Progress />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/settings" element={<Settings />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

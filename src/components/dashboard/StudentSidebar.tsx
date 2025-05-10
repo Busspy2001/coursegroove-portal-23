@@ -42,7 +42,7 @@ const StudentSidebar = () => {
   };
 
   const menuItems = [
-    { title: "Accueil", path: "/student", icon: Home },
+    { title: "Accueil", path: "/dashboard", icon: Home },
     { title: "Mes cours", path: "/my-courses", icon: BookOpen },
     { title: "Certifications", path: "/certifications", icon: Award },
     { title: "Favoris", path: "/favorites", icon: Star },
@@ -84,10 +84,10 @@ const StudentSidebar = () => {
                   >
                     <Button
                       variant="ghost"
-                      className="w-full justify-start"
+                      className="w-full justify-start hover:text-schoolier-teal"
                       onClick={() => navigate(item.path)}
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className={`mr-2 h-4 w-4 ${isActive(item.path) ? 'text-schoolier-blue' : 'text-schoolier-gray'}`} />
                       <span>{item.title}</span>
                     </Button>
                   </SidebarMenuButton>
