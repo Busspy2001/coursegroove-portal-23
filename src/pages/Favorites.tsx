@@ -124,6 +124,8 @@ const FavoriteCourseCard = ({ course }: { course: FavoriteCourse }) => {
 };
 
 const Favorites = () => {
+  const navigate = useNavigate();
+  
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full">

@@ -169,6 +169,16 @@ const CertificationCard = ({ certification }: { certification: CertificationProp
 };
 
 const Certifications = () => {
+  const navigate = useNavigate();
+
+  // Fix: Using ref instead of querySelector for tab switching
+  const handleSwitchToAvailableCerts = () => {
+    const availableTab = document.querySelector('[data-value="available"]') as HTMLElement;
+    if (availableTab) {
+      availableTab.click();
+    }
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full">
@@ -212,7 +222,7 @@ const Certifications = () => {
                       <p className="text-muted-foreground mb-6">
                         Découvrez nos parcours de certification pour développer vos compétences.
                       </p>
-                      <Button onClick={() => document.querySelector('[data-value="available"]')?.click()}>
+                      <Button onClick={handleSwitchToAvailableCerts}>
                         Explorer les certifications disponibles
                       </Button>
                     </div>

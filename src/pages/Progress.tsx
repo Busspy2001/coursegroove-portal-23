@@ -4,7 +4,8 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import StudentSidebar from "@/components/dashboard/StudentSidebar";
 import { useUserData } from "@/hooks/use-user-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+// Rename the imported Progress to avoid naming conflict
+import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, 
@@ -128,7 +129,7 @@ const Progress = () => {
                       <TrendingUp className="h-5 w-5 mr-2 text-schoolier-teal" />
                       <span className="text-2xl font-bold">{Math.round(stats.averageProgress)}%</span>
                     </div>
-                    <Progress value={stats.averageProgress} className="h-2" />
+                    <ProgressBar value={stats.averageProgress} className="h-2" />
                   </CardContent>
                 </Card>
               </div>
@@ -278,28 +279,28 @@ const Progress = () => {
                               <span className="text-sm font-medium">Apprenant assidu (5/7 jours)</span>
                               <span className="text-sm font-semibold">71%</span>
                             </div>
-                            <Progress value={71} className="h-2" />
+                            <ProgressBar value={71} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm font-medium">Expert JavaScript (3/5 cours)</span>
                               <span className="text-sm font-semibold">60%</span>
                             </div>
-                            <Progress value={60} className="h-2" />
+                            <ProgressBar value={60} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm font-medium">Maître des quiz (8/10 quiz)</span>
                               <span className="text-sm font-semibold">80%</span>
                             </div>
-                            <Progress value={80} className="h-2" />
+                            <ProgressBar value={80} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm font-medium">Communauté active (2/5 discussions)</span>
                               <span className="text-sm font-semibold">40%</span>
                             </div>
-                            <Progress value={40} className="h-2" />
+                            <ProgressBar value={40} className="h-2" />
                           </div>
                         </div>
                       </CardContent>
