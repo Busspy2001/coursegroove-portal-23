@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -41,36 +42,36 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
   const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
 
+  // Completely restructured function to avoid TypeScript recursion issues
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
-      // First check if the user already exists
-      const { data } = await supabase
+      setCreatingAccount(account.email);
+      
+      // Check if the user already exists in profiles
+      const profileResponse = await supabase
         .from('profiles_unified')
         .select('id')
         .eq('email', account.email)
         .single();
       
-      // If the user exists, return true
-      if (data) {
+      // If we found a profile, the account exists
+      if (profileResponse.data) {
+        setCreatingAccount(null);
         return true;
       }
       
-      // User doesn't exist, create the account
-      setCreatingAccount(account.email);
-      
-      // Register the new user with auth service
+      // Account doesn't exist, try to register it
       await register(account.name, account.email, account.password);
       
-      // Need to update role if not a student
+      // If not a student, update the role
       if (account.role !== 'student') {
-        const userResponse = await supabase.auth.getUser();
-        const userData = userResponse.data;
+        const authUser = await supabase.auth.getUser();
         
-        if (userData?.user?.id) {
+        if (authUser.data?.user?.id) {
           await supabase
             .from('profiles_unified')
             .update({ role: account.role })
-            .eq('id', userData.user.id);
+            .eq('id', authUser.data.user.id);
         }
       }
 
@@ -81,12 +82,14 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
       
       return true;
     } catch (error) {
-      console.error("Error ensuring demo account exists:", error);
-      // If we get a "User already registered" error, we can continue with login
+      console.error("Error handling account:", error);
+      
+      // Check for already registered error messages
       const errorMessage = String(error);
       if (errorMessage.includes("already registered") || errorMessage.includes("already exists")) {
         return true;
       }
+      
       return false;
     } finally {
       setCreatingAccount(null);
