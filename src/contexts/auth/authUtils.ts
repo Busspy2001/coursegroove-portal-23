@@ -31,7 +31,6 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
             full_name: name,
             email: email,
             role: 'student',
-            avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
             created_at: new Date().toISOString()
           });
           
@@ -54,8 +53,8 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
             email: supabaseUser.email || '',
             name: newProfile?.full_name || name,
             role: (newProfile?.role as UserRole) || 'student',
-            avatar: newProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
-            bio: newProfile?.bio || ''
+            avatar: supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+            bio: ''
           };
         } catch (createError) {
           console.error("Failed to create missing profile:", createError);
@@ -72,16 +71,17 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
       };
     }
     
-    // Use type assertion to handle the fields not detected in the TypeScript types
-    const profileWithTypes = profile as (typeof profile & { avatar_url?: string; bio?: string });
+    // Generate avatar URL if not present in the profile
+    const avatarUrl = supabaseUser.user_metadata?.avatar_url || 
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=0D9488&color=fff`;
     
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
       role: (profile?.role as UserRole) || 'student',
-      avatar: profileWithTypes?.avatar_url || supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=0D9488&color=fff`,
-      bio: profileWithTypes?.bio || ''
+      avatar: avatarUrl,
+      bio: ''  // Default empty string since bio might not exist in the profiles_unified table
     };
   } catch (error) {
     console.error("Error in mapSupabaseUser:", error);
