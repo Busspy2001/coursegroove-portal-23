@@ -83,11 +83,11 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
           if (userData?.user?.id) {
             console.log("Updating role for new user:", account.role);
             
-            // Using type assertion to bypass TypeScript errors
-            const { error: updateError } = await supabase
-              .from('profiles_unified')
-              .update({ role: account.role } as any)
-              .eq('id', userData.user.id);
+            // Using type assertion with as unknown first to bypass strict TypeScript errors
+            const { error: updateError } = await (supabase
+              .from('profiles_unified' as unknown as never)
+              .update({ role: account.role } as unknown as never)
+              .eq('id', userData.user.id));
               
             if (updateError) {
               console.error("Failed to update role:", updateError);

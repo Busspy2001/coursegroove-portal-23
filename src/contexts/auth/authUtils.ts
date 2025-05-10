@@ -10,12 +10,12 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
   
   try {
     // Get user profile from the profiles_unified table
-    // Using generic any type to bypass TypeScript errors since we can't modify the types.ts file
-    const { data: profile, error } = await supabase
-      .from('profiles_unified')
+    // Using double type assertion to bypass TypeScript errors since we can't modify the types.ts file
+    const { data: profile, error } = await (supabase
+      .from('profiles_unified' as unknown as never)
       .select('*')
       .eq('id', supabaseUser.id)
-      .single() as { data: ProfilesUnified | null, error: any };
+      .single() as unknown as { data: ProfilesUnified | null, error: any });
     
     if (error) {
       console.error("Error fetching user profile:", error);
@@ -28,24 +28,24 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           const email = supabaseUser.email || '';
           
           // Create a default profile
-          await supabase
-            .from('profiles_unified')
+          await (supabase
+            .from('profiles_unified' as unknown as never)
             .insert({
               id: supabaseUser.id,
               full_name: name,
               email: email,
               role: 'student',
               created_at: new Date().toISOString()
-            } as any);
+            } as unknown as never));
           
           console.log("Created missing profile for user:", supabaseUser.id);
           
           // Try fetching the profile again
-          const { data: newProfile, error: newError } = await supabase
-            .from('profiles_unified')
+          const { data: newProfile, error: newError } = await (supabase
+            .from('profiles_unified' as unknown as never)
             .select('*')
             .eq('id', supabaseUser.id)
-            .single() as { data: ProfilesUnified | null, error: any };
+            .single() as unknown as { data: ProfilesUnified | null, error: any });
             
           if (newError) {
             throw newError;
