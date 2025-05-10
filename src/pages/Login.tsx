@@ -43,8 +43,10 @@ const Login = () => {
     }
   };
 
-  const handleRegisterClick = () => {
-    navigate("/register");
+  const handleTabChange = (value: string) => {
+    if (value === "register") {
+      navigate("/register");
+    }
   };
 
   return (
@@ -52,10 +54,10 @@ const Login = () => {
       <div className="max-w-5xl w-full flex">
         {/* Left side: Login form */}
         <Card className="w-full md:w-1/2 shadow-2xl">
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue="login" className="w-full" onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Connexion</TabsTrigger>
-              <TabsTrigger value="register" onClick={handleRegisterClick}>Inscription</TabsTrigger>
+              <TabsTrigger value="register">Inscription</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <CardHeader>

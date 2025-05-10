@@ -11,8 +11,10 @@ import { RegisterBenefits } from "@/components/auth/RegisterBenefits";
 const Register = () => {
   const navigate = useNavigate();
   
-  const handleLoginClick = () => {
-    navigate("/login");
+  const handleTabChange = (value: string) => {
+    if (value === "login") {
+      navigate("/login");
+    }
   };
 
   return (
@@ -23,9 +25,9 @@ const Register = () => {
         
         {/* Right side: Registration form */}
         <Card className="w-full md:w-1/2 shadow-2xl">
-          <Tabs defaultValue="register" className="w-full">
+          <Tabs defaultValue="register" className="w-full" onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login" onClick={handleLoginClick}>Connexion</TabsTrigger>
+              <TabsTrigger value="login">Connexion</TabsTrigger>
               <TabsTrigger value="register">Inscription</TabsTrigger>
             </TabsList>
             <TabsContent value="register">
