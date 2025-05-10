@@ -1,7 +1,8 @@
 
 import React from "react";
-import CourseCard, { EnrolledCourse } from "./CourseCard";
+import CourseCard from "./CourseCard";
 import EmptyCourseState from "./EmptyCourseState";
+import { EnrolledCourse } from "@/types/user-data";
 
 interface MyCoursesTabProps {
   enrolledCourses: EnrolledCourse[];

@@ -42,22 +42,27 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
   const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
 
-  // Completely restructured function to avoid TypeScript recursion issues
+  // Fixed function to avoid TypeScript recursive type issue
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
       setCreatingAccount(account.email);
       
       // Check if the user already exists in profiles
-      const profileResponse = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles_unified')
         .select('id')
         .eq('email', account.email)
         .single();
       
-      // If we found a profile, the account exists
-      if (profileResponse.data) {
-        setCreatingAccount(null);
+      // If profile exists, we're done
+      if (profileData) {
         return true;
+      }
+      
+      // If error is not "not found", something else happened
+      if (profileError && !profileError.message.includes("No rows found")) {
+        console.error("Profile check error:", profileError);
+        return false;
       }
       
       // Account doesn't exist, try to register it
@@ -65,13 +70,13 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
       
       // If not a student, update the role
       if (account.role !== 'student') {
-        const authUser = await supabase.auth.getUser();
+        const authUserResponse = await supabase.auth.getUser();
         
-        if (authUser.data?.user?.id) {
+        if (authUserResponse.data?.user?.id) {
           await supabase
             .from('profiles_unified')
             .update({ role: account.role })
-            .eq('id', authUser.data.user.id);
+            .eq('id', authUserResponse.data.user.id);
         }
       }
 
