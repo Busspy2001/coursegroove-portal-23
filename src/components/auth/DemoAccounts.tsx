@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -44,26 +43,29 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
 
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
-      // Check if the user already exists
+      // First check if the user already exists
       const { data } = await supabase
         .from('profiles_unified')
         .select('id')
         .eq('email', account.email)
         .single();
       
+      // If the user exists, return true
       if (data) {
-        return true; // User exists
+        return true;
       }
       
-      // Create the user if it doesn't exist
+      // User doesn't exist, create the account
       setCreatingAccount(account.email);
       
-      // Register the new user
+      // Register the new user with auth service
       await register(account.name, account.email, account.password);
       
-      // After creating the user, update their role directly if needed
+      // Need to update role if not a student
       if (account.role !== 'student') {
-        const { data: userData } = await supabase.auth.getUser();
+        const userResponse = await supabase.auth.getUser();
+        const userData = userResponse.data;
+        
         if (userData?.user?.id) {
           await supabase
             .from('profiles_unified')
@@ -81,7 +83,6 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
     } catch (error) {
       console.error("Error ensuring demo account exists:", error);
       // If we get a "User already registered" error, we can continue with login
-      // The error message might be different depending on the version of Supabase
       const errorMessage = String(error);
       if (errorMessage.includes("already registered") || errorMessage.includes("already exists")) {
         return true;
