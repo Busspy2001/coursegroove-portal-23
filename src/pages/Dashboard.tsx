@@ -1,9 +1,8 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatCards from "@/components/dashboard/StatCards";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";

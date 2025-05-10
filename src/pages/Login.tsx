@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +6,11 @@ import { Book } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { LoginBenefits } from "@/components/auth/LoginBenefits";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { useAuth } from "@/contexts/auth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
   const handleTabChange = (value: string) => {
     if (value === "register") {

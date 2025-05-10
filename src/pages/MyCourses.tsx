@@ -1,9 +1,8 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { useUserData } from "@/hooks/use-user-data";
 import CourseCard from "@/components/dashboard/CourseCard";
 import EmptyCourseState from "@/components/dashboard/EmptyCourseState";
