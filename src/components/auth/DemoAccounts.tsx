@@ -42,26 +42,26 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
   const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
 
-  // Fixed function to avoid TypeScript recursive type issue
+  // Completely rewritten function to avoid TypeScript recursion issues
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
       setCreatingAccount(account.email);
       
       // Check if the user already exists in profiles
-      const { data: profileData, error: profileError } = await supabase
+      const profileQuery = await supabase
         .from('profiles_unified')
         .select('id')
         .eq('email', account.email)
         .single();
       
-      // If profile exists, we're done
-      if (profileData) {
+      // If we found a profile, the account exists
+      if (profileQuery.data) {
         return true;
       }
       
       // If error is not "not found", something else happened
-      if (profileError && !profileError.message.includes("No rows found")) {
-        console.error("Profile check error:", profileError);
+      if (profileQuery.error && !profileQuery.error.message.includes("No rows found")) {
+        console.error("Profile check error:", profileQuery.error);
         return false;
       }
       
@@ -70,13 +70,13 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
       
       // If not a student, update the role
       if (account.role !== 'student') {
-        const authUserResponse = await supabase.auth.getUser();
+        const authUserQuery = await supabase.auth.getUser();
         
-        if (authUserResponse.data?.user?.id) {
+        if (authUserQuery.data?.user?.id) {
           await supabase
             .from('profiles_unified')
             .update({ role: account.role })
-            .eq('id', authUserResponse.data.user.id);
+            .eq('id', authUserQuery.data.user.id);
         }
       }
 
