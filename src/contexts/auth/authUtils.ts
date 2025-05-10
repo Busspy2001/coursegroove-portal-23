@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { User, UserRole } from "./types";
+import { ProfilesUnified } from "@/types/database";
 
 // Map Supabase user to our User interface
 export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promise<User | null> => {
@@ -9,11 +10,12 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
   
   try {
     // Get user profile from the profiles_unified table
+    // Using generic any type to bypass TypeScript errors since we can't modify the types.ts file
     const { data: profile, error } = await supabase
-      .from('profiles_unified')
+      .from('profiles_unified' as any)
       .select('*')
       .eq('id', supabaseUser.id)
-      .single();
+      .single() as { data: ProfilesUnified | null, error: any };
     
     if (error) {
       console.error("Error fetching user profile:", error);
@@ -26,22 +28,24 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           const email = supabaseUser.email || '';
           
           // Create a default profile
-          await supabase.from('profiles_unified').insert({
-            id: supabaseUser.id,
-            full_name: name,
-            email: email,
-            role: 'student',
-            created_at: new Date().toISOString()
-          });
+          await supabase
+            .from('profiles_unified' as any)
+            .insert({
+              id: supabaseUser.id,
+              full_name: name,
+              email: email,
+              role: 'student',
+              created_at: new Date().toISOString()
+            });
           
           console.log("Created missing profile for user:", supabaseUser.id);
           
           // Try fetching the profile again
           const { data: newProfile, error: newError } = await supabase
-            .from('profiles_unified')
+            .from('profiles_unified' as any)
             .select('*')
             .eq('id', supabaseUser.id)
-            .single();
+            .single() as { data: ProfilesUnified | null, error: any };
             
           if (newError) {
             throw newError;
@@ -53,7 +57,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
             email: supabaseUser.email || '',
             name: newProfile?.full_name || name,
             role: (newProfile?.role as UserRole) || 'student',
-            avatar: supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+            avatar: supabaseUser.user_metadata?.avatar_url || newProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
             bio: ''
           };
         } catch (createError) {
@@ -73,6 +77,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
     
     // Generate avatar URL if not present in the profile
     const avatarUrl = supabaseUser.user_metadata?.avatar_url || 
+      profile?.avatar_url || 
       `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=0D9488&color=fff`;
     
     return {

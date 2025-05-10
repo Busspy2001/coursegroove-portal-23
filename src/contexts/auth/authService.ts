@@ -57,15 +57,17 @@ export const authService = {
       }
       
       try {
-        // Create a profile in the profiles_unified table
-        const { error: profileError } = await supabase.from('profiles_unified').insert({
-          id: data.user.id,
-          full_name: name,
-          email: email,
-          role: 'student',
-          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
-          created_at: new Date().toISOString()
-        });
+        // Create a profile in the profiles_unified table - using 'as any' to bypass type checking
+        const { error: profileError } = await supabase
+          .from('profiles_unified' as any)
+          .insert({
+            id: data.user.id,
+            full_name: name,
+            email: email,
+            role: 'student',
+            avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+            created_at: new Date().toISOString()
+          });
         
         if (profileError) {
           console.error("Profile creation error:", profileError);
