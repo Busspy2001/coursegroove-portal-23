@@ -1,9 +1,8 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { useCourseData } from "@/hooks/use-course-data";
 import { useCourse } from "@/hooks/use-course";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

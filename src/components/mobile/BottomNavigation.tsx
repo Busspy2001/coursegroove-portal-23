@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, BookOpen, Search, User, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 
 const BottomNavigation = () => {
   const location = useLocation();

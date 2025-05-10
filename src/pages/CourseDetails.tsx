@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -9,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useToast } from "@/components/ui/use-toast";
 import { Share2, Star, Clock, BarChart2, Users, Globe, CheckCircle, PlayCircle, FileText, MessageSquare, Award } from "lucide-react";
 import { allCourses } from "@/data/courseData";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import CourseCard from "@/components/CourseCard";
 
 const CourseDetails = () => {
