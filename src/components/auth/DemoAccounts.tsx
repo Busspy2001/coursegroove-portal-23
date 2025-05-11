@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Loader2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface DemoAccount {
   email: string;
@@ -35,20 +36,53 @@ export const demoAccounts: DemoAccount[] = [
   }
 ];
 
-export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
+export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolean }) => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showDemoAccounts, setShowDemoAccounts] = useState(true); // Auto-expanded by default
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true);
   const [loggingIn, setLoggingIn] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
+
+  // Réinitialiser l'erreur quand l'utilisateur ouvre/ferme la section
+  useEffect(() => {
+    setLoginError(null);
+  }, [showDemoAccounts]);
+
+  // Timeout pour éviter les blocages indéfinis
+  useEffect(() => {
+    let timeout: number | undefined;
+    
+    if (loggingIn) {
+      timeout = window.setTimeout(() => {
+        if (loggingIn) {
+          setLoggingIn(null);
+          setLoginError("La connexion a pris trop de temps. Veuillez réessayer.");
+          toast({
+            title: "Délai d'attente dépassé",
+            description: "La connexion a pris trop de temps. Veuillez réessayer.",
+            variant: "destructive",
+          });
+        }
+      }, 10000); // 10 secondes de timeout
+    }
+    
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [loggingIn, toast]);
 
   const handleDemoLogin = async (account: DemoAccount) => {
     try {
-      // Afficher l'état de chargement pour ce compte spécifique
+      // Réinitialiser les états
+      setLoginError(null);
       setLoggingIn(account.email);
+      console.log(`🚀 Tentative de connexion avec le compte ${account.role}:`, account.email);
       
-      // Tentative de connexion simple sans logique complexe
-      await login(account.email, account.password, true);
+      // Tentative de connexion
+      const user = await login(account.email, account.password, true);
+      console.log("✅ Connexion réussie:", user);
       
       // Afficher un message de succès
       toast({
@@ -56,19 +90,31 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
         description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
       });
       
-      // Redirection basée sur le rôle
-      if (account.role === 'instructor') {
-        navigate('/instructor');
-      } else if (account.role === 'business_admin' || account.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      // Indiquer la redirection
+      setRedirecting(true);
+      
+      // Redirection basée sur le rôle après un court délai pour laisser le temps à l'utilisateur de voir le toast
+      setTimeout(() => {
+        console.log(`🔄 Redirection vers le tableau de bord pour le rôle: ${account.role}`);
+        if (account.role === 'instructor') {
+          navigate('/instructor');
+        } else if (account.role === 'business_admin' || account.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 500);
+      
     } catch (error: any) {
-      console.error("Erreur de connexion démo:", error);
+      console.error("❌ Erreur de connexion démo:", error);
+      
+      // Message d'erreur spécifique
+      const errorMessage = error.message || "Impossible de se connecter au compte de démonstration.";
+      setLoginError(errorMessage);
+      
       toast({
         title: "Erreur de connexion",
-        description: "Impossible de se connecter au compte de démonstration. Veuillez réessayer.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -97,6 +143,20 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
           Utilisez ces comptes pour tester la plateforme sans avoir à vous inscrire
         </p>
       </div>
+      
+      {loginError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription>{loginError}</AlertDescription>
+        </Alert>
+      )}
+      
+      {redirecting && (
+        <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
+          <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600" />
+          <AlertDescription>Redirection vers votre tableau de bord...</AlertDescription>
+        </Alert>
+      )}
       
       {showDemoAccounts && (
         <div className="space-y-2">
@@ -127,10 +187,15 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
               <Button 
                 size="sm" 
                 onClick={() => handleDemoLogin(account)}
-                disabled={isLoading || loggingIn !== null}
+                disabled={parentIsLoading || loggingIn !== null || redirecting}
                 className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
               >
-                {loggingIn === account.email ? "Connexion..." : "Se connecter"}
+                {loggingIn === account.email ? (
+                  <span className="flex items-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> 
+                    Connexion...
+                  </span>
+                ) : "Se connecter"}
               </Button>
             </div>
           ))}

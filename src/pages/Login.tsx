@@ -1,9 +1,9 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Book } from "lucide-react";
+import { Book, Loader2 } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { LoginBenefits } from "@/components/auth/LoginBenefits";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
@@ -13,16 +13,28 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const isMobile = useIsMobile();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   // Redirect to dashboard if already authenticated
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("🔍 Vérification de l'authentification dans Login:", isAuthenticated);
     if (isAuthenticated) {
-      navigate("/dashboard");
+      console.log("✅ Utilisateur authentifié, préparation de la redirection");
+      setIsRedirecting(true);
+      
+      // Ajout d'un délai avant la redirection pour éviter les problèmes de navigation
+      const redirectTimer = setTimeout(() => {
+        console.log("🔄 Redirection vers le tableau de bord");
+        navigate("/dashboard");
+      }, 500);
+      
+      return () => clearTimeout(redirectTimer);
     }
   }, [isAuthenticated, navigate]);
   
@@ -32,6 +44,18 @@ const Login = () => {
     }
   };
 
+  // Affichage d'un indicateur de chargement pendant la vérification de l'authentification
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-10 w-10 text-schoolier-teal animate-spin mb-4" />
+          <p className="text-muted-foreground">Vérification de votre session...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -40,6 +64,13 @@ const Login = () => {
         <div className="max-w-5xl w-full flex">
           {/* Left side: Login form */}
           <Card className="w-full md:w-1/2 shadow-2xl">
+            {isRedirecting && (
+              <Alert className="m-4 bg-green-50 text-green-800 border-green-200">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600" />
+                <AlertDescription>Vous êtes déjà connecté. Redirection vers votre tableau de bord...</AlertDescription>
+              </Alert>
+            )}
+            
             <Tabs defaultValue="login" className="w-full" onValueChange={handleTabChange}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Connexion</TabsTrigger>

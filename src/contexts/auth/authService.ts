@@ -7,24 +7,28 @@ import { User } from "./types";
 export const authService = {
   login: async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
     try {
+      console.log("🔑 Tentative de connexion pour:", email);
       // Use the rememberMe option to set the session expiry
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          // For persistent sessions, we don't need to specify expiresIn
-          // Supabase will handle sessions based on the client configuration
-        }
+        // Pas besoin de spécifier expiresIn, Supabase gère les sessions selon la configuration du client
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Erreur d'authentification:", error);
+        throw error;
+      }
       
+      console.log("✅ Authentification réussie, récupération des données utilisateur");
       const mappedUser = await mapSupabaseUser(data.user);
       
       if (!mappedUser) {
+        console.error("❌ Impossible de récupérer les données utilisateur");
         throw new Error("User data couldn't be retrieved");
       }
       
+      console.log("👤 Données utilisateur récupérées:", mappedUser);
       toast({
         title: "Connexion réussie",
         description: `Bienvenue, ${mappedUser.name || 'utilisateur'}!`,
@@ -32,7 +36,7 @@ export const authService = {
       
       return mappedUser;
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("❌ Erreur de connexion:", error);
       toast({
         title: "Erreur de connexion",
         description: error.message || "Impossible de se connecter. Veuillez réessayer.",
