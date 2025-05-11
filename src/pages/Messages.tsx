@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import StudentSidebar from "@/components/dashboard/StudentSidebar";
@@ -16,9 +15,11 @@ import {
   Calendar,
   Info,
   Search,
-  Plus
+  Plus,
+  ArrowLeft
 } from "lucide-react";
 import Footer from "@/components/Footer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
@@ -320,8 +321,9 @@ const MessageBubble = ({ message, isCurrentUser }: { message: Message, isCurrent
   );
 };
 
-const ChatWindow = ({ conversation }: { conversation: Conversation }) => {
+const ChatWindow = ({ conversation, onBack }: { conversation: Conversation, onBack?: () => void }) => {
   const [newMessage, setNewMessage] = useState("");
+  const isMobile = useIsMobile();
   
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -334,6 +336,11 @@ const ChatWindow = ({ conversation }: { conversation: Conversation }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b flex items-center justify-between">
+        {isMobile && onBack && (
+          <Button variant="ghost" size="icon" onClick={onBack} className="mr-2">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
         <div className="flex items-center">
           <Avatar className="h-10 w-10 mr-3">
             <AvatarImage src={conversation.participant.avatar} alt={conversation.participant.name} />
@@ -352,7 +359,7 @@ const ChatWindow = ({ conversation }: { conversation: Conversation }) => {
         </Button>
       </div>
       
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 overflow-y-auto">
         {mockMessagesForConv1.map((message) => (
           <MessageBubble 
             key={message.id} 
@@ -379,91 +386,115 @@ const ChatWindow = ({ conversation }: { conversation: Conversation }) => {
 
 const Messages = () => {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(mockConversations[0]);
+  const isMobile = useIsMobile();
+  const [showConversation, setShowConversation] = useState(false);
+  
+  const handleSelectConversation = (conversation: Conversation) => {
+    setSelectedConversation(conversation);
+    if (isMobile) {
+      setShowConversation(true);
+    }
+  };
+  
+  const handleBackToList = () => {
+    setShowConversation(false);
+  };
   
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full">
         <StudentSidebar />
         
         <SidebarInset className="p-0">
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen w-full">
             <div className="flex items-center p-4 border-b">
               <SidebarTrigger className="mr-4" />
               <h1 className="text-xl font-semibold">Messages</h1>
             </div>
             
-            <div className="flex-grow flex flex-col md:flex-row">
-              <Tabs defaultValue="messages" className="w-full md:w-80 border-r">
-                <div className="p-4">
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="messages">Messages</TabsTrigger>
-                    <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  </TabsList>
-                  
-                  <div className="mb-4 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher..."
-                      className="pl-9"
-                    />
-                  </div>
+            <div className="flex-grow flex flex-col md:flex-row w-full">
+              {/* On mobile: Show either the conversation list or the selected conversation */}
+              {(!isMobile || !showConversation) && (
+                <div className="w-full md:w-80 border-r">
+                  <Tabs defaultValue="messages">
+                    <div className="p-4">
+                      <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="messages">Messages</TabsTrigger>
+                        <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                      </TabsList>
+                      
+                      <div className="mb-4 relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Rechercher..."
+                          className="pl-9"
+                        />
+                      </div>
+                    </div>
+                    
+                    <TabsContent value="messages" className="mt-0 border-t">
+                      <div className="flex justify-between items-center p-3">
+                        <h3 className="text-sm font-medium">Récents</h3>
+                        <Button variant="ghost" size="sm" className="h-8 px-2">
+                          <Plus className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Nouveau message</span>
+                        </Button>
+                      </div>
+                      <ScrollArea className="h-[calc(100vh-14rem)] overflow-y-auto">
+                        {mockConversations.map((conversation) => (
+                          <ConversationItem
+                            key={conversation.id}
+                            conversation={conversation}
+                            selected={selectedConversation?.id === conversation.id}
+                            onClick={() => handleSelectConversation(conversation)}
+                          />
+                        ))}
+                      </ScrollArea>
+                    </TabsContent>
+                    
+                    <TabsContent value="notifications" className="mt-0 border-t">
+                      <div className="flex justify-between items-center p-3">
+                        <h3 className="text-sm font-medium">Notifications</h3>
+                        <Button variant="ghost" size="sm" className="h-8 px-2">
+                          <span className="text-xs">Tout marquer comme lu</span>
+                        </Button>
+                      </div>
+                      <ScrollArea className="h-[calc(100vh-14rem)] overflow-y-auto">
+                        {mockNotifications.map((notification) => (
+                          <React.Fragment key={notification.id}>
+                            <NotificationItem notification={notification} />
+                            <Separator />
+                          </React.Fragment>
+                        ))}
+                      </ScrollArea>
+                    </TabsContent>
+                  </Tabs>
                 </div>
-                
-                <TabsContent value="messages" className="mt-0 border-t">
-                  <div className="flex justify-between items-center p-3">
-                    <h3 className="text-sm font-medium">Récents</h3>
-                    <Button variant="ghost" size="sm" className="h-8 px-2">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Nouveau message
-                    </Button>
-                  </div>
-                  <ScrollArea className="h-[calc(100vh-14rem)]">
-                    {mockConversations.map((conversation) => (
-                      <ConversationItem
-                        key={conversation.id}
-                        conversation={conversation}
-                        selected={selectedConversation?.id === conversation.id}
-                        onClick={() => setSelectedConversation(conversation)}
-                      />
-                    ))}
-                  </ScrollArea>
-                </TabsContent>
-                
-                <TabsContent value="notifications" className="mt-0 border-t">
-                  <div className="flex justify-between items-center p-3">
-                    <h3 className="text-sm font-medium">Toutes les notifications</h3>
-                    <Button variant="ghost" size="sm" className="h-8 px-2">
-                      Tout marquer comme lu
-                    </Button>
-                  </div>
-                  <ScrollArea className="h-[calc(100vh-14rem)]">
-                    {mockNotifications.map((notification) => (
-                      <React.Fragment key={notification.id}>
-                        <NotificationItem notification={notification} />
-                        <Separator />
-                      </React.Fragment>
-                    ))}
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
+              )}
               
-              <div className="hidden md:flex flex-1 flex-col">
-                {selectedConversation ? (
-                  <ChatWindow conversation={selectedConversation} />
-                ) : (
-                  <div className="flex flex-col h-full items-center justify-center p-6 text-center">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground opacity-40 mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Aucune conversation sélectionnée</h3>
-                    <p className="text-muted-foreground mb-6 max-w-xs">
-                      Sélectionnez une conversation existante ou démarrez une nouvelle discussion.
-                    </p>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Nouveau message
-                    </Button>
-                  </div>
-                )}
-              </div>
+              {/* On mobile: Chat window takes full width when selected */}
+              {(!isMobile || showConversation) && (
+                <div className="flex-1 flex flex-col h-[calc(100vh-6rem)]">
+                  {selectedConversation ? (
+                    <ChatWindow 
+                      conversation={selectedConversation} 
+                      onBack={isMobile ? handleBackToList : undefined}
+                    />
+                  ) : (
+                    <div className="flex flex-col h-full items-center justify-center p-6 text-center">
+                      <MessageSquare className="h-12 w-12 text-muted-foreground opacity-40 mb-4" />
+                      <h3 className="text-lg font-medium mb-2">Aucune conversation sélectionnée</h3>
+                      <p className="text-muted-foreground mb-6 max-w-xs">
+                        Sélectionnez une conversation existante ou démarrez une nouvelle discussion.
+                      </p>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Nouveau message
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             
             <Footer />
