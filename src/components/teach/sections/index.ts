@@ -1,5 +1,5 @@
 
-// Export all teach section components for easy importing
+// Export all section components
 export { default as HeroSection } from './HeroSection';
 export { default as ProblemsSection } from './ProblemsSection';
 export { default as ProcessSection } from './ProcessSection';

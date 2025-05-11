@@ -1,6 +1,6 @@
 
 // Export all business components for easy importing
-export { default as TeachProblemCard } from '../teach/sections/ProblemsSection';
-export { default as TeachProcessStep } from '../teach/sections/ProcessSection';
-export { default as TeachFeature } from '../teach/sections/FeaturesSection';
-export { default as TeachTestimonial } from '../teach/sections/TestimonialsSection';
+export { default as TeachProblemCard } from './components/ProblemCard';
+export { default as TeachProcessStep } from './components/ProcessStep';
+export { default as TeachFeature } from './components/Feature';
+export { default as TeachTestimonial } from './components/Testimonial';
