@@ -1,15 +1,20 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser } from "./authUtils";
 import { User } from "./types";
 
 export const authService = {
-  login: async (email: string, password: string): Promise<User> => {
+  login: async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
     try {
+      // Use the rememberMe option to set the session expiry
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
+        options: {
+          // If rememberMe is true, set a long expiry (1 year)
+          // Otherwise, default to shorter session (browser session)
+          expiresIn: rememberMe ? 31536000 : 3600 // 1 year vs 1 hour
+        }
       });
       
       if (error) throw error;

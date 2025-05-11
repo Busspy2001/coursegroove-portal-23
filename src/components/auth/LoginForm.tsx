@@ -19,7 +19,7 @@ export const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true); // Default to true for better UX
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -28,7 +28,7 @@ export const LoginForm = () => {
     setLoginError(null);
     
     try {
-      const user = await login(email, password);
+      const user = await login(email, password, rememberMe);
       toast({
         title: "Connexion réussie !",
         description: "Bienvenue sur Schoolier.",
@@ -112,7 +112,7 @@ export const LoginForm = () => {
             checked={rememberMe} 
             onCheckedChange={(checked) => setRememberMe(checked as boolean)} 
           />
-          <Label htmlFor="remember">Se souvenir de moi</Label>
+          <Label htmlFor="remember" className="cursor-pointer">Se souvenir de moi</Label>
         </div>
         <Button type="submit" className="w-full bg-schoolier-teal hover:bg-schoolier-dark-teal" disabled={isLoading}>
           {isLoading ? "Connexion en cours..." : "Se connecter"}
