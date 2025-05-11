@@ -33,13 +33,13 @@ const staggerContainer = {
   }
 };
 
-const Business = () => {
-  // Demo request function - moved to component scope
-  const requestDemo = () => {
-    // This would be connected to a form or calendly in a real implementation
-    alert("Merci de votre intérêt ! Un conseiller Schoolier Business vous contactera sous peu.");
-  };
+// Demo request function - moved outside components to be accessible everywhere in this file
+const requestDemo = () => {
+  // This would be connected to a form or calendly in a real implementation
+  alert("Merci de votre intérêt ! Un conseiller Schoolier Business vous contactera sous peu.");
+};
 
+const Business = () => {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-schoolier-dark">
       <Navbar />
