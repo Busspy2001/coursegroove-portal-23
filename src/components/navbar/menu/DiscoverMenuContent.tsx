@@ -1,11 +1,12 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Book, Grid, HelpCircle, MessageSquare, Award } from "lucide-react";
 import { motion } from "framer-motion";
 import CourseCategories from "./CourseCategories";
 import CertificationProviders from "./CertificationProviders";
 import PopularTopics from "./PopularTopics";
+import ListItem from "./ListItem";
 
 interface DiscoverMenuContentProps {
   className?: string;
@@ -43,9 +44,67 @@ const DiscoverMenuContent: React.FC<DiscoverMenuContentProps> = ({
       initial="hidden"
       animate="visible"
     >
-      {/* Course Categories Column */}
+      {/* First Column - Core Sections */}
       <motion.div
         variants={itemVariants} 
+        className="flex flex-col space-y-4"
+      >
+        <h3 className="font-bold text-lg text-schoolier-dark-blue dark:text-white mb-4">
+          Explorez Schoolier
+        </h3>
+        
+        <ul className="space-y-3">
+          <li>
+            <ListItem 
+              title="Nos cours" 
+              icon={<Book className="h-5 w-5 text-schoolier-blue" />}
+              href="/courses"
+            >
+              Découvrez notre catalogue complet de formations en ligne
+            </ListItem>
+          </li>
+          <li>
+            <ListItem 
+              title="Catégories" 
+              icon={<Grid className="h-5 w-5 text-schoolier-green" />}
+              href="/categories"
+            >
+              Parcourez nos cours par domaine d'expertise
+            </ListItem>
+          </li>
+          <li>
+            <ListItem 
+              title="Pourquoi Schoolier" 
+              icon={<HelpCircle className="h-5 w-5 text-schoolier-teal" />}
+              href="/about"
+            >
+              Découvrez notre mission et nos avantages uniques
+            </ListItem>
+          </li>
+          <li>
+            <ListItem 
+              title="Témoignages" 
+              icon={<MessageSquare className="h-5 w-5 text-purple-500" />}
+              href="/testimonials"
+            >
+              Ce que disent nos étudiants satisfaits
+            </ListItem>
+          </li>
+          <li>
+            <ListItem 
+              title="Nos valeurs" 
+              icon={<Award className="h-5 w-5 text-amber-500" />}
+              href="/values"
+            >
+              Les principes qui guident notre plateforme éducative
+            </ListItem>
+          </li>
+        </ul>
+      </motion.div>
+
+      {/* Second Column - Categories */}
+      <motion.div 
+        variants={itemVariants}
         className="flex flex-col space-y-4"
       >
         <h3 className="font-bold text-lg text-schoolier-dark-blue dark:text-white mb-2">
@@ -54,18 +113,7 @@ const DiscoverMenuContent: React.FC<DiscoverMenuContentProps> = ({
         <CourseCategories />
       </motion.div>
 
-      {/* Certification Providers Column */}
-      <motion.div 
-        variants={itemVariants}
-        className="flex flex-col space-y-4"
-      >
-        <h3 className="font-bold text-lg text-schoolier-dark-blue dark:text-white mb-2">
-          Certifications professionnelles
-        </h3>
-        <CertificationProviders />
-      </motion.div>
-
-      {/* Popular Topics Column */}
+      {/* Third Column - Popular Topics */}
       <motion.div 
         variants={itemVariants}
         className="flex flex-col space-y-4"
