@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -39,14 +39,14 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
-  const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const [creatingAccount, setCreatingAccount] = useState<string | null>(null);
 
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
       setCreatingAccount(account.email);
       
-      // First check if user exists by email in auth
+      // Check if user exists by email in auth
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: account.email,
         password: account.password
@@ -64,40 +64,47 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
       try {
         console.log("Attempting to register demo account:", account.email);
         
-        // Note: passing true as the last parameter to indicate this is a demo account
-        await register(account.name, account.email, account.password, true);
+        // Create demo account with auto-confirmation
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: account.email,
+          password: account.password,
+          options: {
+            data: {
+              name: account.name
+            }
+          }
+        });
         
-        // If not a student, update the role (register creates with student role by default)
-        if (account.role !== 'student') {
+        if (signUpError) {
+          console.error("Failed to create demo account:", signUpError);
+          throw signUpError;
+        }
+        
+        if (signUpData.user) {
           // Wait a moment for auth to complete
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Get the current user
-          const { data: userData } = await supabase.auth.getUser();
-          
-          if (userData?.user?.id) {
-            console.log("Updating role for new demo user:", account.role);
+          // Update the user profile role
+          const { error: updateError } = await supabase
+            .from('profiles_unified' as unknown as never)
+            .update({ 
+              role: account.role, 
+              is_demo: true,
+              full_name: account.name
+            } as unknown as never)
+            .eq('id', signUpData.user.id);
             
-            const { error: updateError } = await supabase
-              .from('profiles_unified' as unknown as never)
-              .update({ 
-                role: account.role, 
-                is_demo: true 
-              } as unknown as never)
-              .eq('id', userData.user.id);
-              
-            if (updateError) {
-              console.error("Failed to update role:", updateError);
-            }
+          if (updateError) {
+            console.error("Failed to update role:", updateError);
           }
+          
+          toast({
+            title: "Compte démo créé",
+            description: `Le compte démo ${account.name} a été créé avec succès.`,
+          });
+          
+          return true;
         }
-        
-        toast({
-          title: "Compte démo créé",
-          description: `Le compte démo ${account.name} a été créé avec succès.`,
-        });
-        
-        return true;
       } catch (registerError) {
         console.error("Registration error:", registerError);
         
@@ -130,13 +137,30 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
         return;
       }
       
-      // Then login with the account
-      await login(account.email, account.password);
+      // Direct login with Supabase to avoid any issues with custom login flow
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: account.email,
+        password: account.password
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Success! Show toast and navigate
       toast({
         title: "Connexion démo réussie !",
         description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
       });
-      navigate("/dashboard");
+      
+      // Redirect based on role
+      if (account.role === 'instructor') {
+        navigate('/instructor');
+      } else if (account.role === 'business_admin' || account.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error("Demo login error:", error);
       toast({

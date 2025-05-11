@@ -47,7 +47,8 @@ export const authService = {
           data: {
             name
           },
-          emailRedirectTo: `${window.location.origin}/login`
+          // No email redirection for demo accounts
+          ...(isDemoAccount ? {} : { emailRedirectTo: `${window.location.origin}/login` })
         }
       });
       
@@ -88,20 +89,19 @@ export const authService = {
       
       // Auto-confirm demo accounts to bypass email verification
       if (isDemoAccount) {
-        try {
-          // For demo accounts, automatically sign in after creation
-          if (!data.session) {
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-              email,
-              password
-            });
-            
-            if (signInError) {
-              console.error("Auto-signin for demo account failed:", signInError);
-            }
+        console.log("Auto-confirming demo account");
+        // For demo accounts, automatically sign in after creation
+        if (!data.session) {
+          // Direct admin confirmation of user (would normally require admin access)
+          // Since we can't access admin functions, we'll try signing in directly
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          
+          if (signInError) {
+            console.error("Auto-signin for demo account failed:", signInError);
           }
-        } catch (autoSignInError) {
-          console.error("Auto-signin error:", autoSignInError);
         }
       } else {
         toast({
@@ -148,22 +148,6 @@ export const authService = {
   logout: async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
-
-      // Option: Log session end in user_sessions
-      /*
-      try {
-        const userId = (await supabase.auth.getUser()).data.user?.id;
-        if (userId) {
-          await supabase
-            .from('user_sessions')
-            .update({ logout_at: new Date().toISOString() })
-            .eq('user_id', userId)
-            .is('logout_at', null);
-        }
-      } catch (sessionError) {
-        console.error("Error logging session end:", sessionError);
-      }
-      */
       
       toast({
         title: "Déconnexion réussie",

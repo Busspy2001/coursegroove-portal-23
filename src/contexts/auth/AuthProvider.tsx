@@ -21,6 +21,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check for existing session on mount
   useEffect(() => {
+    // Set up auth state listener first to prevent missing auth events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      
+      if (session) {
+        try {
+          const mappedUser = await mapSupabaseUser(session.user);
+          console.log("Mapped user:", mappedUser);
+          setCurrentUser(mappedUser);
+        } catch (error) {
+          console.error("Error mapping user:", error);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
+      }
+    });
+
+    // Then check for existing session
     const checkUser = async () => {
       setLoading(true);
       try {
@@ -40,16 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     checkUser();
     
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        const mappedUser = await mapSupabaseUser(session.user);
-        setCurrentUser(mappedUser);
-      } else if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
-      }
-    });
-
     return () => {
       subscription.unsubscribe();
     };
@@ -60,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const user = await authService.login(email, password);
       setCurrentUser(user);
+      return user;
     } finally {
       setLoading(false);
     }
@@ -70,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const user = await authService.register(name, email, password, isDemoAccount);
       setCurrentUser(user);
+      return user;
     } finally {
       setLoading(false);
     }
