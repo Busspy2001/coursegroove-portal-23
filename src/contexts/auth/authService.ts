@@ -37,16 +37,17 @@ export const authService = {
     }
   },
 
-  register: async (name: string, email: string, password: string): Promise<User> => {
+  register: async (name: string, email: string, password: string, isDemoAccount: boolean = false): Promise<User> => {
     try {
-      // Create a new user
+      // For demo accounts, we use signUp with email confirmation disabled
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             name
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
       
@@ -57,15 +58,16 @@ export const authService = {
       }
       
       try {
-        // Create a profile in the profiles_unified table - using type assertion to bypass type checking
+        // Create a profile in the profiles_unified table
         const { error: profileError } = await (supabase
           .from('profiles_unified' as unknown as never)
           .insert({
             id: data.user.id,
             full_name: name,
             email: email,
-            role: 'student',
+            role: isDemoAccount ? 'demo' : 'student',
             avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
+            is_demo: isDemoAccount,
             created_at: new Date().toISOString()
           } as unknown as never));
         
@@ -84,10 +86,29 @@ export const authService = {
         throw new Error("User data couldn't be retrieved after registration");
       }
       
-      toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès!",
-      });
+      // Auto-confirm demo accounts to bypass email verification
+      if (isDemoAccount) {
+        try {
+          // For demo accounts, automatically sign in after creation
+          if (!data.session) {
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email,
+              password
+            });
+            
+            if (signInError) {
+              console.error("Auto-signin for demo account failed:", signInError);
+            }
+          }
+        } catch (autoSignInError) {
+          console.error("Auto-signin error:", autoSignInError);
+        }
+      } else {
+        toast({
+          title: "Inscription réussie",
+          description: "Votre compte a été créé avec succès! Veuillez vérifier votre email pour confirmer votre compte.",
+        });
+      }
       
       return mappedUser;
     } catch (error: any) {

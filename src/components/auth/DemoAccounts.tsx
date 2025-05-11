@@ -42,13 +42,12 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const [showDemoAccounts, setShowDemoAccounts] = React.useState(false);
   const [creatingAccount, setCreatingAccount] = React.useState<string | null>(null);
 
-  // Completely rewritten function with simplified logic to avoid TypeScript recursion issues
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
     try {
       setCreatingAccount(account.email);
       
       // First check if user exists by email in auth
-      const { data: authData } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: account.email,
         password: account.password
       });
@@ -61,16 +60,12 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
     } catch (authError) {
       console.log("Auth check error (expected if new account):", authError);
       
-      // If auth error is not about invalid credentials, it's another issue
-      if (!String(authError).includes("Invalid login credentials")) {
-        console.error("Unexpected auth error:", authError);
-        return false;
-      }
-      
-      // Auth failed - account might not exist, try to register it
+      // Auth failed - account might not exist, try to register it as a demo account
       try {
-        console.log("Attempting to register account:", account.email);
-        await register(account.name, account.email, account.password);
+        console.log("Attempting to register demo account:", account.email);
+        
+        // Note: passing true as the last parameter to indicate this is a demo account
+        await register(account.name, account.email, account.password, true);
         
         // If not a student, update the role (register creates with student role by default)
         if (account.role !== 'student') {
@@ -81,13 +76,15 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
           const { data: userData } = await supabase.auth.getUser();
           
           if (userData?.user?.id) {
-            console.log("Updating role for new user:", account.role);
+            console.log("Updating role for new demo user:", account.role);
             
-            // Using type assertion with as unknown first to bypass strict TypeScript errors
-            const { error: updateError } = await (supabase
+            const { error: updateError } = await supabase
               .from('profiles_unified' as unknown as never)
-              .update({ role: account.role, is_demo: true } as unknown as never)
-              .eq('id', userData.user.id));
+              .update({ 
+                role: account.role, 
+                is_demo: true 
+              } as unknown as never)
+              .eq('id', userData.user.id);
               
             if (updateError) {
               console.error("Failed to update role:", updateError);

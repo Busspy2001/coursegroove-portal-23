@@ -65,10 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, isDemoAccount: boolean = false) => {
     setLoading(true);
     try {
-      const user = await authService.register(name, email, password);
+      const user = await authService.register(name, email, password, isDemoAccount);
       setCurrentUser(user);
     } finally {
       setLoading(false);

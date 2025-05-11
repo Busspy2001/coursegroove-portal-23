@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { EnrolledCourse, Achievement, UserStats } from "@/types/user-data";
 import { CourseEnrollment, ProfilesUnified } from '@/types/database';
@@ -109,7 +108,7 @@ export const calculateStatsFromCourses = (courses: EnrolledCourse[]): UserStats 
   };
 };
 
-// Nouvelles fonctions pour interagir avec les tables créées
+// Fonctions pour interagir avec les tables créées
 export const fetchUserProfile = async (userId: string): Promise<ProfilesUnified | null> => {
   try {
     const { data, error } = await (supabase
@@ -132,7 +131,7 @@ export const fetchUserProfile = async (userId: string): Promise<ProfilesUnified 
 
 export const updateUserProfile = async (userId: string, profileData: Partial<ProfilesUnified>): Promise<boolean> => {
   try {
-    // Modifié ici: Nous évitions les type casts problématiques en utilisant une technique alternative
+    // Modifié ici: Nous évitons les type casts problématiques en utilisant une technique alternative
     const response = await supabase
       .from('profiles_unified' as unknown as never)
       .update(profileData as unknown as never)
