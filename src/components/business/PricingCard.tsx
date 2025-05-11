@@ -23,6 +23,7 @@ interface PricingCardProps {
   cta: string;
   popular: boolean;
   onRequestDemo: () => void;
+  onOpenSales?: () => void;
 }
 
 export const PricingCard: React.FC<PricingCardProps> = ({ 
@@ -33,8 +34,17 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   features, 
   cta, 
   popular,
-  onRequestDemo
+  onRequestDemo,
+  onOpenSales
 }) => {
+  const handleClick = () => {
+    if (tier === "Enterprise") {
+      onOpenSales?.();
+    } else {
+      onRequestDemo();
+    }
+  };
+
   return (
     <motion.div 
       className={`rounded-lg border ${popular ? 'border-schoolier-blue scale-105' : 'border-gray-200 dark:border-gray-700'} shadow-lg overflow-hidden relative`}
@@ -65,7 +75,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         <Button 
           className={`w-full mt-6 ${popular ? 'bg-schoolier-blue hover:bg-schoolier-dark-blue' : ''}`}
           variant={popular ? 'default' : 'outline'}
-          onClick={onRequestDemo}
+          onClick={handleClick}
         >
           {cta}
         </Button>

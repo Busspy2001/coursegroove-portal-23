@@ -16,9 +16,10 @@ const fadeIn = {
 
 interface CtaSectionProps {
   onRequestDemo: () => void;
+  onSignup?: () => void;
 }
 
-const CtaSection: React.FC<CtaSectionProps> = ({ onRequestDemo }) => {
+const CtaSection: React.FC<CtaSectionProps> = ({ onRequestDemo, onSignup }) => {
   return (
     <section className="py-16 lg:py-24 bg-schoolier-blue dark:bg-schoolier-dark-blue">
       <div className="container px-4 md:px-6">
@@ -46,6 +47,7 @@ const CtaSection: React.FC<CtaSectionProps> = ({ onRequestDemo }) => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
+              onClick={onSignup}
               variant="outline" 
               size="lg"
               className="border-white text-white hover:bg-white/20 text-lg px-8"

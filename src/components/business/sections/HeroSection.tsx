@@ -16,9 +16,10 @@ const fadeIn = {
 
 interface HeroSectionProps {
   onRequestDemo: () => void;
+  onSignup?: () => void;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ onRequestDemo }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ onRequestDemo, onSignup }) => {
   return (
     <section className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-schoolier-dark py-16 lg:py-24">
       <div className="container px-4 md:px-6">
@@ -42,7 +43,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRequestDemo }) => {
                 Demander une démo
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10 text-lg px-8">
+              <Button 
+                onClick={onSignup} 
+                variant="outline" 
+                size="lg" 
+                className="border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10 text-lg px-8"
+              >
                 Créer un compte entreprise
               </Button>
             </div>

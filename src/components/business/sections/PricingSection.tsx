@@ -16,9 +16,10 @@ const fadeIn = {
 
 interface PricingSectionProps {
   onRequestDemo: () => void;
+  onOpenSales?: () => void;
 }
 
-const PricingSection: React.FC<PricingSectionProps> = ({ onRequestDemo }) => {
+const PricingSection: React.FC<PricingSectionProps> = ({ onRequestDemo, onOpenSales }) => {
   return (
     <section className="py-16 lg:py-24 bg-white dark:bg-schoolier-dark">
       <div className="container px-4 md:px-6">
@@ -92,6 +93,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onRequestDemo }) => {
                   cta="Contacter les ventes"
                   popular={false}
                   onRequestDemo={onRequestDemo}
+                  onOpenSales={onOpenSales}
                 />
               </div>
             </TabsContent>
@@ -144,6 +146,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onRequestDemo }) => {
                   cta="Contacter les ventes"
                   popular={false}
                   onRequestDemo={onRequestDemo}
+                  onOpenSales={onOpenSales}
                 />
               </div>
             </TabsContent>
