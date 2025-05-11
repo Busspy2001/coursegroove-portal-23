@@ -127,9 +127,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       console.log("🚪 Début du processus de déconnexion directement dans AuthProvider");
-      // Utiliser directement clearSession pour garantir le bon fonctionnement
-      await clearSession();
-      // Vider l'état local
+      
+      // Utiliser directement supabase.auth.signOut() qui est la méthode standard
+      await supabase.auth.signOut();
+      
+      // Vider l'état local et les caches
       setCurrentUser(null);
       clearUserCache();
       console.log("✅ Déconnexion réussie et cache utilisateur vidé");

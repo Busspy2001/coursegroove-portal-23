@@ -41,17 +41,23 @@ const InstructorSidebar = () => {
   const handleLogout = async () => {
     try {
       console.log("Déconnexion en cours...");
+      // Attendre la fin de la déconnexion avant de naviguer
       await logout();
+      
+      // Afficher un toast de succès uniquement si la déconnexion a réussi
       toast({
         title: "Déconnecté avec succès",
         description: "Vous avez été déconnecté de votre compte",
       });
+      
+      // Redirection vers la page de connexion
       navigate("/login");
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
+      // Afficher un toast d'erreur avec plus de détails
       toast({
         title: "Erreur de déconnexion",
-        description: "Un problème est survenu lors de la déconnexion",
+        description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         variant: "destructive",
       });
     }

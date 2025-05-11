@@ -222,9 +222,12 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     try {
-      console.log("🚪 Tentative de déconnexion...");
-      // Utiliser directement clearSession au lieu de supabase.auth.signOut()
-      await clearSession();
+      console.log("🚪 Tentative de déconnexion via authService...");
+      
+      // Utiliser directement supabase.auth.signOut() au lieu de clearSession
+      await supabase.auth.signOut();
+      
+      console.log("✅ Déconnexion réussie via authService");
       
       // Notification de déconnexion réussie
       toast({
@@ -232,7 +235,7 @@ export const authService = {
         description: "Vous avez été déconnecté avec succès.",
       });
     } catch (error: any) {
-      console.error("❌ Erreur de déconnexion:", error);
+      console.error("❌ Erreur de déconnexion dans authService:", error);
       toast({
         title: "Erreur de déconnexion",
         description: error.message || "Impossible de se déconnecter. Veuillez réessayer.",

@@ -23,12 +23,14 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Cache for user data - prevents repeated database calls
 export const userCache = new Map();
 
-// Helper for session management
+// Helper for session management - FIXED implementation
 export const clearSession = async () => {
   userCache.clear();
   try {
+    // Utiliser directement signOut sans passer par admin qui n'existe pas
     await supabase.auth.signOut();
     console.log("Session cleared successfully");
+    return true;
   } catch (error) {
     console.error("Error clearing session:", error);
     throw error;
