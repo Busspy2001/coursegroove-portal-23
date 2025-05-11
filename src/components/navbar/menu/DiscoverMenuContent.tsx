@@ -107,10 +107,10 @@ const DiscoverMenuContent: React.FC<DiscoverMenuContentProps> = ({
         
         <div className="pt-2">
           <Link 
-            to="/courses" 
+            to="/categories" 
             className="flex items-center text-sm font-medium text-schoolier-blue hover:underline"
           >
-            Explorer tous les cours
+            Explorer toutes les catégories
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </div>

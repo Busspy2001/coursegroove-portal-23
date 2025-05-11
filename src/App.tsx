@@ -34,6 +34,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Business = lazy(() => import("./pages/Business"));
 const Teach = lazy(() => import("./pages/Teach"));
+const Categories = lazy(() => import("./pages/Categories"));
 
 // Nouvelles pages du tableau de bord étudiant
 const Certifications = lazy(() => import("./pages/Certifications"));
@@ -93,6 +94,7 @@ const App = () => (
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/business" element={<Business />} />
               <Route path="/teach" element={<Teach />} />
+              <Route path="/categories" element={<Categories />} />
               
               {/* Nouvelles routes pour le tableau de bord étudiant */}
               <Route path="/certifications" element={<Certifications />} />
