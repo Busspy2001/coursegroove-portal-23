@@ -2,8 +2,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { InstructorCard } from "./InstructorCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const FeaturedInstructors = () => {
+  const isMobile = useIsMobile();
+  
   const featuredInstructors = [
     {
       id: 1,
@@ -48,28 +51,47 @@ export const FeaturedInstructors = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-12 md:py-16 bg-white">
       <div className="container px-4 mx-auto">
-        <div className="flex justify-between items-center mb-10">
-          <h2 className="text-3xl font-bold">Formateurs à la une</h2>
-          <a href="#all-instructors" className="text-schoolier-blue hover:underline">
+        <div className="flex justify-between items-center mb-6 md:mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold">Formateurs à la une</h2>
+          <a href="#all-instructors" className="text-schoolier-blue hover:underline text-sm md:text-base">
             Voir tous
           </a>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featuredInstructors.map((instructor, index) => (
-            <motion.div
-              key={instructor.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <InstructorCard instructor={instructor} />
-            </motion.div>
-          ))}
-        </div>
+        {isMobile ? (
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
+            <div className="flex space-x-4 pb-4" style={{ minWidth: "min-content" }}>
+              {featuredInstructors.map((instructor, index) => (
+                <div key={instructor.id} className="w-64 flex-shrink-0">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <InstructorCard instructor={instructor} />
+                  </motion.div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredInstructors.map((instructor, index) => (
+              <motion.div
+                key={instructor.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+              >
+                <InstructorCard instructor={instructor} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

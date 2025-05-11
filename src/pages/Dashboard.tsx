@@ -12,12 +12,19 @@ import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { loading, stats, enrolledCourses, achievements, refetch } = useUserData();
   const isMobile = useIsMobile();
+
+  // Animation variants
+  const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } }
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -57,7 +64,12 @@ const Dashboard = () => {
         {!isMobile && <StudentSidebar />}
         
         <SidebarInset className="p-0">
-          <div className="flex flex-col min-h-screen pb-16 md:pb-0">
+          <motion.div 
+            className="flex flex-col min-h-screen pb-16 md:pb-0"
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <div className="flex items-center p-4 border-b">
               {!isMobile && <SidebarTrigger className="mr-4" />}
               <h1 className="text-xl font-semibold">Tableau de bord</h1>
@@ -74,7 +86,7 @@ const Dashboard = () => {
             </div>
             
             {!isMobile && <Footer />}
-          </div>
+          </motion.div>
         </SidebarInset>
         
         {isMobile && <BottomNavigation />}

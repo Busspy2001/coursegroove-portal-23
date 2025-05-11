@@ -10,6 +10,7 @@ import { InstructorTestimonials } from "@/components/instructors/InstructorTesti
 import { InstructorsFilter } from "@/components/instructors/InstructorsFilter";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { motion } from "framer-motion";
 
 const Instructors = () => {
   const isMobile = useIsMobile();
@@ -19,18 +20,23 @@ const Instructors = () => {
       <Navbar />
       
       <div className={`flex-1 ${isMobile ? "pb-16" : ""}`}>
-        <InstructorsHero />
-        <FeaturedInstructors />
-        <InstructorCategories />
-        <InstructorsFilter />
-        <InstructorTestimonials />
-        <BecomeInstructorCta />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <InstructorsHero />
+          <FeaturedInstructors />
+          <InstructorCategories />
+          <InstructorsFilter />
+          <InstructorTestimonials />
+          <BecomeInstructorCta />
+        </motion.div>
       </div>
 
       <Footer />
       
-      {/* Mobile Bottom Navigation */}
-      <BottomNavigation />
+      {isMobile && <BottomNavigation />}
     </div>
   );
 };

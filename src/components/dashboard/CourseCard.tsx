@@ -44,16 +44,25 @@ const CourseCard = ({ course, index = 0 }: CourseCardProps) => {
     }
   };
 
+  // Handle continue course with tap/swipe on mobile
+  const handleContinueCourse = () => {
+    navigate(`/courses/${course.id}`);
+  };
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
       variants={cardVariants}
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: isMobile ? 1.01 : 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
     >
-      <Card key={course.id} className="overflow-hidden border-2 hover:border-schoolier-blue/20 hover:shadow-lg transition-all duration-300">
+      <Card 
+        key={course.id} 
+        className="overflow-hidden border-2 hover:border-schoolier-blue/20 hover:shadow-lg transition-all duration-300"
+        onClick={isMobile ? handleContinueCourse : undefined}
+      >
         <div className="flex flex-col md:flex-row">
           <div className={`w-full md:w-64 h-36 md:h-auto relative`}>
             <img
@@ -84,7 +93,10 @@ const CourseCard = ({ course, index = 0 }: CourseCardProps) => {
               </div>
               <div className="mt-2 md:mt-0">
                 <Button 
-                  onClick={() => navigate(`/courses/${course.id}`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/courses/${course.id}`);
+                  }}
                   className="mb-2 w-full md:w-auto text-xs md:text-sm h-8 md:h-10 bg-schoolier-blue hover:bg-schoolier-blue/90" 
                 >
                   <PlayCircle className="mr-2 h-4 w-4" /> Continuer

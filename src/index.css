@@ -189,4 +189,35 @@
   .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
   }
+
+  /* Touch-friendly interaction areas for mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Mobile page transitions */
+  .page-transition-left {
+    @apply animate-[slide-in-from-right_0.3s_ease-out];
+  }
+  
+  .page-transition-right {
+    @apply animate-[slide-in-from-left_0.3s_ease-out];
+  }
+
+  /* Mobile swipe area */
+  .swipe-area {
+    @apply touch-pan-y overflow-x-auto overscroll-x-contain snap-x snap-mandatory;
+  }
+  
+  .swipe-item {
+    @apply snap-start snap-always flex-shrink-0;
+  }
+
+  /* Bottom safe area for iOS */
+  @supports(padding: max(0px)) {
+    .safe-bottom {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+  }
 }
+

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Bell, Search, Globe } from "lucide-react";
@@ -16,6 +17,7 @@ import MobileMenu from "./navbar/MobileMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+
 const Navbar = () => {
   const {
     currentUser,
@@ -27,16 +29,20 @@ const Navbar = () => {
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
   const handleLogout = async () => {
     await logout();
     navigate("/");
   };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+
   const toggleSearch = () => {
     setIsSearchExpanded(!isSearchExpanded);
   };
@@ -56,10 +62,14 @@ const Navbar = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isSearchExpanded]);
-  return <header className="relative z-50 w-full">
+
+  return (
+    <header className="relative z-50 w-full">
       {/* Main header with logo first */}
       <ScrollHeader>
-        <nav className="container flex items-center justify-between h-14 transition-all duration-300 px-[20px] py-[35px]">
+        <nav className={cn("container flex items-center justify-between transition-all duration-300 px-[20px]", 
+            isMobile ? "h-14 py-[25px]" : "h-14 py-[35px]"
+        )}>
           {/* Logo */}
           <div className="flex-shrink-0 mx-auto lg:mx-0">
             <NavbarLogo />
@@ -100,6 +110,8 @@ const Navbar = () => {
 
       {/* Search bar positioned below main header */}
       {!isMobile}
-    </header>;
+    </header>
+  );
 };
+
 export default Navbar;
