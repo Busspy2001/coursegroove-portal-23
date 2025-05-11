@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 export interface DemoAccount {
@@ -41,144 +40,40 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showDemoAccounts, setShowDemoAccounts] = useState(true); // Auto-expanded by default
-  const [creatingAccount, setCreatingAccount] = useState<string | null>(null);
+  const [loggingIn, setLoggingIn] = useState<string | null>(null);
 
   const handleDemoLogin = async (account: DemoAccount) => {
     try {
-      setCreatingAccount(account.email);
+      // Afficher l'état de chargement pour ce compte spécifique
+      setLoggingIn(account.email);
       
-      // Try the simple login first
-      try {
-        const user = await login(account.email, account.password);
-        
-        // Success! Show toast and navigate
-        toast({
-          title: "Connexion démo réussie !",
-          description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
-        });
-        
-        // Redirect based on role
-        if (account.role === 'instructor') {
-          navigate('/instructor');
-        } else if (account.role === 'business_admin' || account.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
-        
-        return;
-      } catch (loginError) {
-        console.log("Initial login failed, trying to create account:", loginError);
-        // Continue to account creation step
-      }
+      // Tentative de connexion simple sans logique complexe
+      await login(account.email, account.password, true);
       
-      // Create demo account
-      try {
-        // First check if the user exists
-        const { data: userExists } = await supabase.auth.signInWithPassword({
-          email: account.email,
-          password: account.password
-        });
-        
-        if (userExists.user) {
-          // User exists, but initial login failed - try again with direct supabase call
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: account.email,
-            password: account.password
-          });
-          
-          if (error) throw error;
-          
-          // Success! Show toast and navigate
-          toast({
-            title: "Connexion démo réussie !",
-            description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
-          });
-          
-          // Redirect based on role
-          if (account.role === 'instructor') {
-            navigate('/instructor');
-          } else if (account.role === 'business_admin' || account.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/dashboard');
-          }
-          
-          return;
-        }
-      } catch (checkError) {
-        console.log("User check failed, creating new account:", checkError);
-        // User doesn't exist, create it
-      }
-      
-      // At this point, we need to create the account
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: account.email,
-        password: account.password,
-        options: {
-          data: {
-            name: account.name
-          }
-        }
+      // Afficher un message de succès
+      toast({
+        title: "Connexion réussie !",
+        description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
       });
       
-      if (signUpError) {
-        console.error("Failed to create demo account:", signUpError);
-        throw signUpError;
+      // Redirection basée sur le rôle
+      if (account.role === 'instructor') {
+        navigate('/instructor');
+      } else if (account.role === 'business_admin' || account.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
       }
-      
-      if (signUpData.user) {
-        // Wait a moment for auth to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Update the user profile role
-        const { error: updateError } = await supabase
-          .from('profiles_unified' as unknown as never)
-          .update({ 
-            role: account.role, 
-            is_demo: true,
-            full_name: account.name
-          } as unknown as never)
-          .eq('id', signUpData.user.id);
-          
-        if (updateError) {
-          console.error("Failed to update role:", updateError);
-          throw updateError;
-        }
-        
-        // Direct login after creating account
-        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-          email: account.email,
-          password: account.password
-        });
-        
-        if (loginError) {
-          throw loginError;
-        }
-        
-        toast({
-          title: "Compte démo créé",
-          description: `Le compte démo ${account.name} a été créé et connecté avec succès.`,
-        });
-        
-        // Redirect based on role
-        if (account.role === 'instructor') {
-          navigate('/instructor');
-        } else if (account.role === 'business_admin' || account.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
-      }
-    } catch (error) {
-      console.error("Demo login error:", error);
+    } catch (error: any) {
+      console.error("Erreur de connexion démo:", error);
       toast({
-        title: "Erreur de connexion démo",
-        description: "Impossible de se connecter au compte démo. Veuillez réessayer.",
+        title: "Erreur de connexion",
+        description: "Impossible de se connecter au compte de démonstration. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
-      setCreatingAccount(null);
+      // Réinitialiser l'état de chargement
+      setLoggingIn(null);
     }
   };
 
@@ -232,10 +127,10 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
               <Button 
                 size="sm" 
                 onClick={() => handleDemoLogin(account)}
-                disabled={isLoading || creatingAccount !== null}
+                disabled={isLoading || loggingIn !== null}
                 className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
               >
-                {creatingAccount === account.email ? "Connexion..." : "Se connecter"}
+                {loggingIn === account.email ? "Connexion..." : "Se connecter"}
               </Button>
             </div>
           ))}
