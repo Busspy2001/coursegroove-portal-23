@@ -83,7 +83,7 @@ const StudentSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 bg-gray-50">
         <Button variant="ghost" className="w-full justify-start text-schoolier-red hover:text-schoolier-red hover:bg-schoolier-red/10" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           Se déconnecter
