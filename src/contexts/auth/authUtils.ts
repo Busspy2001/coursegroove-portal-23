@@ -58,7 +58,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
             name: newProfile?.full_name || name,
             role: (newProfile?.role as UserRole) || 'student',
             avatar: supabaseUser.user_metadata?.avatar_url || newProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
-            bio: ''
+            bio: newProfile?.bio || ''
           };
         } catch (createError) {
           console.error("Failed to create missing profile:", createError);
@@ -71,7 +71,8 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
         email: supabaseUser.email || '',
         name: supabaseUser.user_metadata?.name || 'User',
         role: 'student', // Default role
-        avatar: supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`
+        avatar: supabaseUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`,
+        bio: ''
       };
     }
     
@@ -86,7 +87,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
       name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
       role: (profile?.role as UserRole) || 'student',
       avatar: avatarUrl,
-      bio: ''  // Default empty string since bio might not exist in the profiles_unified table
+      bio: profile?.bio || ''
     };
   } catch (error) {
     console.error("Error in mapSupabaseUser:", error);
@@ -97,7 +98,8 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name || 'User',
       role: 'student',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`,
+      bio: ''
     };
   }
 };

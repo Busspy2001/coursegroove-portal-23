@@ -127,6 +127,22 @@ export const authService = {
   logout: async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
+
+      // Option: Log session end in user_sessions
+      /*
+      try {
+        const userId = (await supabase.auth.getUser()).data.user?.id;
+        if (userId) {
+          await supabase
+            .from('user_sessions')
+            .update({ logout_at: new Date().toISOString() })
+            .eq('user_id', userId)
+            .is('logout_at', null);
+        }
+      } catch (sessionError) {
+        console.error("Error logging session end:", sessionError);
+      }
+      */
       
       toast({
         title: "Déconnexion réussie",

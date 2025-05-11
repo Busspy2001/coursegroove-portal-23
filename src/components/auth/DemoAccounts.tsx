@@ -30,7 +30,7 @@ export const demoAccounts: DemoAccount[] = [
   {
     email: "admin@schoolier.com",
     password: "password123",
-    role: "admin",
+    role: "business_admin",
     name: "Administrateur Démo"
   }
 ];
@@ -86,7 +86,7 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
             // Using type assertion with as unknown first to bypass strict TypeScript errors
             const { error: updateError } = await (supabase
               .from('profiles_unified' as unknown as never)
-              .update({ role: account.role } as unknown as never)
+              .update({ role: account.role, is_demo: true } as unknown as never)
               .eq('id', userData.user.id));
               
             if (updateError) {

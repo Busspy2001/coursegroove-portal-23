@@ -1,81 +1,84 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { EnrolledCourse, Achievement, UserStats } from "@/types/user-data";
+import { CourseEnrollment, ProfilesUnified } from '@/types/database';
 
 export const fetchEnrolledCourses = async (userId: string): Promise<EnrolledCourse[]> => {
-  // Future implementation with Supabase
-  /*
-  const { data: enrollments, error: enrollmentsError } = await supabase
-    .from('course_enrollments')
-    .select(`
-      *,
-      course:course_id (
-        id,
-        title,
-        thumbnail_url,
-        category,
-        duration,
-        instructor_id,
-        instructor:instructor_id (
-          profiles_unified!inner (
+  try {
+    const { data: enrollments, error: enrollmentsError } = await (supabase
+      .from('course_enrollments' as unknown as never)
+      .select(`
+        *,
+        course:course_id (
+          id,
+          title,
+          thumbnail_url,
+          category,
+          duration,
+          instructor_id,
+          instructor:instructor_id (
+            id,
             full_name
           )
         )
-      )
-    `)
-    .eq('user_id', userId);
+      `)
+      .eq('student_id', userId) as unknown as { data: any[], error: any });
 
-  if (enrollmentsError) throw enrollmentsError;
+    if (enrollmentsError) throw enrollmentsError;
 
-  // Process enrollment data
-  const processedCourses = enrollments.map(enrollment => ({
-    id: enrollment.id,
-    title: enrollment.course?.title || '',
-    thumbnail: enrollment.course?.thumbnail_url || '',
-    instructor: enrollment.course?.instructor?.profiles_unified?.full_name || 'Unknown Instructor',
-    progress: enrollment.progress || 0,
-    lastAccessed: enrollment.last_accessed_at ? new Date(enrollment.last_accessed_at) : new Date()
-  }));
+    if (!enrollments || enrollments.length === 0) return [];
 
-  // Sort by last accessed
-  processedCourses.sort((a, b) => b.lastAccessed.getTime() - a.lastAccessed.getTime());
-  
-  return processedCourses;
-  */
-  
-  // For now, return an empty array until Supabase integration is complete
-  return [];
+    // Process enrollment data
+    const processedCourses = enrollments.map(enrollment => ({
+      id: enrollment.id,
+      title: enrollment.course?.title || '',
+      thumbnail: enrollment.course?.thumbnail_url || '',
+      instructor: enrollment.course?.instructor?.full_name || 'Unknown Instructor',
+      progress: enrollment.progress || 0,
+      lastAccessed: enrollment.last_accessed_at ? new Date(enrollment.last_accessed_at) : new Date()
+    }));
+
+    // Sort by last accessed
+    processedCourses.sort((a, b) => b.lastAccessed.getTime() - a.lastAccessed.getTime());
+    
+    return processedCourses;
+  } catch (error) {
+    console.error("Error fetching enrolled courses:", error);
+    return [];
+  }
 };
 
 export const fetchUserAchievements = async (userId: string): Promise<Achievement[]> => {
-  // Future implementation with Supabase
-  /*
-  const { data: achievementsData, error: achievementsError } = await supabase
-    .from('user_achievements')
-    .select(`
-      *,
-      achievement:achievement_id (
-        name,
-        description,
-        icon
-      )
-    `)
-    .eq('user_id', userId);
-    
-  if (achievementsError) throw achievementsError;
+  try {
+    const { data: achievementsData, error: achievementsError } = await (supabase
+      .from('user_achievements' as unknown as never)
+      .select(`
+        *,
+        achievement:achievement_id (
+          id,
+          name,
+          description,
+          icon
+        )
+      `)
+      .eq('user_id', userId) as unknown as { data: any[], error: any });
+      
+    if (achievementsError) throw achievementsError;
 
-  const processedAchievements = achievementsData.map(item => ({
-    name: item.achievement?.name || '',
-    description: item.achievement?.description || '',
-    icon: item.achievement?.icon || '🏆',
-    unlocked: true
-  }));
+    if (!achievementsData || achievementsData.length === 0) return [];
 
-  return processedAchievements;
-  */
-  
-  // For now, return an empty array until Supabase integration is complete
-  return [];
+    const processedAchievements = achievementsData.map(item => ({
+      name: item.achievement?.name || '',
+      description: item.achievement?.description || '',
+      icon: item.achievement?.icon || '🏆',
+      unlocked: true
+    }));
+
+    return processedAchievements;
+  } catch (error) {
+    console.error("Error fetching user achievements:", error);
+    return [];
+  }
 };
 
 export const calculateTotalHours = (courses: EnrolledCourse[]): number => {
@@ -104,4 +107,44 @@ export const calculateStatsFromCourses = (courses: EnrolledCourse[]): UserStats 
       ? new Date(Math.max(...courses.map(course => course.lastAccessed.getTime())))
       : null
   };
+};
+
+// Nouvelles fonctions pour interagir avec les tables créées
+export const fetchUserProfile = async (userId: string): Promise<ProfilesUnified | null> => {
+  try {
+    const { data, error } = await (supabase
+      .from('profiles_unified' as unknown as never)
+      .select('*')
+      .eq('id', userId)
+      .single() as unknown as { data: ProfilesUnified | null, error: any });
+
+    if (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in fetchUserProfile:", error);
+    return null;
+  }
+};
+
+export const updateUserProfile = async (userId: string, profileData: Partial<ProfilesUnified>): Promise<boolean> => {
+  try {
+    const { error } = await (supabase
+      .from('profiles_unified' as unknown as never)
+      .update(profileData as any)
+      .eq('id', userId) as unknown as { error: any });
+
+    if (error) {
+      console.error("Error updating user profile:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in updateUserProfile:", error);
+    return false;
+  }
 };
