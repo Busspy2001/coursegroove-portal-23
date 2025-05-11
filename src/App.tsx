@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -26,8 +27,21 @@ const CourseDetails = lazy(() => import("./pages/CourseDetails"));
 const CourseCreation = lazy(() => import("./pages/CourseCreation")); 
 const CourseEditor = lazy(() => import("./pages/CourseEditor"));
 const Profile = lazy(() => import("./pages/Profile"));
-const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
+
+// Instructor Dashboard Pages
+const InstructorDashboard = lazy(() => import("./pages/instructor/InstructorDashboard"));
+const InstructorCourses = lazy(() => import("./pages/instructor/InstructorCourses"));
+const InstructorStudents = lazy(() => import("./pages/instructor/InstructorStudents"));
+const InstructorReviews = lazy(() => import("./pages/instructor/InstructorReviews"));
+const InstructorStats = lazy(() => import("./pages/instructor/InstructorStats"));
+const InstructorEarnings = lazy(() => import("./pages/instructor/InstructorEarnings"));
+const InstructorSettings = lazy(() => import("./pages/instructor/InstructorSettings"));
+const InstructorSupport = lazy(() => import("./pages/instructor/InstructorSupport"));
+
+// Admin Dashboard
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+
+// General pages
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Faq = lazy(() => import("./pages/Faq"));
@@ -39,7 +53,6 @@ const Categories = lazy(() => import("./pages/Categories"));
 const Testimonials = lazy(() => import("./pages/Testimonials"));
 const Values = lazy(() => import("./pages/Values"));
 const Instructors = lazy(() => import("./pages/Instructors"));
-const InstructorCourses = lazy(() => import("./pages/instructor/InstructorCourses"));
 
 // Nouvelles pages du tableau de bord étudiant
 const Certifications = lazy(() => import("./pages/Certifications"));
@@ -90,11 +103,23 @@ function App() {
                 <Route path="/courses/:courseId" element={<CourseDetails />} />
                 <Route path="/courses/create" element={<CourseCreation />} />
                 <Route path="/profile" element={<Profile />} />
+                
+                {/* Instructor Routes */}
                 <Route path="/instructor" element={<InstructorDashboard />} />
                 <Route path="/instructor/courses" element={<InstructorCourses />} />
                 <Route path="/instructor/courses/create" element={<CourseCreation />} />
                 <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
+                <Route path="/instructor/students" element={<InstructorStudents />} />
+                <Route path="/instructor/reviews" element={<InstructorReviews />} />
+                <Route path="/instructor/stats" element={<InstructorStats />} />
+                <Route path="/instructor/earnings" element={<InstructorEarnings />} />
+                <Route path="/instructor/settings" element={<InstructorSettings />} />
+                <Route path="/instructor/support" element={<InstructorSupport />} />
+                
+                {/* Admin Route */}
                 <Route path="/admin" element={<AdminDashboard />} />
+                
+                {/* General Routes */}
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<Faq />} />
