@@ -1,62 +1,57 @@
-
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { 
-  Home, 
-  BookOpen, 
-  Award, 
-  Star, 
-  TrendingUp, 
-  MessageSquare, 
-  Settings, 
-  LogOut 
-} from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
+import { Home, BookOpen, Award, Star, TrendingUp, MessageSquare, Settings, LogOut } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
 const StudentSidebar = () => {
-  const { currentUser, logout } = useAuth();
+  const {
+    currentUser,
+    logout
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
-
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-
-  const menuItems = [
-    { title: "Accueil", path: "/dashboard", icon: Home },
-    { title: "Mes cours", path: "/my-courses", icon: BookOpen },
-    { title: "Certifications", path: "/certifications", icon: Award },
-    { title: "Favoris", path: "/favorites", icon: Star },
-    { title: "Progression", path: "/progress", icon: TrendingUp },
-    { title: "Messages", path: "/messages", icon: MessageSquare },
-    { title: "Paramètres", path: "/settings", icon: Settings },
-  ];
-
+  const menuItems = [{
+    title: "Accueil",
+    path: "/dashboard",
+    icon: Home
+  }, {
+    title: "Mes cours",
+    path: "/my-courses",
+    icon: BookOpen
+  }, {
+    title: "Certifications",
+    path: "/certifications",
+    icon: Award
+  }, {
+    title: "Favoris",
+    path: "/favorites",
+    icon: Star
+  }, {
+    title: "Progression",
+    path: "/progress",
+    icon: TrendingUp
+  }, {
+    title: "Messages",
+    path: "/messages",
+    icon: MessageSquare
+  }, {
+    title: "Paramètres",
+    path: "/settings",
+    icon: Settings
+  }];
   const getInitials = (name: string = "Utilisateur") => {
-    return name.split(" ").map((n) => n[0]).join("").toUpperCase();
+    return name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
-
-  return (
-    <Sidebar>
+  return <Sidebar>
       <SidebarHeader className="flex justify-start items-center p-4">
         <Avatar className="h-10 w-10 mr-2">
           <AvatarImage src={currentUser?.avatar} alt={currentUser?.name} />
@@ -70,46 +65,30 @@ const StudentSidebar = () => {
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="bg-gray-50">
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton 
-                    asChild
-                    isActive={isActive(item.path)}
-                    tooltip={item.title}
-                  >
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start hover:text-schoolier-teal"
-                      onClick={() => navigate(item.path)}
-                    >
+              {menuItems.map(item => <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton asChild isActive={isActive(item.path)} tooltip={item.title}>
+                    <Button variant="ghost" className="w-full justify-start hover:text-schoolier-teal" onClick={() => navigate(item.path)}>
                       <item.icon className={`mr-2 h-4 w-4 ${isActive(item.path) ? 'text-schoolier-blue' : 'text-schoolier-gray'}`} />
                       <span>{item.title}</span>
                     </Button>
                   </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                </SidebarMenuItem>)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       
       <SidebarFooter className="p-4">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start text-schoolier-red hover:text-schoolier-red hover:bg-schoolier-red/10"
-          onClick={handleLogout}
-        >
+        <Button variant="ghost" className="w-full justify-start text-schoolier-red hover:text-schoolier-red hover:bg-schoolier-red/10" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           Se déconnecter
         </Button>
       </SidebarFooter>
-    </Sidebar>
-  );
+    </Sidebar>;
 };
-
 export default StudentSidebar;
