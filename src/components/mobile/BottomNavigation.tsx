@@ -23,7 +23,7 @@ const BottomNavigation = () => {
   
   return (
     <motion.div 
-      className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-50"
+      className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-50 safe-bottom"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ 
@@ -31,6 +31,11 @@ const BottomNavigation = () => {
         stiffness: 260, 
         damping: 20, 
         delay: 0.2 
+      }}
+      style={{
+        boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.1)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)"
       }}
     >
       <div className="flex items-center justify-around h-16">
@@ -69,14 +74,16 @@ const BottomNavigation = () => {
   );
 };
 
-// Updated Nav Item to use onClick instead of Link
+// Updated Nav Item with enhanced visual feedback
 const NavItem = ({ onClick, icon, label, isActive }) => {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center w-full h-full relative",
-        isActive ? "text-schoolier-blue" : "text-[#64748b]"
+        "flex flex-col items-center justify-center w-full h-full relative transition-colors",
+        isActive 
+          ? "text-schoolier-blue font-medium" 
+          : "text-[#64748b] hover:text-schoolier-blue/70"
       )}
     >
       {icon}
