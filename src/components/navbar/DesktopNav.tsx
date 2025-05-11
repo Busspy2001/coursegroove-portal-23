@@ -93,33 +93,33 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ isActive }) => {
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <Link to="/business">
-            <NavigationMenuLink
-              className={cn(
-                navigationMenuTriggerStyle(),
-                "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
-                isActive("/business") &&
-                  "text-schoolier-blue font-medium"
-              )}
-            >
+          <NavigationMenuLink
+            asChild
+            className={cn(
+              navigationMenuTriggerStyle(),
+              "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
+              isActive("/business") && "text-schoolier-blue font-medium"
+            )}
+          >
+            <Link to="/business">
               Schoolier Business
-            </NavigationMenuLink>
-          </Link>
+            </Link>
+          </NavigationMenuLink>
         </NavigationMenuItem>
         
         <NavigationMenuItem>
-          <Link to="/teach">
-            <NavigationMenuLink
-              className={cn(
-                navigationMenuTriggerStyle(),
-                "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
-                isActive("/teach") &&
-                  "text-schoolier-blue font-medium"
-              )}
-            >
+          <NavigationMenuLink
+            asChild
+            className={cn(
+              navigationMenuTriggerStyle(),
+              "font-spartan text-[#334155] hover:text-[#044289] transition-colors px-4",
+              isActive("/teach") && "text-schoolier-blue font-medium"
+            )}
+          >
+            <Link to="/teach">
               Enseigner sur Schoolier
-            </NavigationMenuLink>
-          </Link>
+            </Link>
+          </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
