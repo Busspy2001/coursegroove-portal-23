@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
@@ -17,6 +16,8 @@ import { Progress } from "@/components/ui/progress";
 import { Clock, CheckCircle, Lock, Award, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Footer from "@/components/Footer";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CertificationProps {
   id: string;
@@ -170,6 +171,7 @@ const CertificationCard = ({ certification }: { certification: CertificationProp
 
 const Certifications = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Fix: Using ref instead of querySelector for tab switching
   const handleSwitchToAvailableCerts = () => {
@@ -262,6 +264,7 @@ const Certifications = () => {
             </div>
             
             <Footer />
+            {isMobile && <BottomNavigation />}
           </div>
         </SidebarInset>
       </div>
