@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser } from "./authUtils";
@@ -11,9 +12,8 @@ export const authService = {
         email,
         password,
         options: {
-          // If rememberMe is true, set a long expiry (1 year)
-          // Otherwise, default to shorter session (browser session)
-          expiresIn: rememberMe ? 31536000 : 3600 // 1 year vs 1 hour
+          // For persistent sessions, we don't need to specify expiresIn
+          // Supabase will handle sessions based on the client configuration
         }
       });
       
