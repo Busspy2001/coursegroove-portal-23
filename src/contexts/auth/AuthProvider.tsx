@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentUser(null);
       clearUserCache();
       console.log("✅ Déconnexion réussie et cache utilisateur vidé");
-      return true;
+      // Don't return a boolean to match the Promise<void> return type
     } catch (error) {
       console.error("❌ Erreur lors de la déconnexion dans AuthProvider:", error);
       throw error;
