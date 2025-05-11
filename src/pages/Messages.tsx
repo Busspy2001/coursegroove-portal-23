@@ -38,37 +38,37 @@ const Messages = () => {
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full">
+      <div className="flex min-h-screen w-full">
         <StudentSidebar />
         
-        <SidebarInset className="p-0">
-          <div className="flex flex-col min-h-screen w-full">
-            <div className="flex items-center p-4 border-b">
-              <SidebarTrigger className="mr-4" />
-              <h1 className="text-xl font-semibold">Messages</h1>
-            </div>
-            
-            <div className="flex-grow flex flex-col md:flex-row w-full">
-              {/* On mobile: Show either the conversation list or the selected conversation */}
-              {(!isMobile || !showConversation) && (
-                <div className="w-full md:w-80 border-r">
-                  <Tabs defaultValue="messages">
-                    <div className="p-4">
-                      <TabsList className="grid w-full grid-cols-2 mb-4">
-                        <TabsTrigger value="messages">Messages</TabsTrigger>
-                        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                      </TabsList>
-                      
-                      <div className="mb-4 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Rechercher..."
-                          className="pl-9"
-                        />
-                      </div>
-                    </div>
+        <SidebarInset className="p-0 flex flex-col overflow-hidden w-full">
+          <div className="flex items-center p-4 border-b">
+            <SidebarTrigger className="mr-4" />
+            <h1 className="text-xl font-semibold">Messages</h1>
+          </div>
+          
+          <div className="flex flex-grow w-full overflow-hidden">
+            {/* Panneau gauche - Conversations et notifications */}
+            {(!isMobile || !showConversation) && (
+              <div className="w-full md:w-80 border-r flex flex-col overflow-hidden">
+                <Tabs defaultValue="messages" className="flex flex-col h-full">
+                  <div className="p-4 shrink-0">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="messages">Messages</TabsTrigger>
+                      <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                    </TabsList>
                     
-                    <TabsContent value="messages" className="mt-0 border-t">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Rechercher..."
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-grow overflow-hidden">
+                    <TabsContent value="messages" className="mt-0 border-t h-full">
                       <ConversationsList 
                         conversations={mockConversations}
                         selectedConversation={selectedConversation}
@@ -76,29 +76,27 @@ const Messages = () => {
                       />
                     </TabsContent>
                     
-                    <TabsContent value="notifications" className="mt-0 border-t">
+                    <TabsContent value="notifications" className="mt-0 border-t h-full">
                       <NotificationsList notifications={mockNotifications} />
                     </TabsContent>
-                  </Tabs>
-                </div>
-              )}
-              
-              {/* On mobile: Chat window takes full width when selected */}
-              {(!isMobile || showConversation) && (
-                <div className="flex-1 flex flex-col h-[calc(100vh-6rem)]">
-                  {selectedConversation ? (
-                    <ChatWindow 
-                      conversation={selectedConversation} 
-                      onBack={isMobile ? handleBackToList : undefined}
-                    />
-                  ) : (
-                    <EmptyChatState />
-                  )}
-                </div>
-              )}
-            </div>
+                  </div>
+                </Tabs>
+              </div>
+            )}
             
-            <Footer />
+            {/* Panneau droit - Conversation actuelle */}
+            {(!isMobile || showConversation) && (
+              <div className="flex-grow h-full overflow-hidden">
+                {selectedConversation ? (
+                  <ChatWindow 
+                    conversation={selectedConversation} 
+                    onBack={isMobile ? handleBackToList : undefined}
+                  />
+                ) : (
+                  <EmptyChatState />
+                )}
+              </div>
+            )}
           </div>
         </SidebarInset>
       </div>

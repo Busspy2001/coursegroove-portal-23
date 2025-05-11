@@ -14,25 +14,27 @@ interface ConversationsListProps {
 
 const ConversationsList = ({ conversations, selectedConversation, onSelectConversation }: ConversationsListProps) => {
   return (
-    <>
-      <div className="flex justify-between items-center p-3">
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center p-3 border-b">
         <h3 className="text-sm font-medium">Récents</h3>
         <Button variant="ghost" size="sm" className="h-8 px-2">
           <Plus className="h-4 w-4 mr-1" />
           <span className="hidden sm:inline">Nouveau message</span>
         </Button>
       </div>
-      <ScrollArea className="h-[calc(100vh-14rem)] overflow-y-auto">
-        {conversations.map((conversation) => (
-          <ConversationItem
-            key={conversation.id}
-            conversation={conversation}
-            selected={selectedConversation?.id === conversation.id}
-            onClick={() => onSelectConversation(conversation)}
-          />
-        ))}
+      <ScrollArea className="flex-grow">
+        <div className="py-1">
+          {conversations.map((conversation) => (
+            <ConversationItem
+              key={conversation.id}
+              conversation={conversation}
+              selected={selectedConversation?.id === conversation.id}
+              onClick={() => onSelectConversation(conversation)}
+            />
+          ))}
+        </div>
       </ScrollArea>
-    </>
+    </div>
   );
 };
 

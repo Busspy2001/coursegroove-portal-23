@@ -29,8 +29,8 @@ const ChatWindow = ({ conversation, onBack }: ChatWindowProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-3 border-b flex items-center justify-between">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+      <div className="p-3 border-b flex items-center justify-between bg-white dark:bg-gray-900 shadow-sm">
         {isMobile && onBack && (
           <Button variant="ghost" size="icon" onClick={onBack} className="mr-2">
             <ArrowLeft className="h-5 w-5" />
@@ -54,24 +54,26 @@ const ChatWindow = ({ conversation, onBack }: ChatWindowProps) => {
         </Button>
       </div>
       
-      <ScrollArea className="flex-1 p-4 overflow-y-auto">
-        {messages.map((message) => (
-          <MessageBubble 
-            key={message.id} 
-            message={message} 
-            isCurrentUser={message.sender.id === 'user-1'}
-          />
-        ))}
+      <ScrollArea className="flex-grow overflow-y-auto px-4 py-2">
+        <div className="pb-2">
+          {messages.map((message) => (
+            <MessageBubble 
+              key={message.id} 
+              message={message} 
+              isCurrentUser={message.sender.id === 'user-1'}
+            />
+          ))}
+        </div>
       </ScrollArea>
       
-      <form onSubmit={sendMessage} className="p-3 border-t flex gap-2">
+      <form onSubmit={sendMessage} className="p-3 border-t flex gap-2 bg-white dark:bg-gray-900">
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Écrivez votre message..."
           className="flex-1"
         />
-        <Button type="submit" size="icon">
+        <Button type="submit" size="icon" className="shrink-0">
           <Send className="h-4 w-4" />
         </Button>
       </form>
