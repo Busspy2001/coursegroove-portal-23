@@ -1,16 +1,13 @@
 
-import { User as SupabaseUser } from "@supabase/supabase-js";
-
-export type UserRole = "student" | "instructor" | "admin" | "business_admin" | "super_admin" | "demo";
+export type UserRole = 'student' | 'instructor' | 'admin' | 'business_admin' | 'demo';
 
 export interface User {
   id: string;
-  name: string;
   email: string;
+  name?: string;
   role: UserRole;
   avatar?: string;
   bio?: string;
-  phone?: string;
 }
 
 export interface AuthContextType {

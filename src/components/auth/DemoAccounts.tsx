@@ -1,11 +1,12 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 export interface DemoAccount {
   email: string;
@@ -39,7 +40,7 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true); // Auto-expanded by default
   const [creatingAccount, setCreatingAccount] = useState<string | null>(null);
 
   const ensureAccountExists = async (account: DemoAccount): Promise<boolean> => {
@@ -173,34 +174,58 @@ export const DemoAccounts = ({ isLoading }: { isLoading: boolean }) => {
 
   return (
     <div className="mt-6">
-      <Button
-        variant="outline"
-        type="button"
-        className="w-full flex items-center justify-between"
-        onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-      >
-        <span>Accès aux comptes démo</span>
-        {showDemoAccounts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </Button>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-md font-medium">Accès rapide aux comptes de démonstration</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDemoAccounts(!showDemoAccounts)}
+          className="h-8 w-8 p-0"
+        >
+          {showDemoAccounts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+      </div>
+      
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 mb-4 flex items-center">
+        <Info className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
+        <p className="text-xs text-blue-700 dark:text-blue-400">
+          Utilisez ces comptes pour tester la plateforme sans avoir à vous inscrire
+        </p>
+      </div>
       
       {showDemoAccounts && (
-        <div className="mt-3 space-y-2 p-3 border rounded-md bg-gray-50 dark:bg-gray-800">
-          <p className="text-xs text-muted-foreground mb-2">
-            Sélectionnez un compte de démonstration pour tester la plateforme:
-          </p>
+        <div className="space-y-2">
           {demoAccounts.map((account, index) => (
-            <div key={index} className="flex items-center justify-between p-2 border rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+            <div 
+              key={index} 
+              className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+            >
               <div>
                 <p className="text-sm font-medium">{account.name}</p>
-                <p className="text-xs text-muted-foreground">{account.email}</p>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground mr-2">{account.email}</span>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-semibold">Compte de démonstration</h4>
+                        <p className="text-xs">Email: <span className="font-medium">{account.email}</span></p>
+                        <p className="text-xs">Mot de passe: <span className="font-medium">{account.password}</span></p>
+                        <p className="text-xs">Rôle: <span className="font-medium capitalize">{account.role}</span></p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
               </div>
               <Button 
                 size="sm" 
                 onClick={() => handleDemoLogin(account)}
                 disabled={isLoading || creatingAccount !== null}
-                variant="secondary"
+                className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
               >
-                {creatingAccount === account.email ? "Création..." : "Utiliser"}
+                {creatingAccount === account.email ? "Connexion..." : "Se connecter"}
               </Button>
             </div>
           ))}

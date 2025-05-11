@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +8,18 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { LoginBenefits } from "@/components/auth/LoginBenefits";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { useAuth } from "@/contexts/auth";
+import { Separator } from "@/components/ui/separator";
 
 const Login = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  
+  // Redirect to dashboard if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
   
   const handleTabChange = (value: string) => {
     if (value === "register") {
@@ -39,8 +48,9 @@ const Login = () => {
                   Entrez vos identifiants pour accéder à vos cours
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <LoginForm />
+                <Separator className="my-4" />
                 <SocialLoginButtons />
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">

@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
 import { DemoAccounts } from "./DemoAccounts";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const LoginForm = () => {
   const { login } = useAuth();
@@ -19,10 +20,13 @@ export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginError(null);
+    
     try {
       const user = await login(email, password);
       toast({
@@ -30,13 +34,21 @@ export const LoginForm = () => {
         description: "Bienvenue sur Schoolier.",
       });
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error);
+      
+      // Handle specific error messages
+      if (error.message?.includes("Email not confirmed")) {
+        setLoginError("Votre email n'a pas été confirmé. Veuillez vérifier votre boîte mail ou utiliser un compte de démonstration ci-dessous.");
+      } else {
+        setLoginError(error.message || "Vérifiez vos identifiants et réessayez.");
+      }
+      
       toast({
         title: "Erreur de connexion",
         description: "Vérifiez vos identifiants et réessayez.",
         variant: "destructive",
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -45,6 +57,13 @@ export const LoginForm = () => {
   return (
     <form onSubmit={handleLogin}>
       <div className="space-y-4">
+        {loginError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>{loginError}</AlertDescription>
+          </Alert>
+        )}
+      
         <div className="space-y-2">
           <Label htmlFor="email">Adresse email</Label>
           <div className="relative">
