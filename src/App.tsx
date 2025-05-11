@@ -31,12 +31,6 @@ const Profile = lazy(() => import("./pages/Profile"));
 // Instructor Dashboard Pages
 const InstructorDashboard = lazy(() => import("./pages/instructor/InstructorDashboard"));
 const InstructorCourses = lazy(() => import("./pages/instructor/InstructorCourses"));
-const InstructorStudents = lazy(() => import("./pages/instructor/InstructorStudents"));
-const InstructorReviews = lazy(() => import("./pages/instructor/InstructorReviews"));
-const InstructorStats = lazy(() => import("./pages/instructor/InstructorStats"));
-const InstructorEarnings = lazy(() => import("./pages/instructor/InstructorEarnings"));
-const InstructorSettings = lazy(() => import("./pages/instructor/InstructorSettings"));
-const InstructorSupport = lazy(() => import("./pages/instructor/InstructorSupport"));
 
 // Admin Dashboard
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -109,12 +103,6 @@ function App() {
                 <Route path="/instructor/courses" element={<InstructorCourses />} />
                 <Route path="/instructor/courses/create" element={<CourseCreation />} />
                 <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
-                <Route path="/instructor/students" element={<InstructorStudents />} />
-                <Route path="/instructor/reviews" element={<InstructorReviews />} />
-                <Route path="/instructor/stats" element={<InstructorStats />} />
-                <Route path="/instructor/earnings" element={<InstructorEarnings />} />
-                <Route path="/instructor/settings" element={<InstructorSettings />} />
-                <Route path="/instructor/support" element={<InstructorSupport />} />
                 
                 {/* Admin Route */}
                 <Route path="/admin" element={<AdminDashboard />} />

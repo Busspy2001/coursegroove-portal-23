@@ -11,6 +11,7 @@ interface InstructorStats {
   averageRating: number;
   totalEnrollments: number;
   completionRate: number;
+  studentsTrend: number; // Ajout de la propriété manquante
 }
 
 interface Course {
@@ -36,7 +37,8 @@ export function useInstructorData() {
     monthlyRevenue: 0,
     averageRating: 0,
     totalEnrollments: 0,
-    completionRate: 0
+    completionRate: 0,
+    studentsTrend: 12 // Valeur par défaut
   });
   const [courses, setCourses] = useState<Course[]>([]);
   const { currentUser } = useAuth();
@@ -67,7 +69,8 @@ export function useInstructorData() {
         monthlyRevenue: 1274,
         averageRating: 4.8,
         totalEnrollments: 305,
-        completionRate: 72
+        completionRate: 72,
+        studentsTrend: 12
       };
       
       const mockCourses: Course[] = [
