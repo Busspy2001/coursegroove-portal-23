@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, BookOpen, TrendingUp, Award, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
@@ -9,8 +9,17 @@ import { motion } from "framer-motion";
 const BottomNavigation = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
   const isActive = (path: string) => location.pathname === path;
+  
+  const handleNavClick = (path: string, requiresAuth: boolean = false) => {
+    if (requiresAuth && !isAuthenticated) {
+      navigate("/login");
+    } else {
+      navigate(path);
+    }
+  };
   
   return (
     <motion.div 
@@ -26,31 +35,31 @@ const BottomNavigation = () => {
     >
       <div className="flex items-center justify-around h-16">
         <NavItem 
-          to="/dashboard" 
+          onClick={() => handleNavClick("/")}
           icon={<Home className="h-5 w-5" />} 
           label="Accueil" 
-          isActive={isActive("/dashboard")} 
+          isActive={isActive("/")} 
         />
         <NavItem 
-          to="/my-courses" 
+          onClick={() => handleNavClick(isAuthenticated ? "/my-courses" : "/login", true)} 
           icon={<BookOpen className="h-5 w-5" />} 
           label="Cours" 
           isActive={isActive("/my-courses")} 
         />
         <NavItem 
-          to="/progress" 
+          onClick={() => handleNavClick("/progress", true)} 
           icon={<TrendingUp className="h-5 w-5" />} 
           label="Progression" 
           isActive={isActive("/progress")} 
         />
         <NavItem 
-          to="/certifications" 
+          onClick={() => handleNavClick("/certifications", true)} 
           icon={<Award className="h-5 w-5" />} 
           label="Récompenses" 
           isActive={isActive("/certifications")} 
         />
         <NavItem 
-          to={isAuthenticated ? "/profile" : "/login"} 
+          onClick={() => handleNavClick(isAuthenticated ? "/profile" : "/login", true)} 
           icon={<User className="h-5 w-5" />} 
           label="Profil" 
           isActive={isActive("/profile") || isActive("/login")} 
@@ -60,11 +69,11 @@ const BottomNavigation = () => {
   );
 };
 
-// Extract Nav Item as a sub-component for cleaner code
-const NavItem = ({ to, icon, label, isActive }) => {
+// Updated Nav Item to use onClick instead of Link
+const NavItem = ({ onClick, icon, label, isActive }) => {
   return (
-    <Link
-      to={to}
+    <button
+      onClick={onClick}
       className={cn(
         "flex flex-col items-center justify-center w-full h-full relative",
         isActive ? "text-schoolier-blue" : "text-[#64748b]"
@@ -81,7 +90,7 @@ const NavItem = ({ to, icon, label, isActive }) => {
           transition={{ duration: 0.2 }}
         />
       )}
-    </Link>
+    </button>
   );
 };
 
