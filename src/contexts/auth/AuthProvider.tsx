@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, User } from "./types";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
 import { authService } from "./authService";
+import { clearSession } from "@/integrations/supabase/client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -125,11 +126,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       setLoading(true);
-      await authService.logout();
+      console.log("🚪 Début du processus de déconnexion directement dans AuthProvider");
+      // Utiliser directement clearSession pour garantir le bon fonctionnement
+      await clearSession();
+      // Vider l'état local
       setCurrentUser(null);
-      clearUserCache(); // Vider le cache à la déconnexion
+      clearUserCache();
+      console.log("✅ Déconnexion réussie et cache utilisateur vidé");
+      return true;
     } catch (error) {
-      console.error("❌ Erreur lors de la déconnexion:", error);
+      console.error("❌ Erreur lors de la déconnexion dans AuthProvider:", error);
+      throw error;
     } finally {
       setLoading(false);
     }

@@ -20,9 +20,23 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
+// Cache for user data - prevents repeated database calls
+export const userCache = new Map();
+
+// Helper for session management
+export const clearSession = async () => {
+  userCache.clear();
+  try {
+    await supabase.auth.signOut();
+    console.log("Session cleared successfully");
+  } catch (error) {
+    console.error("Error clearing session:", error);
+    throw error;
+  }
+};
+
 // Expose admin methods for demo purposes - this is for demo accounts only
 // In a real production app, these should be moved to a secure backend
-// This is only used for demo purposes
 if (typeof window !== 'undefined') {
   (supabase.auth as any).admin = {
     listUsers: async () => {
@@ -33,12 +47,3 @@ if (typeof window !== 'undefined') {
     }
   };
 }
-
-// Cache for user data - prevents repeated database calls
-export const userCache = new Map();
-
-// Helper for session management
-export const clearSession = async () => {
-  userCache.clear();
-  await supabase.auth.signOut();
-};
