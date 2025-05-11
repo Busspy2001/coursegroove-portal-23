@@ -16,7 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { currentUser, isAuthenticated, loading: authLoading } = useAuth();
   const isMobile = useIsMobile();
   const [isRedirecting, setIsRedirecting] = useState(false);
   
@@ -32,16 +32,29 @@ const Login = () => {
     return () => clearTimeout(authCheckTimeout);
   }, [authLoading]);
   
-  // Redirection rapide vers le dashboard si déjà authentifié
+  // Redirection rapide vers le tableau de bord approprié selon le rôle
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log("✅ Utilisateur authentifié, préparation de la redirection");
+    if (isAuthenticated && currentUser) {
+      console.log("✅ Utilisateur authentifié avec le rôle:", currentUser.role);
       setIsRedirecting(true);
       
-      // Redirection immédiate - ne pas attendre
-      navigate("/dashboard");
+      // Déterminer la destination en fonction du rôle
+      let destination = "/dashboard"; // Default destination
+      
+      if (currentUser.role === 'instructor') {
+        destination = "/instructor";
+        console.log("🧑‍🏫 Redirection vers le tableau de bord instructeur");
+      } else if (currentUser.role === 'admin') {
+        destination = "/admin";
+        console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
+      } else {
+        console.log("🎓 Redirection vers le tableau de bord étudiant");
+      }
+      
+      // Redirection immédiate
+      navigate(destination);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, currentUser, navigate]);
   
   const handleTabChange = (value: string) => {
     if (value === "register") {

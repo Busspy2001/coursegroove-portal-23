@@ -68,13 +68,18 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
       // Connexion réussie, préparer la redirection
       setRedirecting(true);
       
-      // Redirection immédiate - ne pas attendre
-      const destination = account.role === 'instructor' 
-        ? '/instructor' 
-        : account.role === 'business_admin' || account.role === 'admin'
-          ? '/admin'
-          : '/dashboard';
+      // Déterminer la destination en fonction du rôle
+      const destinations = {
+        'instructor': '/instructor',
+        'admin': '/admin',
+        'business_admin': '/admin',
+        'student': '/dashboard'
+      };
       
+      const destination = destinations[user.role as keyof typeof destinations] || '/dashboard';
+      console.log(`🚀 Redirection vers ${destination} pour l'utilisateur avec le rôle ${user.role}`);
+      
+      // Redirection immédiate
       navigate(destination);
       
     } catch (error: any) {

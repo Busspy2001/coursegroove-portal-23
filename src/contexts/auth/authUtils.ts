@@ -10,6 +10,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
   
   // Vérifier d'abord le cache
   if (userCache.has(supabaseUser.id)) {
+    console.log("🏎️ Utilisateur récupéré du cache");
     return userCache.get(supabaseUser.id);
   }
   
@@ -29,6 +30,10 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           .eq('id', supabaseUser.id)
           .single() as unknown as { data: ProfilesUnified | null, error: any });
         
+        if (error) {
+          console.log("⚠️ Erreur lors de la récupération du profil:", error);
+        }
+        
         // Generate avatar URL if not present in the profile
         const avatarUrl = supabaseUser.user_metadata?.avatar_url || 
           profile?.avatar_url || 
@@ -44,11 +49,14 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           bio: profile?.bio || ''
         };
         
+        console.log("👤 Profil utilisateur avec rôle:", user.role);
+        
         // Mettre en cache pour les prochaines requêtes
         userCache.set(supabaseUser.id, user);
         
         resolve(user);
       } catch (err) {
+        console.error("❌ Erreur lors de la récupération du profil:", err);
         // En cas d'erreur, créer un utilisateur avec les données minimales
         const fallbackUser = {
           id: supabaseUser.id,
@@ -67,7 +75,11 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
     });
     
     // Course après timeout ou données récupérées
-    return await Promise.race([profilePromise, timeoutPromise]) as User | null;
+    const user = await Promise.race([profilePromise, timeoutPromise]) as User | null;
+    if (!user) {
+      console.warn("⏱️ Timeout atteint lors de la récupération du profil utilisateur");
+    }
+    return user;
   } catch (error) {
     console.error("Error in mapSupabaseUser:", error);
     

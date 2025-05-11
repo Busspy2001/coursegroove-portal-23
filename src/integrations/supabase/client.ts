@@ -15,9 +15,16 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storage: localStorage, // Using localStorage for token storage
-    flowType: 'pkce' // Utilise PKCE pour plus de sécurité et de performance
+    flowType: 'pkce', // Using PKCE for better security and performance
+    debug: false // Disable debug logs in production
   }
 });
 
-// Cache pour les données utilisateur - évite les appels répétés à la base de données
+// Cache for user data - prevents repeated database calls
 export const userCache = new Map();
+
+// Helper for session management
+export const clearSession = async () => {
+  userCache.clear();
+  await supabase.auth.signOut();
+};

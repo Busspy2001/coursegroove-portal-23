@@ -34,7 +34,7 @@ export const authService = {
         throw new Error("User data couldn't be retrieved");
       }
       
-      console.log("👤 Données utilisateur récupérées");
+      console.log("👤 Données utilisateur récupérées avec le rôle:", mappedUser.role);
       
       // Pour les comptes de démo, pas besoin de toast si on redirige automatiquement
       if (!isDemoAccount) {

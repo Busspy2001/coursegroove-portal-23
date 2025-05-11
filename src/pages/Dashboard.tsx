@@ -29,6 +29,7 @@ const Dashboard = () => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
+      console.log("⚠️ Utilisateur non authentifié, redirection vers la page de connexion");
       navigate("/login");
     }
   }, [isAuthenticated, navigate]);
@@ -36,8 +37,10 @@ const Dashboard = () => {
   // Redirect to role-specific dashboard if needed
   useEffect(() => {
     if (currentUser?.role === 'instructor') {
+      console.log("👨‍🏫 Redirection vers tableau de bord instructeur");
       navigate('/instructor');
     } else if (currentUser?.role === 'admin') {
+      console.log("👨‍💼 Redirection vers tableau de bord administrateur");
       navigate('/admin');
     }
     // For 'student' role we stay on this page

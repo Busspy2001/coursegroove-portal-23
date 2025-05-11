@@ -29,11 +29,25 @@ export const LoginForm = () => {
     
     try {
       const user = await login(email, password, rememberMe);
+      
       toast({
         title: "Connexion réussie !",
         description: "Bienvenue sur Schoolier.",
       });
-      navigate("/dashboard");
+      
+      console.log("🚀 Utilisateur connecté avec le rôle:", user.role);
+      
+      // Redirection selon le rôle
+      if (user.role === 'instructor') {
+        console.log("👨‍🏫 Redirection vers tableau de bord instructeur");
+        navigate('/instructor');
+      } else if (user.role === 'admin') {
+        console.log("👨‍💼 Redirection vers tableau de bord administrateur");
+        navigate('/admin');
+      } else {
+        console.log("🎓 Redirection vers tableau de bord étudiant");
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       

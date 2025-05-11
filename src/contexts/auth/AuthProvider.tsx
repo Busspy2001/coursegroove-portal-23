@@ -39,13 +39,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               const mappedUser = await mapSupabaseUser(session.user);
               if (mappedUser) {
-                console.log("👤 Données utilisateur récupérées");
+                console.log("👤 Données utilisateur récupérées, rôle:", mappedUser.role);
                 setCurrentUser(mappedUser);
-                setLoading(false);
               }
             } catch (error) {
               console.error("❌ Erreur lors de la récupération des données utilisateur:", error);
               setCurrentUser(null);
+            } finally {
               setLoading(false);
             }
           }, 0);
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const mappedUser = await mapSupabaseUser(session.user);
           if (mappedUser) {
             setCurrentUser(mappedUser);
-            console.log("👤 Utilisateur connecté");
+            console.log("👤 Utilisateur connecté avec le rôle:", mappedUser.role);
           }
         } else {
           console.log("ℹ️ Aucune session existante trouvée");
