@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -35,6 +36,7 @@ const Business = lazy(() => import("./pages/Business"));
 const Teach = lazy(() => import("./pages/Teach"));
 const Categories = lazy(() => import("./pages/Categories"));
 const Testimonials = lazy(() => import("./pages/Testimonials"));
+const Values = lazy(() => import("./pages/Values"));
 
 // Nouvelles pages du tableau de bord étudiant
 const Certifications = lazy(() => import("./pages/Certifications"));
@@ -96,6 +98,7 @@ const App = () => (
               <Route path="/teach" element={<Teach />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/values" element={<Values />} />
               
               {/* Nouvelles routes pour le tableau de bord étudiant */}
               <Route path="/certifications" element={<Certifications />} />
