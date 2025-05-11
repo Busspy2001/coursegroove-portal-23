@@ -11,12 +11,15 @@ import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import StudentSidebar from "@/components/dashboard/StudentSidebar";
 import Footer from "@/components/Footer";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MyCourses = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { loading, enrolledCourses } = useUserData();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const isMobile = useIsMobile();
   
   // Filter courses based on search term
   const filteredCourses = React.useMemo(() => {
@@ -54,30 +57,31 @@ const MyCourses = () => {
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full">
-        <StudentSidebar />
+        {!isMobile && <StudentSidebar />}
         
         <SidebarInset className="p-0">
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen pb-16 md:pb-0">
             <div className="flex items-center p-4 border-b">
-              <SidebarTrigger className="mr-4" />
+              {!isMobile && <SidebarTrigger className="mr-4" />}
               <h1 className="text-xl font-semibold">Mes cours</h1>
             </div>
             
-            <div className="container px-6 py-8 flex-grow">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div className="container px-4 md:px-6 py-6 md:py-8 flex-grow">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
-                  <h1 className="text-3xl font-bold flex items-center">
-                    <BookOpen className="mr-2 h-6 w-6" />
+                  <h1 className="text-2xl md:text-3xl font-bold flex items-center">
+                    <BookOpen className="mr-2 h-5 w-5 md:h-6 md:w-6" />
                     Mes cours
                   </h1>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm md:text-base text-muted-foreground">
                     Gérez et suivez tous vos cours en un seul endroit.
                   </p>
                 </div>
                 <Button 
                   className="mt-4 md:mt-0" 
+                  size={isMobile ? "sm" : "default"}
                   onClick={() => navigate("/courses")}
                 >
                   Explorer plus de cours
@@ -96,7 +100,7 @@ const MyCourses = () => {
               </div>
               
               {/* Course list */}
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {filteredCourses.length > 0 ? (
                   filteredCourses.map((course) => (
                     <CourseCard key={course.id} course={course} />
@@ -116,9 +120,11 @@ const MyCourses = () => {
               </div>
             </div>
             
-            <Footer />
+            {!isMobile && <Footer />}
           </div>
         </SidebarInset>
+        
+        {isMobile && <BottomNavigation />}
       </div>
     </SidebarProvider>
   );

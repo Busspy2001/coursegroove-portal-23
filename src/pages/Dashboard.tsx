@@ -10,11 +10,14 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatCards from "@/components/dashboard/StatCards";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import Footer from "@/components/Footer";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Dashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { loading, stats, enrolledCourses, achievements, refetch } = useUserData();
+  const isMobile = useIsMobile();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -49,18 +52,18 @@ const Dashboard = () => {
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full">
-        <StudentSidebar />
+        {!isMobile && <StudentSidebar />}
         
         <SidebarInset className="p-0">
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen pb-16 md:pb-0">
             <div className="flex items-center p-4 border-b">
-              <SidebarTrigger className="mr-4" />
+              {!isMobile && <SidebarTrigger className="mr-4" />}
               <h1 className="text-xl font-semibold">Tableau de bord</h1>
             </div>
             
-            <div className="container px-6 py-8 flex-grow">
+            <div className="container px-4 md:px-6 py-6 md:py-8 flex-grow">
               <DashboardHeader userName={currentUser?.name} />
               <StatCards stats={stats} />
               <DashboardTabs 
@@ -70,9 +73,11 @@ const Dashboard = () => {
               />
             </div>
             
-            <Footer />
+            {!isMobile && <Footer />}
           </div>
         </SidebarInset>
+        
+        {isMobile && <BottomNavigation />}
       </div>
     </SidebarProvider>
   );

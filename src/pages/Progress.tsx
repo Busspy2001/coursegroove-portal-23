@@ -1,4 +1,3 @@
-
 import React from "react";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import StudentSidebar from "@/components/dashboard/StudentSidebar";
@@ -24,6 +23,8 @@ import {
 } from "recharts";
 import { TrendingUp, Clock, Award, Calendar, CheckCircle } from "lucide-react";
 import Footer from "@/components/Footer";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Données fictives pour les graphiques
 const weeklyActivityData = [
@@ -60,86 +61,87 @@ const COLORS = ['#0366d6', '#0d9488', '#10b981', '#eab308', '#64748b'];
 
 const Progress = () => {
   const { stats, loading } = useUserData();
+  const isMobile = useIsMobile();
   
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full">
-        <StudentSidebar />
+        {!isMobile && <StudentSidebar />}
         
         <SidebarInset className="p-0">
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen pb-16 md:pb-0">
             <div className="flex items-center p-4 border-b">
-              <SidebarTrigger className="mr-4" />
+              {!isMobile && <SidebarTrigger className="mr-4" />}
               <h1 className="text-xl font-semibold">Progression</h1>
             </div>
             
-            <div className="container px-6 py-8 flex-grow">
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Ma progression</h1>
-                <p className="text-muted-foreground">
+            <div className="container px-4 md:px-6 py-6 md:py-8 flex-grow">
+              <div className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">Ma progression</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
                   Suivez votre évolution et vos performances d'apprentissage.
                 </p>
               </div>
 
               {/* Statistiques générales */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Temps total d'apprentissage</CardTitle>
+                  <CardHeader className="pb-2 p-3 md:p-6">
+                    <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Temps total</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 md:p-6 pt-0">
                     <div className="flex items-center">
-                      <Clock className="h-5 w-5 mr-2 text-schoolier-blue" />
-                      <span className="text-2xl font-bold">{stats.totalHoursLearned}h</span>
+                      <Clock className="h-4 w-4 md:h-5 md:w-5 mr-2 text-schoolier-blue" />
+                      <span className="text-lg md:text-2xl font-bold">{stats.totalHoursLearned}h</span>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Cours terminés</CardTitle>
+                  <CardHeader className="pb-2 p-3 md:p-6">
+                    <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Cours terminés</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 md:p-6 pt-0">
                     <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 mr-2 text-schoolier-green" />
-                      <span className="text-2xl font-bold">{stats.totalCoursesCompleted}</span>
-                      <span className="text-sm text-muted-foreground ml-2">/ {stats.totalCoursesEnrolled}</span>
+                      <CheckCircle className="h-4 w-4 md:h-5 md:w-5 mr-2 text-schoolier-green" />
+                      <span className="text-lg md:text-2xl font-bold">{stats.totalCoursesCompleted}</span>
+                      <span className="text-xs md:text-sm text-muted-foreground ml-1 md:ml-2">/ {stats.totalCoursesEnrolled}</span>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Certificats obtenus</CardTitle>
+                  <CardHeader className="pb-2 p-3 md:p-6">
+                    <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Certificats</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 md:p-6 pt-0">
                     <div className="flex items-center">
-                      <Award className="h-5 w-5 mr-2 text-schoolier-yellow" />
-                      <span className="text-2xl font-bold">{stats.certificatesEarned}</span>
+                      <Award className="h-4 w-4 md:h-5 md:w-5 mr-2 text-schoolier-yellow" />
+                      <span className="text-lg md:text-2xl font-bold">{stats.certificatesEarned}</span>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Progression moyenne</CardTitle>
+                  <CardHeader className="pb-2 p-3 md:p-6">
+                    <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Progression</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 md:p-6 pt-0">
                     <div className="flex items-center mb-2">
-                      <TrendingUp className="h-5 w-5 mr-2 text-schoolier-teal" />
-                      <span className="text-2xl font-bold">{Math.round(stats.averageProgress)}%</span>
+                      <TrendingUp className="h-4 w-4 md:h-5 md:w-5 mr-2 text-schoolier-teal" />
+                      <span className="text-lg md:text-2xl font-bold">{Math.round(stats.averageProgress)}%</span>
                     </div>
-                    <ProgressBar value={stats.averageProgress} className="h-2" />
+                    <ProgressBar value={stats.averageProgress} className="h-1.5 md:h-2" />
                   </CardContent>
                 </Card>
               </div>
 
               {/* Onglets avec différents graphiques */}
               <Tabs defaultValue="activity" className="w-full">
-                <TabsList className="mb-6">
-                  <TabsTrigger value="activity">Activité</TabsTrigger>
-                  <TabsTrigger value="courses">Cours</TabsTrigger>
-                  <TabsTrigger value="achievements">Réalisations</TabsTrigger>
+                <TabsList className="mb-6 flex w-full overflow-x-auto no-scrollbar justify-start md:justify-center">
+                  <TabsTrigger value="activity" className="whitespace-nowrap">Activité</TabsTrigger>
+                  <TabsTrigger value="courses" className="whitespace-nowrap">Cours</TabsTrigger>
+                  <TabsTrigger value="achievements" className="whitespace-nowrap">Réalisations</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="activity">
@@ -310,9 +312,11 @@ const Progress = () => {
               </Tabs>
             </div>
             
-            <Footer />
+            {!isMobile && <Footer />}
           </div>
         </SidebarInset>
+        
+        {isMobile && <BottomNavigation />}
       </div>
     </SidebarProvider>
   );
