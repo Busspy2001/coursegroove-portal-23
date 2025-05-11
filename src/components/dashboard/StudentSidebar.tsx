@@ -118,6 +118,7 @@ const StudentSidebar = () => {
           className="w-full justify-start text-schoolier-red hover:text-schoolier-red hover:bg-schoolier-red/10" 
           onClick={handleLogout}
           disabled={isLoggingOut}
+          data-testid="student-sidebar-logout"
         >
           {isLoggingOut ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -8,14 +8,14 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/auth";
 import { Loader2 } from "lucide-react";
 
-// Import Login page directly instead of lazy loading it
+// Import critical pages directly to avoid dynamic loading issues
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard"; // Directly import Dashboard
 
 // Lazy load other components for better performance
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
 const MyCourses = lazy(() => import("./pages/MyCourses"));
 const CourseProgress = lazy(() => import("./pages/CourseProgress"));
@@ -89,12 +89,12 @@ function App() {
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<Index />} />
-                {/* Render Login and Register directly without Suspense */}
+                {/* Critical routes loaded directly without lazy loading */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/student" element={<StudentDashboard />} />
                 <Route path="/my-courses" element={<MyCourses />} />
                 <Route path="/my-courses/:courseId" element={<CourseProgress />} />
