@@ -1,10 +1,9 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/auth";
 import { Loader2 } from "lucide-react";
 
@@ -40,6 +39,7 @@ const Categories = lazy(() => import("./pages/Categories"));
 const Testimonials = lazy(() => import("./pages/Testimonials"));
 const Values = lazy(() => import("./pages/Values"));
 const Instructors = lazy(() => import("./pages/Instructors"));
+const InstructorCourses = lazy(() => import("./pages/instructor/InstructorCourses"));
 
 // Nouvelles pages du tableau de bord étudiant
 const Certifications = lazy(() => import("./pages/Certifications"));
@@ -65,60 +65,63 @@ const LoadingFallback = () => (
   </div>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              {/* Render Login and Register directly without Suspense */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/student" element={<StudentDashboard />} />
-              <Route path="/my-courses" element={<MyCourses />} />
-              <Route path="/my-courses/:courseId" element={<CourseProgress />} />
-              <Route path="/student/profile" element={<StudentProfile />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/courses/:courseId" element={<CourseDetails />} />
-              <Route path="/courses/create" element={<CourseCreation />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/instructor" element={<InstructorDashboard />} />
-              <Route path="/instructor/courses/create" element={<CourseEditor />} />
-              <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/business" element={<Business />} />
-              <Route path="/teach" element={<Teach />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/testimonials" element={<Testimonials />} />
-              <Route path="/values" element={<Values />} />
-              <Route path="/instructors" element={<Instructors />} />
-              
-              {/* Nouvelles routes pour le tableau de bord étudiant */}
-              <Route path="/certifications" element={<Certifications />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/settings" element={<Settings />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Router>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                {/* Render Login and Register directly without Suspense */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/student" element={<StudentDashboard />} />
+                <Route path="/my-courses" element={<MyCourses />} />
+                <Route path="/my-courses/:courseId" element={<CourseProgress />} />
+                <Route path="/student/profile" element={<StudentProfile />} />
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/courses/:courseId" element={<CourseDetails />} />
+                <Route path="/courses/create" element={<CourseCreation />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/instructor" element={<InstructorDashboard />} />
+                <Route path="/instructor/courses" element={<InstructorCourses />} />
+                <Route path="/instructor/courses/create" element={<CourseCreation />} />
+                <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/business" element={<Business />} />
+                <Route path="/teach" element={<Teach />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/testimonials" element={<Testimonials />} />
+                <Route path="/values" element={<Values />} />
+                <Route path="/instructors" element={<Instructors />} />
+                
+                {/* Nouvelles routes pour le tableau de bord étudiant */}
+                <Route path="/certifications" element={<Certifications />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/settings" element={<Settings />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </Router>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

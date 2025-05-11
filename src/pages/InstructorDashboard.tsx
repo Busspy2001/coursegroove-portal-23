@@ -1,19 +1,21 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Users, DollarSign, BarChart2, FilePlus, Star, Loader2 } from "lucide-react";
+import { BookOpen, Users, DollarSign, Star, FilePlus, Loader2 } from "lucide-react";
 import InstructorCoursesList from "@/components/instructor/InstructorCoursesList";
 import InstructorStats from "@/components/instructor/InstructorStats";
 import InstructorStudents from "@/components/instructor/InstructorStudents";
 import InstructorEarnings from "@/components/instructor/InstructorEarnings";
 import InstructorReviews from "@/components/instructor/InstructorReviews";
+import InstructorSidebar from "@/components/instructor/InstructorSidebar";
 import { useInstructorData } from "@/hooks/use-instructor-data";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 const InstructorDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -49,116 +51,122 @@ const InstructorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <div className="container px-6 py-8 flex-grow">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Espace instructeur</h1>
-            <p className="text-muted-foreground">
-              Bienvenue, {currentUser?.name} ! Gérez vos cours et vos étudiants.
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0">
-            <Button onClick={() => navigate("/instructor/courses/create")} className="flex items-center">
-              <FilePlus className="mr-2 h-5 w-5" />
-              Créer un nouveau cours
-            </Button>
-          </div>
-        </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex w-full">
+        <InstructorSidebar />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total des cours</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.totalCourses}</h3>
-                </div>
-                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                  <BookOpen className="h-7 w-7 text-schoolier-blue" />
-                </div>
+        <SidebarInset>
+          <Navbar />
+          
+          <div className="container px-6 py-8 flex-grow">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+              <div>
+                <h1 className="text-3xl font-bold">Espace instructeur</h1>
+                <p className="text-muted-foreground">
+                  Bienvenue, {currentUser?.name} ! Gérez vos cours et vos étudiants.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total des étudiants</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.totalStudents}</h3>
-                </div>
-                <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
-                  <Users className="h-7 w-7 text-schoolier-green" />
-                </div>
+              <div className="mt-4 md:mt-0">
+                <Button onClick={() => navigate("/instructor/courses/create")} className="flex items-center">
+                  <FilePlus className="mr-2 h-5 w-5" />
+                  Créer un nouveau cours
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total des cours</p>
+                      <h3 className="text-3xl font-bold mt-1">{stats.totalCourses}</h3>
+                    </div>
+                    <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                      <BookOpen className="h-7 w-7 text-schoolier-blue" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total des étudiants</p>
+                      <h3 className="text-3xl font-bold mt-1">{stats.totalStudents}</h3>
+                    </div>
+                    <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
+                      <Users className="h-7 w-7 text-schoolier-green" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Revenus ce mois</p>
+                      <h3 className="text-3xl font-bold mt-1">{stats.monthlyRevenue} €</h3>
+                    </div>
+                    <div className="bg-teal-100 dark:bg-teal-900 p-3 rounded-full">
+                      <DollarSign className="h-7 w-7 text-schoolier-teal" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Note moyenne</p>
+                      <h3 className="text-3xl font-bold mt-1">{stats.averageRating}</h3>
+                    </div>
+                    <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
+                      <Star className="h-7 w-7 text-yellow-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Tabs defaultValue="courses" className="w-full">
+              <TabsList className="mb-6">
+                <TabsTrigger value="courses">Mes cours</TabsTrigger>
+                <TabsTrigger value="students">Étudiants</TabsTrigger>
+                <TabsTrigger value="reviews">Avis</TabsTrigger>
+                <TabsTrigger value="earnings">Revenus</TabsTrigger>
+                <TabsTrigger value="stats">Statistiques</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="courses">
+                <InstructorCoursesList courses={courses} />
+              </TabsContent>
+              
+              <TabsContent value="students">
+                <InstructorStudents />
+              </TabsContent>
+              
+              <TabsContent value="reviews">
+                <InstructorReviews />
+              </TabsContent>
+              
+              <TabsContent value="earnings">
+                <InstructorEarnings />
+              </TabsContent>
+              
+              <TabsContent value="stats">
+                <InstructorStats />
+              </TabsContent>
+            </Tabs>
+          </div>
           
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Revenus ce mois</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.monthlyRevenue} €</h3>
-                </div>
-                <div className="bg-teal-100 dark:bg-teal-900 p-3 rounded-full">
-                  <DollarSign className="h-7 w-7 text-schoolier-teal" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Note moyenne</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.averageRating}</h3>
-                </div>
-                <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
-                  <Star className="h-7 w-7 text-yellow-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <Tabs defaultValue="courses" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="courses">Mes cours</TabsTrigger>
-            <TabsTrigger value="students">Étudiants</TabsTrigger>
-            <TabsTrigger value="reviews">Avis</TabsTrigger>
-            <TabsTrigger value="earnings">Revenus</TabsTrigger>
-            <TabsTrigger value="stats">Statistiques</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="courses">
-            <InstructorCoursesList courses={courses} />
-          </TabsContent>
-          
-          <TabsContent value="students">
-            <InstructorStudents />
-          </TabsContent>
-          
-          <TabsContent value="reviews">
-            <InstructorReviews />
-          </TabsContent>
-          
-          <TabsContent value="earnings">
-            <InstructorEarnings />
-          </TabsContent>
-          
-          <TabsContent value="stats">
-            <InstructorStats />
-          </TabsContent>
-        </Tabs>
+          <Footer />
+        </SidebarInset>
       </div>
-      
-      <Footer />
-    </div>
+    </SidebarProvider>
   );
 };
 
