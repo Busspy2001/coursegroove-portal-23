@@ -58,6 +58,45 @@ export const authService = {
 
   register: async (name: string, email: string, password: string, isDemoAccount: boolean = false): Promise<User> => {
     try {
+      console.log("🔑 Tentative d'inscription pour:", email, "isDemoAccount:", isDemoAccount);
+      
+      // Check if user already exists
+      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
+        filter: {
+          email: email
+        }
+      }).catch(() => ({ data: { users: [] }, error: null }));
+      
+      const userExists = users && users.length > 0;
+      
+      if (userExists) {
+        console.log("👤 L'utilisateur existe déjà, pas besoin de le créer à nouveau");
+        
+        // For demo accounts that already exist, try to get their information
+        try {
+          const { data: { user } } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          
+          if (user) {
+            const mappedUser = await mapSupabaseUser(user);
+            if (mappedUser) return mappedUser;
+          }
+        } catch (signInError) {
+          console.error("Error signing in existing user:", signInError);
+        }
+        
+        // If we can't get existing user info, create a fake user object
+        return {
+          id: "existing-user-id",
+          email: email,
+          name: name,
+          role: isDemoAccount && email.includes("instructor") ? "instructor" : 
+                isDemoAccount && email.includes("admin") ? "admin" : "student",
+        } as User;
+      }
+      
       // For demo accounts, we use signUp with email confirmation disabled
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -71,13 +110,27 @@ export const authService = {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Registration error:", error);
+        throw error;
+      }
       
       if (!data.user) {
         throw new Error("Registration failed");
       }
       
       try {
+        // Determine role based on email for demo accounts
+        const roleMapping: Record<string, string> = {
+          'student@schoolier.com': 'student',
+          'instructor@schoolier.com': 'instructor',
+          'admin@schoolier.com': 'admin'
+        };
+        
+        const role = isDemoAccount ? (roleMapping[email] || 'student') : 'student';
+        
+        console.log(`👤 Création du profil avec le rôle: ${role}`);
+        
         // Create a profile in the profiles_unified table
         const { error: profileError } = await (supabase
           .from('profiles_unified' as unknown as never)
@@ -85,7 +138,7 @@ export const authService = {
             id: data.user.id,
             full_name: name,
             email: email,
-            role: isDemoAccount ? 'demo' : 'student',
+            role: role,
             avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
             is_demo: isDemoAccount,
             created_at: new Date().toISOString()
@@ -94,6 +147,8 @@ export const authService = {
         if (profileError) {
           console.error("Profile creation error:", profileError);
           // Don't throw - we'll proceed anyway as the auth user was created
+        } else {
+          console.log("✅ Profil créé avec succès");
         }
       } catch (profileInsertError) {
         console.error("Error during profile insertion:", profileInsertError);

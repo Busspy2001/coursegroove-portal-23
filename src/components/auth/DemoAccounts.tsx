@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface DemoAccount {
   email: string;
@@ -37,24 +38,71 @@ export const demoAccounts: DemoAccount[] = [
 ];
 
 export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolean }) => {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showDemoAccounts, setShowDemoAccounts] = useState(true);
   const [loggingIn, setLoggingIn] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
+  const [creatingAccount, setCreatingAccount] = useState(false);
 
   // Réinitialiser l'erreur quand l'utilisateur ouvre/ferme la section
   useEffect(() => {
     setLoginError(null);
   }, [showDemoAccounts]);
 
+  const createDemoAccount = async (account: DemoAccount) => {
+    try {
+      setCreatingAccount(true);
+      
+      // Check if account exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from('profiles_unified')
+        .select('*')
+        .eq('email', account.email)
+        .single();
+      
+      if (checkError && checkError.message !== 'No rows found') {
+        console.error("Error checking if user exists:", checkError);
+      }
+      
+      // If account doesn't exist, create it
+      if (!existingUser) {
+        console.log(`Le compte ${account.role} n'existe pas. Création en cours...`);
+        await register(account.name, account.email, account.password, true);
+        
+        // Wait a bit to ensure the account is created in Supabase
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        toast({
+          title: "Compte créé avec succès",
+          description: `Le compte ${account.name} a été créé.`,
+        });
+      }
+      
+      return true;
+    } catch (error: any) {
+      console.error("Error creating demo account:", error);
+      toast({
+        title: "Erreur lors de la création du compte",
+        description: error.message || "Une erreur s'est produite",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
+
   const handleDemoLogin = async (account: DemoAccount) => {
     try {
       // Réinitialiser les états
       setLoginError(null);
       setLoggingIn(account.email);
+      
+      // Try to create the account if it doesn't exist
+      await createDemoAccount(account);
       
       // Timeout pour les connexions bloquées
       const loginPromise = login(account.email, account.password, true);
@@ -135,6 +183,16 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
         </Alert>
       )}
       
+      {creatingAccount && (
+        <Alert className="mb-4 bg-blue-50 text-blue-800 border-blue-200">
+          <svg className="animate-spin h-4 w-4 mr-2 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <AlertDescription>Création du compte de démonstration...</AlertDescription>
+        </Alert>
+      )}
+      
       {showDemoAccounts && (
         <div className="space-y-2">
           {demoAccounts.map((account, index) => (
@@ -164,7 +222,7 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
               <Button 
                 size="sm" 
                 onClick={() => handleDemoLogin(account)}
-                disabled={parentIsLoading || loggingIn !== null || redirecting}
+                disabled={parentIsLoading || loggingIn !== null || redirecting || creatingAccount}
                 className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
               >
                 {loggingIn === account.email ? (

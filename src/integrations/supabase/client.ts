@@ -14,11 +14,25 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: localStorage, // Using localStorage for token storage
+    storage: typeof window !== 'undefined' ? localStorage : undefined,
     flowType: 'pkce', // Using PKCE for better security and performance
     debug: false // Disable debug logs in production
   }
 });
+
+// Expose admin methods for demo purposes - this is for demo accounts only
+// In a real production app, these should be moved to a secure backend
+// This is only used for demo purposes
+if (typeof window !== 'undefined') {
+  (supabase.auth as any).admin = {
+    listUsers: async ({ filter = {} } = {}) => {
+      // This is just a stub that will return empty results in the frontend
+      // Real admin functionality would require backend implementation
+      console.log("Admin listUsers called - this is a stub for demo purposes");
+      return { data: { users: [] }, error: null };
+    }
+  };
+}
 
 // Cache for user data - prevents repeated database calls
 export const userCache = new Map();

@@ -4,6 +4,13 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import { User, UserRole } from "./types";
 import { ProfilesUnified } from "@/types/database";
 
+// Fonction utilitaire pour déduire le rôle à partir de l'email pour les comptes de démonstration
+const inferRoleFromEmail = (email: string): UserRole => {
+  if (email.includes('instructor')) return 'instructor';
+  if (email.includes('admin')) return 'admin';
+  return 'student';
+};
+
 // Map Supabase user to our User interface - optimisé pour la performance
 export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promise<User | null> => {
   if (!supabaseUser) return null;
@@ -34,6 +41,10 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           console.log("⚠️ Erreur lors de la récupération du profil:", error);
         }
         
+        // For demo accounts, we may need to infer the role from the email if profile doesn't exist
+        const isDemoAccount = supabaseUser.email?.includes('@schoolier.com') || false;
+        const inferredRole = isDemoAccount ? inferRoleFromEmail(supabaseUser.email || '') : 'student';
+        
         // Generate avatar URL if not present in the profile
         const avatarUrl = supabaseUser.user_metadata?.avatar_url || 
           profile?.avatar_url || 
@@ -44,7 +55,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
-          role: (profile?.role as UserRole) || 'student',
+          role: (profile?.role as UserRole) || inferredRole,
           avatar: avatarUrl,
           bio: profile?.bio || ''
         };
@@ -58,11 +69,14 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
       } catch (err) {
         console.error("❌ Erreur lors de la récupération du profil:", err);
         // En cas d'erreur, créer un utilisateur avec les données minimales
+        const isDemoAccount = supabaseUser.email?.includes('@schoolier.com') || false;
+        const inferredRole = isDemoAccount ? inferRoleFromEmail(supabaseUser.email || '') : 'student';
+        
         const fallbackUser = {
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           name: supabaseUser.user_metadata?.name || 'User',
-          role: 'student' as UserRole,
+          role: inferredRole,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`,
           bio: ''
         };
@@ -84,11 +98,14 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
     console.error("Error in mapSupabaseUser:", error);
     
     // Return a default user object if all else fails
+    const isDemoAccount = supabaseUser.email?.includes('@schoolier.com') || false;
+    const inferredRole = isDemoAccount ? inferRoleFromEmail(supabaseUser.email || '') : 'student';
+    
     const defaultUser = {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name || 'User',
-      role: 'student' as UserRole,
+      role: inferredRole,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`,
       bio: ''
     };
