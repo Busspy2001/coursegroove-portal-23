@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import ConversationItem from './ConversationItem';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ConversationsListProps {
   conversations: Conversation[];
@@ -13,6 +14,8 @@ interface ConversationsListProps {
 }
 
 const ConversationsList = ({ conversations, selectedConversation, onSelectConversation }: ConversationsListProps) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center p-3 border-b">
@@ -22,7 +25,7 @@ const ConversationsList = ({ conversations, selectedConversation, onSelectConver
           <span className="hidden sm:inline">Nouveau message</span>
         </Button>
       </div>
-      <ScrollArea className="flex-grow">
+      <ScrollArea className={`flex-grow ${isMobile ? "pb-16" : ""}`}>
         <div className="py-1">
           {conversations.map((conversation) => (
             <ConversationItem

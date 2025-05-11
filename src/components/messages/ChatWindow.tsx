@@ -54,7 +54,7 @@ const ChatWindow = ({ conversation, onBack }: ChatWindowProps) => {
         </Button>
       </div>
       
-      <ScrollArea className="flex-grow overflow-y-auto px-4 py-2">
+      <ScrollArea className={`flex-grow overflow-y-auto px-4 py-2 ${isMobile ? "pb-20" : ""}`}>
         <div className="pb-2">
           {messages.map((message) => (
             <MessageBubble 

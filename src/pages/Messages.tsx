@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
 
 // Import refactored components
 import ChatWindow from "@/components/messages/ChatWindow";
@@ -99,6 +100,9 @@ const Messages = () => {
             )}
           </div>
         </SidebarInset>
+        
+        {/* Bottom Navigation for Mobile */}
+        {isMobile && <BottomNavigation />}
       </div>
     </SidebarProvider>
   );
