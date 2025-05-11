@@ -25,7 +25,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // This is only used for demo purposes
 if (typeof window !== 'undefined') {
   (supabase.auth as any).admin = {
-    listUsers: async ({ filter = {} } = {}) => {
+    listUsers: async () => {
       // This is just a stub that will return empty results in the frontend
       // Real admin functionality would require backend implementation
       console.log("Admin listUsers called - this is a stub for demo purposes");

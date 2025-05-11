@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser } from "./authUtils";
@@ -60,14 +59,14 @@ export const authService = {
     try {
       console.log("🔑 Tentative d'inscription pour:", email, "isDemoAccount:", isDemoAccount);
       
-      // Check if user already exists
-      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
-        filter: {
-          email: email
-        }
-      }).catch(() => ({ data: { users: [] }, error: null }));
+      // Check if user already exists - Fix for the TypeScript error by removing the filter property
+      // The Supabase Admin API doesn't support filtering by email in the params
+      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers()
+        .catch(() => ({ data: { users: [] }, error: null }));
       
-      const userExists = users && users.length > 0;
+      // Manually filter for the user with matching email
+      const userExists = users && users.length > 0 && 
+                         users.some(user => user.email === email);
       
       if (userExists) {
         console.log("👤 L'utilisateur existe déjà, pas besoin de le créer à nouveau");
