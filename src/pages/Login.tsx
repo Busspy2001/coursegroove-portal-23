@@ -11,10 +11,13 @@ import { useAuth } from "@/contexts/auth";
 import { Separator } from "@/components/ui/separator";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Login = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
   
   // Redirect to dashboard if already authenticated
   React.useEffect(() => {
@@ -33,7 +36,7 @@ const Login = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       
-      <div className="flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className={`flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 ${isMobile ? "pb-16" : ""}`}>
         <div className="max-w-5xl w-full flex">
           {/* Left side: Login form */}
           <Card className="w-full md:w-1/2 shadow-2xl">
@@ -76,6 +79,8 @@ const Login = () => {
       </div>
       
       <Footer />
+      
+      {isMobile && <BottomNavigation />}
     </div>
   );
 };

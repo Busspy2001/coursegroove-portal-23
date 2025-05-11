@@ -10,10 +10,13 @@ import { RegisterBenefits } from "@/components/auth/RegisterBenefits";
 import { useAuth } from "@/contexts/auth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Register = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
   
   const handleTabChange = (value: string) => {
     if (value === "login") {
@@ -25,7 +28,7 @@ const Register = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       
-      <div className="flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className={`flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 ${isMobile ? "pb-16" : ""}`}>
         <div className="max-w-5xl w-full flex">
           {/* Left side: Image and text (hidden on mobile) */}
           <RegisterBenefits />
@@ -67,6 +70,8 @@ const Register = () => {
       </div>
       
       <Footer />
+      
+      {isMobile && <BottomNavigation />}
     </div>
   );
 };
