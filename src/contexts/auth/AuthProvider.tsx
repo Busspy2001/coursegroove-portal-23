@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log("🚪 Début du processus de déconnexion dans AuthProvider");
       
-      // Utiliser toujours la méthode de déconnexion standard
+      // Utiliser directement supabase.auth.signOut() pour une déconnexion cohérente
       const { error } = await supabase.auth.signOut();
       
       if (error) {

@@ -1,7 +1,6 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Home, Book, Settings, User, LogOut } from "lucide-react";
+import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -29,9 +28,13 @@ interface UserMenuProps {
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Éviter les doubles clics
+    
     try {
+      setIsLoggingOut(true);
       console.log("Déconnexion depuis le menu utilisateur...");
       await onLogout();
       
@@ -49,6 +52,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         description: "Un problème est survenu. Veuillez réessayer.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -164,11 +169,16 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem 
             onClick={handleLogout} 
-            className="text-red-500 cursor-pointer"
+            disabled={isLoggingOut}
+            className={`text-red-500 cursor-pointer ${isLoggingOut ? 'opacity-50' : ''}`}
             data-navbar-logout="true"
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Déconnexion
+            {isLoggingOut ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="mr-2 h-4 w-4" />
+            )}
+            {isLoggingOut ? "Déconnexion en cours..." : "Déconnexion"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

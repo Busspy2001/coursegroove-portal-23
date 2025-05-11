@@ -23,8 +23,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Cache for user data - prevents repeated database calls
 export const userCache = new Map();
 
-// Helper for session management - supprimé car il crée des confusions
-// et n'est pas nécessaire puisque nous utilisons directement supabase.auth.signOut()
+// Clear all user data from cache
+export const clearUserCache = () => {
+  console.log("🗑️ Nettoyage du cache utilisateur");
+  userCache.clear();
+};
 
 // Expose admin methods for demo purposes - this is for demo accounts only
 // In a real production app, these should be moved to a secure backend
@@ -36,9 +39,9 @@ if (typeof window !== 'undefined') {
       console.log("Admin listUsers called - this is a stub for demo purposes");
       return { data: { users: [] }, error: null };
     },
-    // Ajout d'une méthode de déconnexion cohérente pour éviter les erreurs
+    // Utilisation de la méthode standard de déconnexion pour assurer la cohérence
     signOut: async () => {
-      console.log("Admin signOut called - utilisation de la méthode standard");
+      console.log("Admin signOut called - utilisation de la méthode standard de déconnexion");
       return await supabase.auth.signOut();
     }
   };

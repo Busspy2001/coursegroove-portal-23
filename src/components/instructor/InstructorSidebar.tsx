@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
@@ -29,6 +29,7 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Loader2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -37,14 +38,14 @@ const InstructorSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Éviter les doubles clics
+    
     try {
-      console.log("Déconnexion en cours...");
-      
-      // Désactiver les interactions pendant la déconnexion pour éviter les doubles clics
-      const button = document.querySelector('[data-logout-button="true"]') as HTMLButtonElement;
-      if (button) button.disabled = true;
+      setIsLoggingOut(true);
+      console.log("Déconnexion en cours depuis InstructorSidebar...");
       
       // Attendre la fin de la déconnexion avant de naviguer
       await logout();
@@ -58,17 +59,15 @@ const InstructorSidebar = () => {
       // Redirection vers la page de connexion
       navigate("/login");
     } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
+      console.error("Erreur lors de la déconnexion depuis InstructorSidebar:", error);
       // Afficher un toast d'erreur avec plus de détails
       toast({
         title: "Erreur de déconnexion",
         description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         variant: "destructive",
       });
-      
-      // Réactiver le bouton en cas d'erreur
-      const button = document.querySelector('[data-logout-button="true"]') as HTMLButtonElement;
-      if (button) button.disabled = false;
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -186,10 +185,15 @@ const InstructorSidebar = () => {
           variant="outline" 
           className="w-full flex items-center gap-2 justify-start" 
           onClick={handleLogout}
+          disabled={isLoggingOut}
           data-logout-button="true"
         >
-          <LogOut className="h-4 w-4" />
-          <span>Déconnexion</span>
+          {isLoggingOut ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LogOut className="h-4 w-4" />
+          )}
+          <span>{isLoggingOut ? "Déconnexion..." : "Déconnexion"}</span>
         </Button>
       </SidebarFooter>
     </Sidebar>

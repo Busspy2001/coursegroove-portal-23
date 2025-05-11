@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { Home, BookOpen, Award, Star, TrendingUp, MessageSquare, Settings, LogOut } from "lucide-react";
+import { Home, BookOpen, Award, Star, TrendingUp, MessageSquare, Settings, LogOut, Loader2 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+
 const StudentSidebar = () => {
   const {
     currentUser,
@@ -12,13 +14,38 @@ const StudentSidebar = () => {
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
   const handleLogout = async () => {
-    await logout();
-    navigate("/login");
+    if (isLoggingOut) return; // Éviter les doubles clics
+    
+    try {
+      setIsLoggingOut(true);
+      console.log("Déconnexion en cours depuis StudentSidebar...");
+      await logout();
+      
+      toast({
+        title: "Déconnecté avec succès",
+        description: "Vous avez été déconnecté de votre compte",
+      });
+      
+      navigate("/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Un problème est survenu. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
+  
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+  
   const menuItems = [{
     title: "Accueil",
     path: "/dashboard",
@@ -48,9 +75,11 @@ const StudentSidebar = () => {
     path: "/settings",
     icon: Settings
   }];
+  
   const getInitials = (name: string = "Utilisateur") => {
     return name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
+  
   return <Sidebar>
       <SidebarHeader className="flex justify-start items-center p-4 bg-gray-50">
         <Avatar className="h-10 w-10 mr-2">
@@ -84,11 +113,21 @@ const StudentSidebar = () => {
       </SidebarContent>
       
       <SidebarFooter className="p-4 bg-gray-50">
-        <Button variant="ghost" className="w-full justify-start text-schoolier-red hover:text-schoolier-red hover:bg-schoolier-red/10" onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Se déconnecter
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-schoolier-red hover:text-schoolier-red hover:bg-schoolier-red/10" 
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+        >
+          {isLoggingOut ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <LogOut className="mr-2 h-4 w-4" />
+          )}
+          {isLoggingOut ? "Déconnexion en cours..." : "Se déconnecter"}
         </Button>
       </SidebarFooter>
     </Sidebar>;
 };
+
 export default StudentSidebar;

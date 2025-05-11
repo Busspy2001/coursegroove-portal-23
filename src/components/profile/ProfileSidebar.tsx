@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { User, Shield, Bell, CreditCard, LogOut, Upload } from "lucide-react";
+import { User, Shield, Bell, CreditCard, LogOut, Upload, Loader2 } from "lucide-react";
 import { User as UserType } from "@/contexts/auth/types";
 import { toast } from "@/hooks/use-toast";
 
@@ -12,12 +12,13 @@ interface ProfileSidebarProps {
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }) => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Éviter les doubles clics
+    
     try {
-      // Désactiver le bouton pendant la déconnexion
-      const button = document.querySelector('[data-profile-logout="true"]') as HTMLButtonElement;
-      if (button) button.disabled = true;
-      
+      setIsLoggingOut(true);
       console.log("Déconnexion du profil en cours...");
       await onLogout();
       
@@ -32,10 +33,8 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
         description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         variant: "destructive",
       });
-      
-      // Réactiver le bouton en cas d'erreur
-      const button = document.querySelector('[data-profile-logout="true"]') as HTMLButtonElement;
-      if (button) button.disabled = false;
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -81,9 +80,15 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
             variant="ghost" 
             className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
             onClick={handleLogout}
+            disabled={isLoggingOut}
             data-profile-logout="true"
           >
-            <LogOut className="mr-3 h-5 w-5" /> Déconnexion
+            {isLoggingOut ? (
+              <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+            ) : (
+              <LogOut className="mr-3 h-5 w-5" />
+            )}
+            {isLoggingOut ? "Déconnexion en cours..." : "Déconnexion"}
           </Button>
         </nav>
       </div>
