@@ -13,11 +13,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { User, Mail, Key, Bell, Shield, CreditCard, Upload, LogOut, Save } from "lucide-react";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Profile = () => {
   const { currentUser, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Profile states
   const [name, setName] = useState(currentUser?.name || "");
@@ -343,6 +346,7 @@ const Profile = () => {
       </div>
       
       <Footer />
+      {isMobile && <BottomNavigation />}
     </div>
   );
 };
