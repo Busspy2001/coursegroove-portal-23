@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   avatar?: string;
   bio?: string;
+  phone?: string; // Adding phone property to the User interface
 }
 
 export interface AuthContextType {
