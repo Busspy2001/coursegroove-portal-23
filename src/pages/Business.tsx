@@ -34,7 +34,7 @@ const staggerContainer = {
 };
 
 const Business = () => {
-  // Demo request function
+  // Demo request function - moved to component scope
   const requestDemo = () => {
     // This would be connected to a form or calendly in a real implementation
     alert("Merci de votre intérêt ! Un conseiller Schoolier Business vous contactera sous peu.");
