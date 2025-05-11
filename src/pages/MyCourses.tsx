@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth";
 import { useUserData } from "@/hooks/use-user-data";
 import CourseCard from "@/components/dashboard/CourseCard";
 import EmptyCourseState from "@/components/dashboard/EmptyCourseState";
-import { Loader2, BookOpen, Search } from "lucide-react";
+import { Loader2, BookOpen, Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
@@ -13,24 +13,48 @@ import StudentSidebar from "@/components/dashboard/StudentSidebar";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EnrolledCourse } from "@/types/user-data";
+import { motion } from "framer-motion";
+
+// Sort types
+type SortOption = "recent" | "progress" | "title";
 
 const MyCourses = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { loading, enrolledCourses } = useUserData();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [sortBy, setSortBy] = React.useState<SortOption>("recent");
   const isMobile = useIsMobile();
   
-  // Filter courses based on search term
-  const filteredCourses = React.useMemo(() => {
-    if (!searchTerm.trim()) return enrolledCourses;
+  // Filter and sort courses
+  const processedCourses = React.useMemo(() => {
+    // First apply search filter
+    let result = enrolledCourses;
     
-    const lowercaseSearch = searchTerm.toLowerCase();
-    return enrolledCourses.filter(course => 
-      course.title.toLowerCase().includes(lowercaseSearch) || 
-      course.instructor.toLowerCase().includes(lowercaseSearch)
-    );
-  }, [enrolledCourses, searchTerm]);
+    if (searchTerm.trim()) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      result = result.filter(course => 
+        course.title.toLowerCase().includes(lowercaseSearch) || 
+        course.instructor.toLowerCase().includes(lowercaseSearch)
+      );
+    }
+    
+    // Then apply sorting
+    return [...result].sort((a, b) => {
+      switch (sortBy) {
+        case "recent":
+          return b.lastAccessed.getTime() - a.lastAccessed.getTime();
+        case "progress":
+          return b.progress - a.progress;
+        case "title":
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
+  }, [enrolledCourses, searchTerm, sortBy]);
 
   // Redirect if not authenticated
   React.useEffect(() => {
@@ -42,6 +66,10 @@ const MyCourses = () => {
   if (!isAuthenticated) {
     return null; // Return nothing during redirect
   }
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value as SortOption);
+  };
 
   if (loading) {
     return (
@@ -69,7 +97,12 @@ const MyCourses = () => {
             </div>
             
             <div className="container px-4 md:px-6 py-6 md:py-8 flex-grow">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6"
+              >
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold flex items-center">
                     <BookOpen className="mr-2 h-5 w-5 md:h-6 md:w-6" />
@@ -86,33 +119,52 @@ const MyCourses = () => {
                 >
                   Explorer plus de cours
                 </Button>
-              </div>
+              </motion.div>
               
               {/* Search and filter */}
-              <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Rechercher dans mes cours..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Rechercher dans mes cours..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <Select onValueChange={handleSortChange} defaultValue={sortBy}>
+                    <SelectTrigger className="w-[180px] bg-white">
+                      <SelectValue placeholder="Trier par" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Plus récent</SelectItem>
+                      <SelectItem value="progress">Progression</SelectItem>
+                      <SelectItem value="title">Alphabétique</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
-              {/* Course list */}
+              {/* Courses list */}
               <div className="space-y-4 md:space-y-6">
-                {filteredCourses.length > 0 ? (
-                  filteredCourses.map((course) => (
-                    <CourseCard key={course.id} course={course} />
+                {processedCourses.length > 0 ? (
+                  processedCourses.map((course, index) => (
+                    <CourseCard key={course.id} course={course} index={index} />
                   ))
                 ) : (
                   searchTerm ? (
-                    <div className="text-center py-12">
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-12"
+                    >
                       <p className="text-lg font-medium">Aucun cours ne correspond à votre recherche</p>
                       <p className="text-sm text-muted-foreground mt-2">
                         Essayez avec des termes différents ou supprimez les filtres.
                       </p>
-                    </div>
+                    </motion.div>
                   ) : (
                     <EmptyCourseState />
                   )
