@@ -30,20 +30,30 @@ import {
   HelpCircle,
   LogOut,
 } from "lucide-react";
-import { authService } from "@/contexts/auth/authService";
+import { toast } from "@/hooks/use-toast";
 
 const InstructorSidebar = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
   
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      console.log("Déconnexion en cours...");
+      await logout();
+      toast({
+        title: "Déconnecté avec succès",
+        description: "Vous avez été déconnecté de votre compte",
+      });
       navigate("/login");
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error("Erreur lors de la déconnexion:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Un problème est survenu lors de la déconnexion",
+        variant: "destructive",
+      });
     }
   };
 
