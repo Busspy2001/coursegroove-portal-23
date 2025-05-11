@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,8 +28,42 @@ import {
 import InstructorLayout from "@/components/instructor/InstructorLayout";
 import ResponsiveChartContainer from "@/components/instructor/ResponsiveChartContainer";
 
+// Adapter l'interface des courses pour être compatible
+interface CourseAdapted {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail_url: string;
+  status: "draft" | "published" | "archived";
+  created_at: string;
+  updated_at: string;
+  total_students: number;
+  average_rating: number;
+  total_lessons: number;
+  duration: string;
+  price: number;
+}
+
+const adaptCourses = (instructorCourses: any[]): CourseAdapted[] => {
+  return instructorCourses.map(course => ({
+    id: course.id,
+    title: course.title,
+    description: course.title, // Fallback description
+    thumbnail_url: course.thumbnail || "/placeholder.svg",
+    status: course.status === "published" ? "published" : "draft",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    total_students: course.total_students,
+    average_rating: course.rating,
+    total_lessons: 10, // Default value
+    duration: "8h", // Default value
+    price: course.price
+  }));
+};
+
 const InstructorDashboard = () => {
   const { loading, stats, courses, refetch } = useInstructorData();
+  const navigate = useNavigate();
   
   // Mock data for charts
   const revenueData = [
@@ -47,6 +80,8 @@ const InstructorDashboard = () => {
     { id: 2, type: "enrollment", message: "5 nouvelles inscriptions à Python pour la data science", time: "Hier" },
     { id: 3, type: "revenue", message: "Paiement de 920€ reçu", time: "Il y a 2 jours" }
   ];
+
+  const adaptedCourses = adaptCourses(courses);
 
   return (
     <InstructorLayout loading={loading}>
@@ -66,8 +101,8 @@ const InstructorDashboard = () => {
                 <h3 className="text-2xl md:text-3xl font-bold mt-1">{stats?.totalCourses || 0}</h3>
                 <div className="flex items-center mt-1">
                   <span className="text-xs text-muted-foreground">
-                    {courses?.filter(c => c.status === "published").length || 0} publiés,{" "}
-                    {courses?.filter(c => c.status === "draft").length || 0} brouillons
+                    {adaptedCourses?.filter(c => c.status === "published").length || 0} publiés,{" "}
+                    {adaptedCourses?.filter(c => c.status === "draft").length || 0} brouillons
                   </span>
                 </div>
               </div>
@@ -277,7 +312,7 @@ const InstructorDashboard = () => {
           </CardHeader>
           <CardContent className="px-6">
             <div className="space-y-4">
-              {courses?.slice(0, 3).map((course, idx) => (
+              {adaptedCourses?.slice(0, 3).map((course, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <div 
                     className="w-10 h-10 rounded bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold"

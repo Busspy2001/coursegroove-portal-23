@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { ReactElement } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ResponsiveContainer } from "recharts";
 
 interface ResponsiveChartContainerProps {
-  children: React.ReactNode;
+  children: ReactElement;
   desktopHeight?: number | string;
   mobileHeight?: number | string;
   aspectRatio?: number;
