@@ -27,37 +27,23 @@ import {
 } from "recharts";
 import InstructorLayout from "@/components/instructor/InstructorLayout";
 import ResponsiveChartContainer from "@/components/instructor/ResponsiveChartContainer";
+import { Course } from "@/components/instructor/InstructorCoursesList";
 
-// Adapter l'interface des courses pour être compatible
-interface CourseAdapted {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  status: "draft" | "published" | "archived";
-  created_at: string;
-  updated_at: string;
-  total_students: number;
-  average_rating: number;
-  total_lessons: number;
-  duration: string;
-  price: number;
-}
-
-const adaptCourses = (instructorCourses: any[]): CourseAdapted[] => {
+// Function to adapt instructor courses to Course interface
+const adaptCourses = (instructorCourses: any[]): Course[] => {
   return instructorCourses.map(course => ({
     id: course.id,
     title: course.title,
-    description: course.title, // Fallback description
+    description: course.title || "", // Using title as fallback description
     thumbnail_url: course.thumbnail || "/placeholder.svg",
     status: course.status === "published" ? "published" : "draft",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    total_students: course.total_students,
-    average_rating: course.rating,
+    total_students: course.total_students || 0,
+    average_rating: course.rating || 0,
     total_lessons: 10, // Default value
     duration: "8h", // Default value
-    price: course.price
+    price: course.price || 0
   }));
 };
 
@@ -81,6 +67,7 @@ const InstructorDashboard = () => {
     { id: 3, type: "revenue", message: "Paiement de 920€ reçu", time: "Il y a 2 jours" }
   ];
 
+  // Convert InstructorCourse[] to Course[]
   const adaptedCourses = adaptCourses(courses);
 
   return (
@@ -312,7 +299,7 @@ const InstructorDashboard = () => {
           </CardHeader>
           <CardContent className="px-6">
             <div className="space-y-4">
-              {adaptedCourses?.slice(0, 3).map((course, idx) => (
+              {adaptedCourses.slice(0, 3).map((course, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <div 
                     className="w-10 h-10 rounded bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold"

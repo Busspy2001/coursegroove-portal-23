@@ -7,12 +7,13 @@ import { FilePlus } from "lucide-react";
 import InstructorCoursesList from "@/components/instructor/InstructorCoursesList";
 import { useInstructorData } from "@/hooks/use-instructor-data";
 import { InstructorCourse } from "@/hooks/use-instructor-data";
+import { Course } from "@/components/instructor/InstructorCoursesList";
 
 const InstructorCourses = () => {
   const navigate = useNavigate();
   const { loading, courses } = useInstructorData();
 
-  // Adapter les cours pour qu'ils correspondent à l'interface attendue par InstructorCoursesList
+  // Adapter les cours pour qu'ils correspondent à l'interface Course attendue par InstructorCoursesList
   const adaptedCourses = React.useMemo(() => {
     return courses.map(course => ({
       id: course.id,
@@ -27,7 +28,7 @@ const InstructorCourses = () => {
       total_lessons: 10, // Default value
       duration: "8h", // Default value
       price: course.price
-    }));
+    } as Course));
   }, [courses]);
 
   return (
