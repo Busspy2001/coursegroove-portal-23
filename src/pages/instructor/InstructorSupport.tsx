@@ -74,10 +74,10 @@ const InstructorSupport = () => {
     return null;
   }
 
-  const handleSendMessage = async () => {
-    if (!contactSubject || !contactMessage) {
+  const handleContactSupport = async () => {
+    if (!contactSubject.trim() || !contactMessage.trim()) {
       toast({
-        title: "Champs incomplets",
+        title: "Champs requis",
         description: "Veuillez remplir tous les champs du formulaire.",
         variant: "destructive",
       });
@@ -87,12 +87,12 @@ const InstructorSupport = () => {
     setSending(true);
     
     try {
-      // In a real app, you would send the data to an API
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
         title: "Message envoyé",
-        description: "Notre équipe vous répondra dans les plus brefs délais.",
+        description: "Nous vous répondrons dans les plus brefs délais.",
       });
       
       // Reset form
@@ -101,7 +101,7 @@ const InstructorSupport = () => {
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue. Veuillez réessayer.",
+        description: "Une erreur est survenue lors de l'envoi de votre message.",
         variant: "destructive",
       });
     } finally {
@@ -109,152 +109,106 @@ const InstructorSupport = () => {
     }
   };
 
-  // Resources categories and data
-  const resourcesCategories = [
+  const handleDownload = (resourceName: string) => {
+    // In a real app, this would download the file
+    toast({
+      title: `Téléchargement de "${resourceName}"`,
+      description: "Le téléchargement va commencer dans quelques secondes.",
+    });
+  };
+
+  const resources = [
     {
-      id: "getting-started",
-      title: "Premiers pas",
-      resources: [
-        {
-          id: "creating-course",
-          title: "Créer votre premier cours",
-          type: "video",
-          duration: "8 min",
-          url: "#"
-        },
-        {
-          id: "course-structure",
-          title: "Structure d'un cours efficace",
-          type: "article",
-          duration: "5 min de lecture",
-          url: "#"
-        },
-        {
-          id: "publishing",
-          title: "Processus de publication",
-          type: "guide",
-          duration: "3 min de lecture",
-          url: "#"
-        }
-      ]
+      title: "Guide de création de cours",
+      description: "Un guide complet pour créer des cours de qualité sur Schoolier",
+      type: "PDF",
+      icon: <FileText className="h-6 w-6 text-blue-600" />,
+      category: "guides",
+      featured: true
     },
     {
-      id: "content-creation",
-      title: "Création de contenu",
-      resources: [
-        {
-          id: "video-recording",
-          title: "Guide d'enregistrement vidéo",
-          type: "guide",
-          duration: "12 min de lecture",
-          url: "#"
-        },
-        {
-          id: "course-materials",
-          title: "Préparer des supports de cours efficaces",
-          type: "video",
-          duration: "15 min",
-          url: "#"
-        },
-        {
-          id: "quiz-creation",
-          title: "Créer des quiz et exercices",
-          type: "tutorial",
-          duration: "10 min",
-          url: "#"
-        }
-      ]
+      title: "Techniques d'engagement des étudiants",
+      description: "Apprenez à maintenir vos étudiants engagés et motivés",
+      type: "PDF",
+      icon: <FileText className="h-6 w-6 text-blue-600" />,
+      category: "guides"
     },
     {
-      id: "marketing",
-      title: "Marketing & promotions",
-      resources: [
-        {
-          id: "course-description",
-          title: "Rédiger une description de cours attrayante",
-          type: "article",
-          duration: "7 min de lecture",
-          url: "#"
-        },
-        {
-          id: "pricing-strategy",
-          title: "Stratégie de prix efficace",
-          type: "webinar",
-          duration: "25 min",
-          url: "#"
-        },
-        {
-          id: "promote-course",
-          title: "Promouvoir votre cours",
-          type: "guide",
-          duration: "15 min de lecture",
-          url: "#"
-        }
-      ]
+      title: "Optimisation de vos miniatures",
+      description: "Comment créer des miniatures qui attirent plus d'inscriptions",
+      type: "Video",
+      icon: <Video className="h-6 w-6 text-red-600" />,
+      category: "tutoriels",
+      featured: true
     },
     {
-      id: "engagement",
-      title: "Engagement des étudiants",
-      resources: [
-        {
-          id: "student-feedback",
-          title: "Gérer les avis et commentaires",
-          type: "video",
-          duration: "12 min",
-          url: "#"
-        },
-        {
-          id: "discussion-forums",
-          title: "Animer les forums de discussion",
-          type: "article",
-          duration: "8 min de lecture",
-          url: "#"
-        },
-        {
-          id: "student-retention",
-          title: "Améliorer la rétention des étudiants",
-          type: "webinar",
-          duration: "30 min",
-          url: "#"
-        }
-      ]
+      title: "Modèles de plan de cours",
+      description: "Des templates pour structurer votre contenu efficacement",
+      type: "ZIP",
+      icon: <Layers className="h-6 w-6 text-green-600" />,
+      category: "templates",
+      featured: true
+    },
+    {
+      title: "Stratégies de prix pour maximiser les revenus",
+      description: "Guide pour définir le prix optimal pour vos cours",
+      type: "PDF",
+      icon: <FileText className="h-6 w-6 text-blue-600" />,
+      category: "guides"
+    },
+    {
+      title: "Configuration audio et vidéo",
+      description: "Comment créer des vidéos professionnelles avec un budget limité",
+      type: "Video",
+      icon: <Video className="h-6 w-6 text-red-600" />,
+      category: "tutoriels"
+    },
+    {
+      title: "Modèles PowerPoint pour cours",
+      description: "Des présentations professionnelles pour vos leçons",
+      type: "ZIP",
+      icon: <Layers className="h-6 w-6 text-green-600" />,
+      category: "templates"
+    },
+    {
+      title: "Répondre aux avis négatifs",
+      description: "Comment gérer les critiques de manière constructive",
+      type: "PDF",
+      icon: <FileText className="h-6 w-6 text-blue-600" />,
+      category: "guides"
     }
   ];
 
-  // FAQ data
-  const faqData = [
+  const filteredResources = resources.filter(resource => 
+    resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    resource.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const faqItems = [
     {
-      question: "Comment devenir instructeur sur Schoolier ?",
-      answer: "Pour devenir instructeur, vous devez d'abord créer un compte, puis cliquer sur 'Devenir instructeur' dans votre tableau de bord. Vous serez guidé à travers le processus de validation qui inclut la vérification de votre identité et de vos compétences. Une fois approuvé, vous pourrez commencer à créer et publier des cours."
+      question: "Comment puis-je retirer mes revenus ?",
+      answer: "Les revenus sont automatiquement transférés vers votre compte bancaire ou PayPal (selon vos préférences dans les paramètres) le 10 de chaque mois, à condition que votre solde dépasse 50€. Si vous avez des questions spécifiques concernant un paiement, veuillez contacter notre équipe de support financier."
     },
     {
-      question: "Quels sont les critères de qualité pour les cours ?",
-      answer: "Schoolier attend de ses instructeurs qu'ils fournissent un contenu de haute qualité. Cela inclut une vidéo et un audio de bonne qualité, un contenu structuré et pédagogique, des exercices pratiques, et des informations à jour et précises. Tous les cours sont soumis à un processus de validation avant publication."
+      question: "Puis-je modifier un cours après sa publication ?",
+      answer: "Oui, vous pouvez modifier votre cours à tout moment. Pour ce faire, accédez à votre tableau de bord, sélectionnez le cours que vous souhaitez modifier, puis cliquez sur le bouton 'Éditer'. Notez que les modifications majeures du contenu peuvent nécessiter une notification aux étudiants déjà inscrits."
     },
     {
-      question: "Comment sont répartis les revenus ?",
-      answer: "Les instructeurs reçoivent 70% des revenus générés par leurs cours, après déduction des frais de transaction. Les paiements sont effectués mensuellement, le 10 de chaque mois, pour les revenus du mois précédent, dès que votre solde atteint 50€."
+      question: "Quelle est la commission prélevée par Schoolier ?",
+      answer: "Schoolier prélève une commission de 20% sur les ventes de cours. Par exemple, si votre cours est vendu 100€, vous recevrez 80€. Cette commission couvre les frais de traitement des paiements, l'hébergement des vidéos, le marketing de la plateforme et le support client."
     },
     {
-      question: "Puis-je publier le même cours sur d'autres plateformes ?",
-      answer: "Oui, Schoolier ne demande pas d'exclusivité. Vous êtes libre de publier votre contenu sur d'autres plateformes, mais nous vous encourageons à créer une offre spécifique pour notre audience."
+      question: "Comment puis-je promouvoir mon cours ?",
+      answer: "Vous pouvez promouvoir votre cours de plusieurs façons : partager sur vos réseaux sociaux, créer un lien d'affiliation pour vos abonnés, utiliser notre outil de coupons de réduction, ou investir dans nos options de promotion premium qui mettent en avant votre cours dans les résultats de recherche et sur la page d'accueil."
     },
     {
-      question: "Comment puis-je améliorer la visibilité de mes cours ?",
-      answer: "Pour améliorer la visibilité de vos cours, nous vous recommandons d'utiliser des mots-clés pertinents dans votre titre et description, de créer une miniature attrayante, d'encourager les avis positifs, de maintenir un taux élevé d'engagement avec vos étudiants, et d'utiliser les outils de promotion intégrés à la plateforme."
+      question: "Puis-je offrir des cours gratuits ?",
+      answer: "Oui, vous pouvez proposer des cours entièrement gratuits ou créer des cours 'freemium' avec quelques leçons gratuites et le reste du contenu payant. Les cours gratuits peuvent être un excellent moyen d'attirer de nouveaux étudiants vers vos cours payants."
     },
     {
-      question: "Quels formats de cours sont acceptés ?",
-      answer: "Schoolier accepte principalement les cours en format vidéo, mais vous pouvez compléter avec des documents PDF, des présentations, des quiz, et d'autres ressources pédagogiques. La plateforme prend en charge les vidéos HD, les présentations PowerPoint, les documents PDF, et les quiz interactifs."
+      question: "Comment répondre aux questions des étudiants ?",
+      answer: "Vous recevrez des notifications par email lorsqu'un étudiant pose une question. Vous pouvez y répondre directement depuis la section 'Messages' de votre tableau de bord ou depuis la page du cours concerné. Nous recommandons de répondre dans un délai de 24 à 48 heures pour maintenir un bon niveau de satisfaction."
     },
-    {
-      question: "Comment gérer les droits d'auteur et les licences ?",
-      answer: "En tant qu'instructeur, vous êtes responsable de vous assurer que tout le contenu que vous utilisez dans vos cours respecte les droits d'auteur. Cela inclut les images, vidéos, musiques, textes et code. Nous vous encourageons à utiliser du contenu sous licence libre ou à créer votre propre contenu."
-    },
-    {
-      question: "Quelles sont les exigences techniques pour les vidéos ?",
-      answer: "Les vidéos doivent être en format MP4, avec une résolution minimale de 720p (HD). Nous recommandons un bon éclairage, un son clair sans bruits de fond, et une durée de 2 à 15 minutes par vidéo. La taille maximale par fichier est de 2 GB."
-    }
   ];
 
   if (loading) {
@@ -264,7 +218,7 @@ const InstructorSupport = () => {
         <div className="container flex-grow flex items-center justify-center">
           <div className="flex flex-col items-center">
             <Loader2 className="h-10 w-10 text-schoolier-blue animate-spin mb-4" />
-            <p className="text-muted-foreground">Chargement du centre d'aide...</p>
+            <p className="text-muted-foreground">Chargement des ressources...</p>
           </div>
         </div>
         <Footer />
@@ -284,363 +238,356 @@ const InstructorSupport = () => {
             <div className="mb-8">
               <h1 className="text-3xl font-bold">Ressources & Support</h1>
               <p className="text-muted-foreground">
-                Retrouvez tous les guides, documents et accédez à l'aide pour les instructeurs
+                Accédez à des ressources utiles et obtenez de l'aide
               </p>
             </div>
             
-            <div className="relative mb-6">
-              <Search className="absolute top-1/2 transform -translate-y-1/2 left-3 h-5 w-5 text-muted-foreground" />
-              <Input 
-                type="search" 
-                placeholder="Rechercher dans la base de connaissances..." 
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <Tabs defaultValue="resources" className="w-full mb-8">
-              <TabsList className="w-full md:w-auto grid grid-cols-4 mb-6">
-                <TabsTrigger value="resources" className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 hidden sm:block" />
-                  <span>Ressources</span>
-                </TabsTrigger>
-                <TabsTrigger value="faq" className="flex items-center gap-2">
-                  <HelpCircle className="h-4 w-4 hidden sm:block" />
-                  <span>FAQ</span>
-                </TabsTrigger>
-                <TabsTrigger value="downloads" className="flex items-center gap-2">
-                  <Download className="h-4 w-4 hidden sm:block" />
-                  <span>Téléchargements</span>
-                </TabsTrigger>
-                <TabsTrigger value="contact" className="flex items-center gap-2">
-                  <MessageCircle className="h-4 w-4 hidden sm:block" />
-                  <span>Contact</span>
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="resources">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {resourcesCategories.map(category => (
-                    <Card key={category.id}>
-                      <CardHeader>
-                        <CardTitle>{category.title}</CardTitle>
-                        <CardDescription>
-                          Guides et tutoriels pour vous aider
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {category.resources.map(resource => (
-                            <div key={resource.id} className="flex items-center gap-4">
-                              <div className={`rounded-full p-2 flex-shrink-0 ${
-                                resource.type === 'video' 
-                                  ? 'bg-red-100 text-red-600' 
-                                  : resource.type === 'article' 
-                                    ? 'bg-blue-100 text-blue-600'
-                                    : resource.type === 'guide'
-                                      ? 'bg-green-100 text-green-600'
-                                      : resource.type === 'webinar'
-                                        ? 'bg-purple-100 text-purple-600'
-                                        : 'bg-amber-100 text-amber-600'
-                              }`}>
-                                {resource.type === 'video' ? (
-                                  <Video className="h-4 w-4" />
-                                ) : resource.type === 'article' ? (
-                                  <FileText className="h-4 w-4" />
-                                ) : resource.type === 'guide' ? (
-                                  <BookOpen className="h-4 w-4" />
-                                ) : resource.type === 'webinar' ? (
-                                  <Video className="h-4 w-4" />
-                                ) : (
-                                  <Layers className="h-4 w-4" />
-                                )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+              <Card className="md:col-span-2">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Centre de ressources</CardTitle>
+                    <div className="relative w-full md:w-60">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type="search" 
+                        placeholder="Rechercher des ressources..." 
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="all" className="w-full">
+                    <TabsList className="mb-6">
+                      <TabsTrigger value="all">Toutes</TabsTrigger>
+                      <TabsTrigger value="guides">Guides</TabsTrigger>
+                      <TabsTrigger value="tutoriels">Tutoriels</TabsTrigger>
+                      <TabsTrigger value="templates">Templates</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="all">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredResources.map((resource, index) => (
+                          <div 
+                            key={index} 
+                            className={`
+                              p-4 border rounded-lg hover:border-schoolier-blue 
+                              hover:bg-blue-50 transition-colors cursor-pointer
+                              ${resource.featured ? 'border-blue-200 bg-blue-50' : ''}
+                            `}
+                            onClick={() => handleDownload(resource.title)}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="bg-white p-3 rounded-lg border">
+                                {resource.icon}
                               </div>
                               <div className="flex-1">
-                                <a 
-                                  href={resource.url} 
-                                  className="font-medium text-sm hover:underline block"
-                                >
-                                  {resource.title}
-                                </a>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge variant="outline" className="text-xs capitalize">
-                                    {resource.type}
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground">
-                                    {resource.duration}
-                                  </span>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-medium">{resource.title}</h3>
+                                  {resource.featured && (
+                                    <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">
+                                      Populaire
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {resource.description}
+                                </p>
+                              </div>
+                              <div>
+                                <Button variant="ghost" size="sm">
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="guides">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredResources
+                          .filter(resource => resource.category === "guides")
+                          .map((resource, index) => (
+                            <div 
+                              key={index} 
+                              className={`
+                                p-4 border rounded-lg hover:border-schoolier-blue 
+                                hover:bg-blue-50 transition-colors cursor-pointer
+                                ${resource.featured ? 'border-blue-200 bg-blue-50' : ''}
+                              `}
+                              onClick={() => handleDownload(resource.title)}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="bg-white p-3 rounded-lg border">
+                                  {resource.icon}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-medium">{resource.title}</h3>
+                                    {resource.featured && (
+                                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">
+                                        Populaire
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {resource.description}
+                                  </p>
+                                </div>
+                                <div>
+                                  <Button variant="ghost" size="sm">
+                                    <Download className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="tutoriels">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredResources
+                          .filter(resource => resource.category === "tutoriels")
+                          .map((resource, index) => (
+                            <div 
+                              key={index} 
+                              className={`
+                                p-4 border rounded-lg hover:border-schoolier-blue 
+                                hover:bg-blue-50 transition-colors cursor-pointer
+                                ${resource.featured ? 'border-blue-200 bg-blue-50' : ''}
+                              `}
+                              onClick={() => handleDownload(resource.title)}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="bg-white p-3 rounded-lg border">
+                                  {resource.icon}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-medium">{resource.title}</h3>
+                                    {resource.featured && (
+                                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">
+                                        Populaire
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {resource.description}
+                                  </p>
+                                </div>
+                                <div>
+                                  <Button variant="ghost" size="sm">
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="templates">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredResources
+                          .filter(resource => resource.category === "templates")
+                          .map((resource, index) => (
+                            <div 
+                              key={index} 
+                              className={`
+                                p-4 border rounded-lg hover:border-schoolier-blue 
+                                hover:bg-blue-50 transition-colors cursor-pointer
+                                ${resource.featured ? 'border-blue-200 bg-blue-50' : ''}
+                              `}
+                              onClick={() => handleDownload(resource.title)}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="bg-white p-3 rounded-lg border">
+                                  {resource.icon}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-medium">{resource.title}</h3>
+                                    {resource.featured && (
+                                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">
+                                        Populaire
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {resource.description}
+                                  </p>
+                                </div>
+                                <div>
+                                  <Button variant="ghost" size="sm">
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
               
-              <TabsContent value="faq">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Questions fréquemment posées</CardTitle>
-                    <CardDescription>
-                      Trouvez rapidement des réponses aux questions courantes
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Accordion type="single" collapsible className="w-full">
-                      {faqData.map((faq, index) => (
-                        <AccordionItem key={index} value={`item-${index}`}>
-                          <AccordionTrigger className="text-left">
-                            {faq.question}
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            {faq.answer}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="downloads">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Documents et ressources téléchargeables</CardTitle>
-                    <CardDescription>
-                      Téléchargez des modèles, guides et autres ressources utiles
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-blue-100 p-3 rounded-full text-blue-600">
-                            <FileText className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">Guide de l'instructeur</h3>
-                            <p className="text-sm text-muted-foreground">Guide complet pour créer des cours de qualité</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">PDF</Badge>
-                              <span className="text-xs text-muted-foreground">5.2 MB</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-green-100 p-3 rounded-full text-green-600">
-                            <FileText className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">Modèle de plan de cours</h3>
-                            <p className="text-sm text-muted-foreground">Structure recommandée pour vos cours</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">DOCX</Badge>
-                              <span className="text-xs text-muted-foreground">1.8 MB</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-amber-100 p-3 rounded-full text-amber-600">
-                            <FileText className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">Checklist qualité vidéo</h3>
-                            <p className="text-sm text-muted-foreground">Vérifiez la qualité de vos vidéos</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">PDF</Badge>
-                              <span className="text-xs text-muted-foreground">0.8 MB</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-purple-100 p-3 rounded-full text-purple-600">
-                            <FileText className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">Guide de marketing</h3>
-                            <p className="text-sm text-muted-foreground">Stratégies pour promouvoir vos cours</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">PDF</Badge>
-                              <span className="text-xs text-muted-foreground">3.5 MB</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-red-100 p-3 rounded-full text-red-600">
-                            <FileText className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">Modèle de quiz</h3>
-                            <p className="text-sm text-muted-foreground">Template pour créer des quiz efficaces</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">XLSX</Badge>
-                              <span className="text-xs text-muted-foreground">1.2 MB</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-teal-100 p-3 rounded-full text-teal-600">
-                            <FileText className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">Guide fiscal</h3>
-                            <p className="text-sm text-muted-foreground">Informations fiscales pour instructeurs</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">PDF</Badge>
-                              <span className="text-xs text-muted-foreground">2.4 MB</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                        </div>
-                      </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contactez le support</CardTitle>
+                  <CardDescription>
+                    Notre équipe est à votre disposition pour vous aider
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <Label htmlFor="contact-subject">Sujet</Label>
+                      <Input 
+                        id="contact-subject" 
+                        placeholder="Ex: Question sur les paiements" 
+                        value={contactSubject}
+                        onChange={(e) => setContactSubject(e.target.value)}
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="contact">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Contacter le support</CardTitle>
-                    <CardDescription>
-                      Notre équipe est disponible pour vous aider avec toute question ou problème
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                        <div>
-                          <Label htmlFor="subject">Sujet</Label>
-                          <Input
-                            id="subject"
-                            placeholder="Ex: Question sur la création de cours"
-                            className="mt-1.5"
-                            value={contactSubject}
-                            onChange={(e) => setContactSubject(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="message">Message</Label>
-                          <Textarea
-                            id="message"
-                            placeholder="Décrivez votre question ou problème en détail..."
-                            className="mt-1.5"
-                            rows={6}
-                            value={contactMessage}
-                            onChange={(e) => setContactMessage(e.target.value)}
-                          />
-                        </div>
-                        <Button 
-                          onClick={handleSendMessage}
-                          disabled={sending || !contactSubject || !contactMessage}
-                          className="w-full"
-                        >
-                          {sending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Envoyer le message
-                        </Button>
-                      </div>
-                      
-                      <div className="space-y-6">
-                        <div className="bg-blue-50 p-6 rounded-lg">
-                          <h3 className="text-lg font-semibold text-blue-700 mb-4">Autres moyens de contact</h3>
-                          <div className="space-y-4">
-                            <div>
-                              <p className="font-medium">Email</p>
-                              <p className="text-sm text-muted-foreground">instructors@schoolier.com</p>
-                            </div>
-                            <div>
-                              <p className="font-medium">Téléphone</p>
-                              <p className="text-sm text-muted-foreground">+33 (0)1 23 45 67 89</p>
-                              <p className="text-xs text-muted-foreground">Lun-Ven, 9h-18h CET</p>
-                            </div>
-                            <div>
-                              <p className="font-medium">Chat en direct</p>
-                              <p className="text-sm text-muted-foreground">Disponible via le widget en bas à droite</p>
-                              <p className="text-xs text-muted-foreground">Temps de réponse moyen: moins de 5 minutes</p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Communauté d'instructeurs</h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Rejoignez notre communauté d'instructeurs pour partager des conseils, bonnes pratiques et vous entraider.
-                          </p>
-                          <Button variant="outline">
-                            Rejoindre la communauté
-                          </Button>
-                        </div>
-                      </div>
+                    <div>
+                      <Label htmlFor="contact-message">Message</Label>
+                      <Textarea 
+                        id="contact-message" 
+                        rows={5} 
+                        placeholder="Décrivez votre problème ou question..." 
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-3 bg-blue-50 border-blue-200">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-center gap-6">
-                    <div className="bg-blue-100 p-4 rounded-full">
-                      <Video className="h-8 w-8 text-blue-700" />
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Délai de réponse estimé: </span>
+                        <span className="font-medium">24h</span>
+                      </div>
+                      <Button 
+                        onClick={handleContactSupport} 
+                        disabled={sending}
+                        className="min-w-[120px]"
+                      >
+                        {sending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Envoi...
+                          </>
+                        ) : (
+                          <>
+                            <MessageCircle className="mr-2 h-4 w-4" />
+                            Envoyer
+                          </>
+                        )}
+                      </Button>
                     </div>
-                    <div className="flex-1 text-center md:text-left">
-                      <h3 className="text-xl font-semibold text-blue-900 mb-2">
-                        Webinar: Comment créer un cours à succès
-                      </h3>
-                      <p className="text-blue-700 mb-4">
-                        Jeudi 15 juin 2025, 14:00 CET — Découvrez les secrets pour créer un cours engageant et à fort impact.
-                      </p>
-                      <Button className="bg-blue-700 hover:bg-blue-800 text-white">
-                        S'inscrire au webinar
+                  </div>
+                  
+                  <div className="mt-6 pt-6 border-t">
+                    <h3 className="font-medium mb-3">Besoin d'aide rapide ?</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button variant="outline" className="flex flex-col items-center p-3 h-auto">
+                        <Settings className="h-5 w-5 mb-1" />
+                        <span className="text-xs">Guide technique</span>
+                      </Button>
+                      <Button variant="outline" className="flex flex-col items-center p-3 h-auto">
+                        <Users className="h-5 w-5 mb-1" />
+                        <span className="text-xs">Forum instructeurs</span>
+                      </Button>
+                      <Button variant="outline" className="flex flex-col items-center p-3 h-auto">
+                        <DollarSign className="h-5 w-5 mb-1" />
+                        <span className="text-xs">Aide paiements</span>
+                      </Button>
+                      <Button variant="outline" className="flex flex-col items-center p-3 h-auto">
+                        <HelpCircle className="h-5 w-5 mb-1" />
+                        <span className="text-xs">FAQ</span>
                       </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+            
+            <Card className="mb-10">
+              <CardHeader>
+                <CardTitle>Questions fréquentes</CardTitle>
+                <CardDescription>
+                  Retrouvez les réponses aux questions les plus courantes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqItems.map((item, index) => (
+                    <AccordionItem key={index} value={`item-${index}`}>
+                      <AccordionTrigger className="text-left">
+                        {item.question}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <p className="text-muted-foreground">
+                          {item.answer}
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <BookOpen className="h-6 w-6 text-blue-700" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-lg mb-2">Formation pour instructeurs</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Développez vos compétences pédagogiques et apprenez à créer des cours engageants qui se vendent bien.
+                      Notre programme de formation pour instructeurs couvre toutes les étapes de la création à la promotion.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button className="bg-blue-700 hover:bg-blue-800">
+                        S'inscrire au programme
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" className="border-blue-300 bg-blue-100 hover:bg-blue-200">
+                            Voir la démo
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Formation pour instructeurs Schoolier
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              <div className="aspect-video bg-gray-100 flex items-center justify-center rounded-md mb-4">
+                                <Video className="h-16 w-16 text-gray-400" />
+                              </div>
+                              <p>
+                                Notre formation vous guide à travers toutes les étapes pour créer des cours à succès 
+                                sur Schoolier, de la conception à la promotion.
+                              </p>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Fermer</AlertDialogCancel>
+                            <AlertDialogAction>S'inscrire maintenant</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           
           <Footer />
