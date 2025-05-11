@@ -51,7 +51,11 @@ const Step: React.FC<StepProps> = ({ icon, number, title, description }) => {
   );
 };
 
-const ProcessSection: React.FC = () => {
+interface ProcessSectionProps {
+  onViewDemo?: () => void;
+}
+
+const ProcessSection: React.FC<ProcessSectionProps> = ({ onViewDemo }) => {
   return (
     <section className="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 md:px-6">
@@ -99,6 +103,7 @@ const ProcessSection: React.FC = () => {
           <Button 
             size="lg" 
             className="bg-schoolier-blue hover:bg-schoolier-dark-blue text-lg px-8"
+            onClick={onViewDemo}
           >
             Voir la démo de l'éditeur
           </Button>

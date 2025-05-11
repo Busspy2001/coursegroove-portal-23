@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Animations
@@ -14,7 +14,12 @@ const fadeIn = {
   }
 };
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onBecomeInstructor: () => void;
+  onCreateAccount: () => void;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onBecomeInstructor, onCreateAccount }) => {
   return (
     <section className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-schoolier-dark py-16 lg:py-24">
       <div className="container px-4 md:px-6">
@@ -35,11 +40,20 @@ const HeroSection: React.FC = () => {
               d'apprentissage impactantes, à votre rythme.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <Button size="lg" className="bg-schoolier-blue hover:bg-schoolier-dark-blue text-lg px-8">
+              <Button 
+                size="lg" 
+                className="bg-schoolier-blue hover:bg-schoolier-dark-blue text-lg px-8"
+                onClick={onBecomeInstructor}
+              >
                 Devenir instructeur
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10 text-lg px-8">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10 text-lg px-8"
+                onClick={onCreateAccount}
+              >
                 Créer mon compte gratuit
               </Button>
             </div>

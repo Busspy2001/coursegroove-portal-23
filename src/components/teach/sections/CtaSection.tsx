@@ -14,7 +14,12 @@ const fadeIn = {
   }
 };
 
-const CtaSection: React.FC = () => {
+interface CtaSectionProps {
+  onBecomeInstructor: () => void;
+  onDownloadGuide: () => void;
+}
+
+const CtaSection: React.FC<CtaSectionProps> = ({ onBecomeInstructor, onDownloadGuide }) => {
   return (
     <section className="py-16 lg:py-24 bg-schoolier-blue dark:bg-schoolier-dark-blue">
       <div className="container px-4 md:px-6">
@@ -36,6 +41,7 @@ const CtaSection: React.FC = () => {
             <Button 
               size="lg" 
               className="bg-white text-schoolier-blue hover:bg-gray-100 text-lg px-8 shadow-lg"
+              onClick={onBecomeInstructor}
             >
               Devenir instructeur maintenant
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -44,6 +50,7 @@ const CtaSection: React.FC = () => {
               variant="outline" 
               size="lg"
               className="border-white text-white hover:bg-white/20 text-lg px-8"
+              onClick={onDownloadGuide}
             >
               <Download className="mr-2 h-5 w-5" />
               Télécharger le guide gratuit

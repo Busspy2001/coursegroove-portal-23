@@ -14,7 +14,17 @@ const fadeIn = {
   }
 };
 
-const PricingSection: React.FC = () => {
+interface PricingSectionProps {
+  onStartFree: () => void;
+  onChoosePro: () => void;
+  onContactSales: () => void;
+}
+
+const PricingSection: React.FC<PricingSectionProps> = ({
+  onStartFree,
+  onChoosePro,
+  onContactSales
+}) => {
   return (
     <section className="py-16 lg:py-24 bg-white dark:bg-schoolier-dark">
       <div className="container px-4 md:px-6">
@@ -60,7 +70,7 @@ const PricingSection: React.FC = () => {
                   <span>Support par email</span>
                 </li>
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={onStartFree}>
                 Commencer gratuitement
               </Button>
             </div>
@@ -100,7 +110,7 @@ const PricingSection: React.FC = () => {
                   <span>Support prioritaire</span>
                 </li>
               </ul>
-              <Button className="w-full bg-schoolier-blue hover:bg-schoolier-dark-blue">
+              <Button className="w-full bg-schoolier-blue hover:bg-schoolier-dark-blue" onClick={onChoosePro}>
                 Choisir Pro
               </Button>
             </div>
@@ -136,7 +146,7 @@ const PricingSection: React.FC = () => {
                   <span>Fonctionnalités sur mesure</span>
                 </li>
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={onContactSales}>
                 Contacter les ventes
               </Button>
             </div>
