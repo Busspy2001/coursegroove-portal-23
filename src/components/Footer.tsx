@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react";
@@ -20,10 +21,18 @@ const Footer = () => {
               avec des cours de qualité dispensés par des experts.
             </p>
             <div className="flex mt-6 space-x-4">
-              <Facebook className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
-              <Twitter className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
-              <Instagram className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
-              <Youtube className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
+              <a href="https://facebook.com/schoolier" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <Facebook className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
+              </a>
+              <a href="https://twitter.com/schoolier" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                <Twitter className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
+              </a>
+              <a href="https://instagram.com/schoolier" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <Instagram className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
+              </a>
+              <a href="https://youtube.com/schoolier" target="_blank" rel="noopener noreferrer" aria-label="Youtube">
+                <Youtube className="h-5 w-5 text-schoolier-gray hover:text-schoolier-blue cursor-pointer" />
+              </a>
             </div>
           </div>
 
@@ -54,11 +63,11 @@ const Footer = () => {
               <Link to="/help" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue dark:hover:text-white">
                 Centre d'aide
               </Link>
-              <Link to="/become-instructor" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue dark:hover:text-white">
+              <Link to="/teach" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue dark:hover:text-white">
                 Devenir instructeur
               </Link>
-              <Link to="/affiliates" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue dark:hover:text-white">
-                Programme d'affiliation
+              <Link to="/business" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue dark:hover:text-white">
+                Pour les entreprises
               </Link>
             </div>
           </div>
@@ -68,11 +77,11 @@ const Footer = () => {
             <div className="flex flex-col mt-4 space-y-2">
               <div className="flex items-center space-x-2">
                 <Mail className="h-5 w-5 text-schoolier-teal" />
-                <span className="text-gray-600 dark:text-gray-300">contact@schoolier.com</span>
+                <a href="mailto:contact@schoolier.com" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue">contact@schoolier.com</a>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-5 w-5 text-schoolier-teal" />
-                <span className="text-gray-600 dark:text-gray-300">+33 (0)1 23 45 67 89</span>
+                <a href="tel:+33123456789" className="text-gray-600 dark:text-gray-300 hover:text-schoolier-blue">+33 (0)1 23 45 67 89</a>
               </div>
             </div>
           </div>

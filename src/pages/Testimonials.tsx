@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Star, MessageSquare, Quote } from "lucide-react";
+import { Star, MessageSquare, Quote, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import TestimonialDialog from "@/components/testimonials/TestimonialDialog";
+
 const Testimonials = () => {
   // Animation variants
   const fadeIn = {
@@ -31,6 +33,9 @@ const Testimonials = () => {
       }
     }
   };
+
+  // Testimonial dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Testimonial data
   const testimonials = [{
@@ -236,13 +241,22 @@ const Testimonials = () => {
             <p className="text-gray-700 mb-8">
               Si vous êtes un apprenant de Schoolier et que vous souhaitez partager votre expérience, nous serions ravis de l'entendre !
             </p>
-            <Button className="bg-schoolier-blue hover:bg-schoolier-blue/90">
+            <Button 
+              className="bg-schoolier-blue hover:bg-schoolier-blue/90"
+              onClick={() => setIsDialogOpen(true)}
+            >
               <MessageSquare className="mr-2 h-4 w-4" />
               Partager votre témoignage
             </Button>
           </div>
         </div>
       </section>
+      
+      {/* Testimonial Dialog */}
+      <TestimonialDialog 
+        isOpen={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)} 
+      />
       
       <Footer />
     </div>;
