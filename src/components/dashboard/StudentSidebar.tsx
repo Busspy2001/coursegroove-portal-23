@@ -52,7 +52,7 @@ const StudentSidebar = () => {
     return name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
   return <Sidebar>
-      <SidebarHeader className="flex justify-start items-center p-4">
+      <SidebarHeader className="flex justify-start items-center p-4 bg-gray-50">
         <Avatar className="h-10 w-10 mr-2">
           <AvatarImage src={currentUser?.avatar} alt={currentUser?.name} />
           <AvatarFallback>{getInitials(currentUser?.name)}</AvatarFallback>
