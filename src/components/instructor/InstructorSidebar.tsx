@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Sidebar,
   SidebarContent,
@@ -35,6 +36,7 @@ const InstructorSidebar = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const handleLogout = async () => {
     try {
@@ -103,8 +105,13 @@ const InstructorSidebar = () => {
   ];
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + "/");
   };
+
+  // Hide sidebar on mobile
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <Sidebar variant="floating" className="z-30">

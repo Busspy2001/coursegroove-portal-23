@@ -1,172 +1,117 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/auth";
 
-// Types
-interface InstructorStats {
+export interface InstructorStats {
   totalCourses: number;
   totalStudents: number;
   monthlyRevenue: number;
   averageRating: number;
-  totalEnrollments: number;
-  completionRate: number;
-  studentsTrend: number; // Ajout de la propriété manquante
+  studentsTrend: number; // Added missing property
 }
 
-interface Course {
+export interface InstructorCourse {
   id: string;
   title: string;
-  description: string;
-  thumbnail_url: string;
-  status: "draft" | "published" | "archived";
-  created_at: string;
-  updated_at: string;
-  total_students: number;
-  average_rating: number;
-  total_lessons: number;
-  duration: string;
+  status: "published" | "draft";
   price: number;
+  total_students: number;
+  rating: number;
+  progress: number;
+  thumbnail: string;
 }
 
-export function useInstructorData() {
+export interface UseInstructorDataReturn {
+  loading: boolean;
+  stats: InstructorStats;
+  courses: InstructorCourse[];
+  refetch: () => void;
+}
+
+export function useInstructorData(): UseInstructorDataReturn {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<InstructorStats>({
-    totalCourses: 0,
-    totalStudents: 0,
-    monthlyRevenue: 0,
-    averageRating: 0,
-    totalEnrollments: 0,
-    completionRate: 0,
-    studentsTrend: 12 // Valeur par défaut
-  });
-  const [courses, setCourses] = useState<Course[]>([]);
   const { currentUser } = useAuth();
-  const { toast } = useToast();
+  const [stats, setStats] = useState<InstructorStats>({
+    totalCourses: 5,
+    totalStudents: 457,
+    monthlyRevenue: 2850,
+    averageRating: 4.8,
+    studentsTrend: 12 // Added missing property
+  });
+  const [courses, setCourses] = useState<InstructorCourse[]>([
+    {
+      id: "1",
+      title: "JavaScript Moderne: ES6+ et au-delà",
+      status: "published",
+      price: 49.99,
+      total_students: 234,
+      rating: 4.9,
+      progress: 100,
+      thumbnail: "/images/courses/js.jpg"
+    },
+    {
+      id: "2",
+      title: "React pour les débutants",
+      status: "published",
+      price: 59.99,
+      total_students: 187,
+      rating: 4.8,
+      progress: 100,
+      thumbnail: "/images/courses/react.jpg"
+    },
+    {
+      id: "3",
+      title: "Fondamentaux du développement web",
+      status: "published",
+      price: 29.99,
+      total_students: 315,
+      rating: 4.7,
+      progress: 100,
+      thumbnail: "/images/courses/webdev.jpg"
+    },
+    {
+      id: "4",
+      title: "Python pour la data science",
+      status: "published",
+      price: 69.99,
+      total_students: 143,
+      rating: 4.8,
+      progress: 100,
+      thumbnail: "/images/courses/python.jpg"
+    },
+    {
+      id: "5",
+      title: "Introduction au Machine Learning",
+      status: "draft",
+      price: 79.99,
+      total_students: 0,
+      rating: 0,
+      progress: 67,
+      thumbnail: "/images/courses/ml.jpg"
+    }
+  ]);
 
   useEffect(() => {
-    if (currentUser && currentUser.role === "instructor") {
-      fetchInstructorData();
-    } else {
-      setLoading(false);
+    if (currentUser?.role === "instructor") {
+      // Simulate API call to fetch instructor dashboard data
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     }
   }, [currentUser]);
 
-  const fetchInstructorData = async () => {
+  const refetch = () => {
     setLoading(true);
-    
-    try {
-      // This is a mock implementation
-      // In a real app, this would be an API call to fetch instructor data
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Mock data for development until Supabase tables are updated
-      const mockStats: InstructorStats = {
-        totalCourses: 5,
-        totalStudents: 256,
-        monthlyRevenue: 1274,
-        averageRating: 4.8,
-        totalEnrollments: 305,
-        completionRate: 72,
-        studentsTrend: 12
-      };
-      
-      const mockCourses: Course[] = [
-        {
-          id: "course1",
-          title: "JavaScript Moderne: ES6 à ES12",
-          description: "Maîtrisez les fonctionnalités modernes de JavaScript avec ce cours complet allant des bases d'ES6 jusqu'aux dernières nouveautés.",
-          thumbnail_url: "https://ui-avatars.com/api/?background=0D9488&color=fff&name=JavaScript+Course",
-          status: "published",
-          created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days ago
-          updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-          total_students: 125,
-          average_rating: 4.7,
-          total_lessons: 45,
-          duration: "12h 30min",
-          price: 49.99
-        },
-        {
-          id: "course2",
-          title: "Fondamentaux du développement web",
-          description: "Un cours complet pour débutants sur HTML, CSS et les bases de JavaScript pour construire des sites web modernes.",
-          thumbnail_url: "https://ui-avatars.com/api/?background=0284C7&color=fff&name=Web+Basics",
-          status: "published",
-          created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days ago
-          updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-          total_students: 87,
-          average_rating: 4.9,
-          total_lessons: 32,
-          duration: "8h 15min",
-          price: 29.99
-        },
-        {
-          id: "course3",
-          title: "React pour les débutants",
-          description: "Apprenez React depuis zéro et construisez des applications web modernes avec cette bibliothèque JavaScript populaire.",
-          thumbnail_url: "https://ui-avatars.com/api/?background=2563EB&color=fff&name=React+Course",
-          status: "draft",
-          created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
-          updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          total_students: 0,
-          average_rating: 0,
-          total_lessons: 18,
-          duration: "6h 45min",
-          price: 39.99
-        },
-        {
-          id: "course4",
-          title: "Python pour la data science",
-          description: "Découvrez comment utiliser Python pour l'analyse de données et la visualisation avec pandas, numpy et matplotlib.",
-          thumbnail_url: "https://ui-avatars.com/api/?background=4C1D95&color=fff&name=Python+Data",
-          status: "published",
-          created_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(), // 120 days ago
-          updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
-          total_students: 44,
-          average_rating: 4.6,
-          total_lessons: 28,
-          duration: "10h 20min",
-          price: 59.99
-        },
-        {
-          id: "course5",
-          title: "Introduction à Git et GitHub",
-          description: "Apprenez à utiliser Git et GitHub pour gérer efficacement vos projets de code et collaborer avec d'autres développeurs.",
-          thumbnail_url: "https://ui-avatars.com/api/?background=0F172A&color=fff&name=Git+GitHub",
-          status: "archived",
-          created_at: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(), // 180 days ago
-          updated_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days ago
-          total_students: 0,
-          average_rating: 0,
-          total_lessons: 12,
-          duration: "3h 45min",
-          price: 19.99
-        }
-      ];
-      
-      setStats(mockStats);
-      setCourses(mockCourses);
-      
-      // Once the Supabase tables are updated, the commented code can be enabled
-      // Keep the commented code for future implementation
-    } catch (error) {
-      console.error('Error fetching instructor data:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger vos données d\'instructeur.',
-        variant: 'destructive',
-      });
-    } finally {
+    setTimeout(() => {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return {
     loading,
     stats,
     courses,
-    refetch: fetchInstructorData
+    refetch
   };
 }
