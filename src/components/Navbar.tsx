@@ -95,10 +95,7 @@ const Navbar = () => {
               </SheetContent>
             </Sheet>}
 
-          {/* Mobile Menu Button */}
-          <button onClick={toggleMobileMenu} className="md:hidden p-2 text-gray-600 dark:text-gray-300 focus:outline-none" aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}>
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          {/* Mobile Menu Button - REMOVED */}
         </nav>
 
         {/* Mobile Menu */}
