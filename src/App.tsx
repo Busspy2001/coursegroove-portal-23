@@ -8,7 +8,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/auth";
 import { Loader2 } from "lucide-react";
 
-// Lazy load components for better performance
+// Import Login page directly instead of lazy loading it
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+// Lazy load other components for better performance
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -16,8 +20,6 @@ const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
 const MyCourses = lazy(() => import("./pages/MyCourses"));
 const CourseProgress = lazy(() => import("./pages/CourseProgress"));
 const StudentProfile = lazy(() => import("./pages/StudentProfile"));
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Courses = lazy(() => import("./pages/Courses"));
@@ -73,6 +75,7 @@ const App = () => (
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               <Route path="/" element={<Index />} />
+              {/* Render Login and Register directly without Suspense */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
