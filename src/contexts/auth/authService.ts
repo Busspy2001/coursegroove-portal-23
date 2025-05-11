@@ -8,12 +8,18 @@ export const authService = {
   login: async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
     try {
       console.log("🔑 Tentative de connexion pour:", email);
-      // Use the rememberMe option to set the session expiry
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        // Pas besoin de spécifier expiresIn, Supabase gère les sessions selon la configuration du client
+      
+      // Reconnaitre les comptes de démonstration pour optimiser la connexion
+      const isDemoAccount = email.includes('@schoolier.com');
+      
+      // Timeout pour éviter les blocages
+      const loginPromise = supabase.auth.signInWithPassword({ email, password });
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("La connexion prend trop de temps. Veuillez réessayer.")), 10000);
       });
+      
+      // Course entre le login et le timeout
+      const { data, error } = await Promise.race([loginPromise, timeoutPromise]) as any;
       
       if (error) {
         console.error("❌ Erreur d'authentification:", error);
@@ -28,11 +34,15 @@ export const authService = {
         throw new Error("User data couldn't be retrieved");
       }
       
-      console.log("👤 Données utilisateur récupérées:", mappedUser);
-      toast({
-        title: "Connexion réussie",
-        description: `Bienvenue, ${mappedUser.name || 'utilisateur'}!`,
-      });
+      console.log("👤 Données utilisateur récupérées");
+      
+      // Pour les comptes de démo, pas besoin de toast si on redirige automatiquement
+      if (!isDemoAccount) {
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue, ${mappedUser.name || 'utilisateur'}!`,
+        });
+      }
       
       return mappedUser;
     } catch (error: any) {

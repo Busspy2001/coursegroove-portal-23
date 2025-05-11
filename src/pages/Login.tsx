@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Book, Loader2 } from "lucide-react";
+import { Book } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { LoginBenefits } from "@/components/auth/LoginBenefits";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
@@ -13,7 +13,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,20 +20,26 @@ const Login = () => {
   const isMobile = useIsMobile();
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Redirect to dashboard if already authenticated
+  // Redirection optimisée si déjà authentifié
   useEffect(() => {
-    console.log("🔍 Vérification de l'authentification dans Login:", isAuthenticated);
+    // Ajouter un timeout pour éviter le blocage trop long sur la page de login
+    const authCheckTimeout = setTimeout(() => {
+      if (authLoading) {
+        console.log("⏱️ Vérification d'authentification trop longue, continuons sans bloquer l'interface");
+      }
+    }, 1500); // 1.5 secondes maximum pour la vérification d'auth
+
+    return () => clearTimeout(authCheckTimeout);
+  }, [authLoading]);
+  
+  // Redirection rapide vers le dashboard si déjà authentifié
+  useEffect(() => {
     if (isAuthenticated) {
       console.log("✅ Utilisateur authentifié, préparation de la redirection");
       setIsRedirecting(true);
       
-      // Ajout d'un délai avant la redirection pour éviter les problèmes de navigation
-      const redirectTimer = setTimeout(() => {
-        console.log("🔄 Redirection vers le tableau de bord");
-        navigate("/dashboard");
-      }, 500);
-      
-      return () => clearTimeout(redirectTimer);
+      // Redirection immédiate - ne pas attendre
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
   
@@ -43,18 +48,6 @@ const Login = () => {
       navigate("/register");
     }
   };
-
-  // Affichage d'un indicateur de chargement pendant la vérification de l'authentification
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <Loader2 className="h-10 w-10 text-schoolier-teal animate-spin mb-4" />
-          <p className="text-muted-foreground">Vérification de votre session...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -65,10 +58,13 @@ const Login = () => {
           {/* Left side: Login form */}
           <Card className="w-full md:w-1/2 shadow-2xl">
             {isRedirecting && (
-              <Alert className="m-4 bg-green-50 text-green-800 border-green-200">
-                <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600" />
-                <AlertDescription>Vous êtes déjà connecté. Redirection vers votre tableau de bord...</AlertDescription>
-              </Alert>
+              <div className="m-4 bg-green-50 text-green-800 border border-green-200 rounded-md p-3 flex items-center">
+                <svg className="animate-spin h-5 w-5 mr-2 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Vous êtes déjà connecté. Redirection vers votre tableau de bord...</span>
+              </div>
             )}
             
             <Tabs defaultValue="login" className="w-full" onValueChange={handleTabChange}>

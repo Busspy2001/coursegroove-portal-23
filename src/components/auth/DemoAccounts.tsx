@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Info, Loader2, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
@@ -50,71 +50,40 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
     setLoginError(null);
   }, [showDemoAccounts]);
 
-  // Timeout pour éviter les blocages indéfinis
-  useEffect(() => {
-    let timeout: number | undefined;
-    
-    if (loggingIn) {
-      timeout = window.setTimeout(() => {
-        if (loggingIn) {
-          setLoggingIn(null);
-          setLoginError("La connexion a pris trop de temps. Veuillez réessayer.");
-          toast({
-            title: "Délai d'attente dépassé",
-            description: "La connexion a pris trop de temps. Veuillez réessayer.",
-            variant: "destructive",
-          });
-        }
-      }, 10000); // 10 secondes de timeout
-    }
-    
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [loggingIn, toast]);
-
   const handleDemoLogin = async (account: DemoAccount) => {
     try {
       // Réinitialiser les états
       setLoginError(null);
       setLoggingIn(account.email);
-      console.log(`🚀 Tentative de connexion avec le compte ${account.role}:`, account.email);
       
-      // Tentative de connexion
-      const user = await login(account.email, account.password, true);
-      console.log("✅ Connexion réussie:", user);
-      
-      // Afficher un message de succès
-      toast({
-        title: "Connexion réussie !",
-        description: `Bienvenue ${account.name}, vous êtes connecté en tant que ${account.role}.`,
+      // Timeout pour les connexions bloquées
+      const loginPromise = login(account.email, account.password, true);
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("La connexion a pris trop de temps.")), 5000);
       });
       
-      // Indiquer la redirection
+      // Tentative de connexion avec timeout
+      const user = await Promise.race([loginPromise, timeoutPromise]);
+      
+      // Connexion réussie, préparer la redirection
       setRedirecting(true);
       
-      // Redirection basée sur le rôle après un court délai pour laisser le temps à l'utilisateur de voir le toast
-      setTimeout(() => {
-        console.log(`🔄 Redirection vers le tableau de bord pour le rôle: ${account.role}`);
-        if (account.role === 'instructor') {
-          navigate('/instructor');
-        } else if (account.role === 'business_admin' || account.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
-      }, 500);
+      // Redirection immédiate - ne pas attendre
+      const destination = account.role === 'instructor' 
+        ? '/instructor' 
+        : account.role === 'business_admin' || account.role === 'admin'
+          ? '/admin'
+          : '/dashboard';
+      
+      navigate(destination);
       
     } catch (error: any) {
-      console.error("❌ Erreur de connexion démo:", error);
-      
-      // Message d'erreur spécifique
-      const errorMessage = error.message || "Impossible de se connecter au compte de démonstration.";
-      setLoginError(errorMessage);
+      // Erreur de connexion
+      setLoginError(error.message || "Impossible de se connecter au compte de démonstration.");
       
       toast({
         title: "Erreur de connexion",
-        description: errorMessage,
+        description: error.message || "Impossible de se connecter au compte de démonstration.",
         variant: "destructive",
       });
     } finally {
@@ -153,7 +122,10 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
       
       {redirecting && (
         <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
-          <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600" />
+          <svg className="animate-spin h-4 w-4 mr-2 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
           <AlertDescription>Redirection vers votre tableau de bord...</AlertDescription>
         </Alert>
       )}
@@ -192,7 +164,10 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
               >
                 {loggingIn === account.email ? (
                   <span className="flex items-center">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> 
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                     Connexion...
                   </span>
                 ) : "Se connecter"}
