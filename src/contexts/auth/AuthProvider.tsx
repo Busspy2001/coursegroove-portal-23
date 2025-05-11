@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, User } from "./types";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
 import { authService } from "./authService";
-import { clearSession } from "@/integrations/supabase/client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -123,19 +122,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-      console.log("🚪 Début du processus de déconnexion directement dans AuthProvider");
+      console.log("🚪 Début du processus de déconnexion dans AuthProvider");
       
-      // Utiliser directement supabase.auth.signOut() qui est la méthode standard
-      await supabase.auth.signOut();
+      // Utiliser toujours la méthode de déconnexion standard
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("❌ Erreur lors de la déconnexion:", error);
+        throw error;
+      }
       
       // Vider l'état local et les caches
       setCurrentUser(null);
       clearUserCache();
       console.log("✅ Déconnexion réussie et cache utilisateur vidé");
-      // Don't return a boolean to match the Promise<void> return type
     } catch (error) {
       console.error("❌ Erreur lors de la déconnexion dans AuthProvider:", error);
       throw error;

@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 
 interface User {
   name?: string;
@@ -28,6 +29,28 @@ interface UserMenuProps {
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    try {
+      console.log("Déconnexion depuis le menu utilisateur...");
+      await onLogout();
+      
+      toast({
+        title: "Déconnecté avec succès",
+        description: "Vous avez été déconnecté de votre compte",
+      });
+      
+      // Redirection vers la page de connexion
+      navigate("/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion depuis le menu utilisateur:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Un problème est survenu. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
+  };
   
   // Function to get role badge color
   const getRoleBadgeColor = (role?: string) => {
@@ -139,7 +162,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onLogout} className="text-red-500 cursor-pointer">
+          <DropdownMenuItem 
+            onClick={handleLogout} 
+            className="text-red-500 cursor-pointer"
+            data-navbar-logout="true"
+          >
             <LogOut className="mr-2 h-4 w-4" />
             Déconnexion
           </DropdownMenuItem>

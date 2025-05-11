@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
 import { User } from "./types";
-import { clearSession } from "@/integrations/supabase/client";
 
 export const authService = {
   login: async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
@@ -222,14 +221,22 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     try {
-      console.log("🚪 Tentative de déconnexion via authService...");
+      console.log("🚪 Tentative de déconnexion via authService");
       
-      // Utiliser directement supabase.auth.signOut() au lieu de clearSession
-      await supabase.auth.signOut();
+      // Utilisation directe et cohérente de la méthode standard
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("❌ Erreur lors de la déconnexion:", error);
+        throw error;
+      }
       
       console.log("✅ Déconnexion réussie via authService");
       
-      // Notification de déconnexion réussie
+      clearUserCache();
+      
+      // Notification de déconnexion réussie - déplacée ici car nous devons s'assurer
+      // que la déconnexion a réussi avant d'afficher ce message
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès.",

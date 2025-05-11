@@ -4,13 +4,41 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { User, Shield, Bell, CreditCard, LogOut, Upload } from "lucide-react";
 import { User as UserType } from "@/contexts/auth/types";
+import { toast } from "@/hooks/use-toast";
 
 interface ProfileSidebarProps {
   currentUser: UserType | null;
-  onLogout: () => void;
+  onLogout: () => Promise<void>;
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }) => {
+  const handleLogout = async () => {
+    try {
+      // Désactiver le bouton pendant la déconnexion
+      const button = document.querySelector('[data-profile-logout="true"]') as HTMLButtonElement;
+      if (button) button.disabled = true;
+      
+      console.log("Déconnexion du profil en cours...");
+      await onLogout();
+      
+      toast({
+        title: "Déconnecté avec succès",
+        description: "Vous avez été déconnecté de votre compte",
+      });
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion du profil:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
+        variant: "destructive",
+      });
+      
+      // Réactiver le bouton en cas d'erreur
+      const button = document.querySelector('[data-profile-logout="true"]') as HTMLButtonElement;
+      if (button) button.disabled = false;
+    }
+  };
+  
   return (
     <div className="lg:col-span-1">
       <div className="p-6 border rounded-lg shadow-sm bg-card">
@@ -51,8 +79,9 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
           </Button>
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50" 
-            onClick={onLogout}
+            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+            onClick={handleLogout}
+            data-profile-logout="true"
           >
             <LogOut className="mr-3 h-5 w-5" /> Déconnexion
           </Button>

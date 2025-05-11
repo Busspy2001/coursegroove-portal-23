@@ -41,6 +41,11 @@ const InstructorSidebar = () => {
   const handleLogout = async () => {
     try {
       console.log("Déconnexion en cours...");
+      
+      // Désactiver les interactions pendant la déconnexion pour éviter les doubles clics
+      const button = document.querySelector('[data-logout-button="true"]') as HTMLButtonElement;
+      if (button) button.disabled = true;
+      
       // Attendre la fin de la déconnexion avant de naviguer
       await logout();
       
@@ -60,6 +65,10 @@ const InstructorSidebar = () => {
         description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         variant: "destructive",
       });
+      
+      // Réactiver le bouton en cas d'erreur
+      const button = document.querySelector('[data-logout-button="true"]') as HTMLButtonElement;
+      if (button) button.disabled = false;
     }
   };
 
@@ -177,6 +186,7 @@ const InstructorSidebar = () => {
           variant="outline" 
           className="w-full flex items-center gap-2 justify-start" 
           onClick={handleLogout}
+          data-logout-button="true"
         >
           <LogOut className="h-4 w-4" />
           <span>Déconnexion</span>
