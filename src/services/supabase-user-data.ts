@@ -132,9 +132,10 @@ export const fetchUserProfile = async (userId: string): Promise<ProfilesUnified 
 
 export const updateUserProfile = async (userId: string, profileData: Partial<ProfilesUnified>): Promise<boolean> => {
   try {
+    // Corrigé ici: Nous utilisons un cast de type plus précis pour résoudre l'erreur
     const { error } = await (supabase
       .from('profiles_unified' as unknown as never)
-      .update(profileData as any)
+      .update(profileData as Record<string, unknown>)
       .eq('id', userId) as unknown as { error: any });
 
     if (error) {
