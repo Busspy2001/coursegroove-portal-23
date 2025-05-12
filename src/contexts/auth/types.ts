@@ -10,7 +10,7 @@ export interface User {
   phone?: string;
 }
 
-export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo';
+export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo' | 'admin';
 
 export interface AuthContextType {
   currentUser: User | null;

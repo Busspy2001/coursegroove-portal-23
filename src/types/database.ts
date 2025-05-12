@@ -1,4 +1,3 @@
-
 // These types represent the database structures we've created
 // They're used as a workaround since we can't modify the auto-generated types.ts
 
@@ -14,6 +13,7 @@ export interface ProfilesUnified {
   is_demo: boolean | null;
   created_at: string | null;
   bio: string | null;
+  phone: string | null;
 }
 
 export interface Course {

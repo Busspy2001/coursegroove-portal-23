@@ -1,4 +1,3 @@
-
 import { supabase, userCache } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { User, UserRole } from "./types";
@@ -55,9 +54,10 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
-          role: (profile?.role as string) || inferredRole,
+          role: (profile?.role as UserRole) || inferredRole,
           avatar: avatarUrl,
-          bio: profile?.bio || ''
+          bio: profile?.bio || '',
+          phone: profile?.phone || ''
         };
         
         console.log("👤 Profil utilisateur avec rôle:", user.role);
@@ -78,7 +78,8 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           name: supabaseUser.user_metadata?.name || 'User',
           role: inferredRole,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`,
-          bio: ''
+          bio: '',
+          phone: ''
         };
         
         // Mettre en cache même l'utilisateur par défaut
@@ -107,7 +108,8 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
       name: supabaseUser.user_metadata?.name || 'User',
       role: inferredRole,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseUser.user_metadata?.name || 'User')}&background=0D9488&color=fff`,
-      bio: ''
+      bio: '',
+      phone: ''
     };
     
     userCache.set(supabaseUser.id, defaultUser);
