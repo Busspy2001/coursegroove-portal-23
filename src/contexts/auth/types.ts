@@ -6,7 +6,11 @@ export interface User {
   role?: string;
   avatar?: string;
   emailVerified?: boolean;
+  bio?: string;
+  phone?: string;
 }
+
+export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo';
 
 export interface AuthContextType {
   currentUser: User | null;

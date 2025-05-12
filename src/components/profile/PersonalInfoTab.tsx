@@ -11,13 +11,11 @@ import { User as UserType } from "@/contexts/auth/types";
 
 interface PersonalInfoTabProps {
   currentUser: UserType | null;
-  initialName: string;
-  initialBio: string;
 }
 
-const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ currentUser, initialName, initialBio }) => {
-  const [name, setName] = useState(initialName);
-  const [bio, setBio] = useState(initialBio);
+const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ currentUser }) => {
+  const [name, setName] = useState(currentUser?.name || "");
+  const [bio, setBio] = useState(currentUser?.bio || "");
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 

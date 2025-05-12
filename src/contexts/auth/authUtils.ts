@@ -55,7 +55,7 @@ export const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promis
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           name: profile?.full_name || supabaseUser.user_metadata?.name || 'User',
-          role: (profile?.role as UserRole) || inferredRole,
+          role: (profile?.role as string) || inferredRole,
           avatar: avatarUrl,
           bio: profile?.bio || ''
         };
