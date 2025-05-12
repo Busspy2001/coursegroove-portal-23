@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,23 +28,18 @@ interface UserMenuProps {
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
-    if (isLoggingOut) return; // Éviter les doubles clics
-    
     try {
-      setIsLoggingOut(true);
       console.log("Déconnexion depuis le menu utilisateur...");
-      await onLogout();
       
       toast({
-        title: "Déconnecté avec succès",
-        description: "Vous avez été déconnecté de votre compte",
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter pendant la déconnexion...",
       });
       
-      // Redirection vers la page de connexion
-      navigate("/login");
+      // Appel à onLogout qui est logout de l'AuthProvider avec un callback
+      await onLogout();
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis le menu utilisateur:", error);
       toast({
@@ -52,8 +47,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         description: "Un problème est survenu. Veuillez réessayer.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoggingOut(false);
     }
   };
   
@@ -169,16 +162,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem 
             onClick={handleLogout} 
-            disabled={isLoggingOut}
-            className={`text-red-500 cursor-pointer ${isLoggingOut ? 'opacity-50' : ''}`}
+            className="text-red-500 cursor-pointer"
             data-navbar-logout="true"
           >
-            {isLoggingOut ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <LogOut className="mr-2 h-4 w-4" />
-            )}
-            {isLoggingOut ? "Déconnexion en cours..." : "Déconnexion"}
+            <LogOut className="mr-2 h-4 w-4" />
+            Déconnexion
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

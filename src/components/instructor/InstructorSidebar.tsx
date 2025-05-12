@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
@@ -34,40 +33,38 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 const InstructorSidebar = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, isLoggingOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
-    if (isLoggingOut) return; // Éviter les doubles clics
+    if (isLoggingOut) return;
     
     try {
-      setIsLoggingOut(true);
       console.log("Déconnexion en cours depuis InstructorSidebar...");
       
-      // Attendre la fin de la déconnexion avant de naviguer
-      await logout();
-      
-      // Afficher un toast de succès uniquement si la déconnexion a réussi
       toast({
-        title: "Déconnecté avec succès",
-        description: "Vous avez été déconnecté de votre compte",
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter pendant la déconnexion...",
       });
       
-      // Redirection vers la page de connexion
-      navigate("/login");
+      // Utiliser le callback pour rediriger après déconnexion complète
+      await logout(() => {
+        navigate("/login");
+        
+        toast({
+          title: "Déconnexion réussie",
+          description: "Vous avez été déconnecté de votre compte",
+        });
+      });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis InstructorSidebar:", error);
-      // Afficher un toast d'erreur avec plus de détails
       toast({
         title: "Erreur de déconnexion",
         description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoggingOut(false);
     }
   };
 

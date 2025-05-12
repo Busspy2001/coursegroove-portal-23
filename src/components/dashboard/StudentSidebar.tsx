@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -10,26 +11,32 @@ import { toast } from "@/hooks/use-toast";
 const StudentSidebar = () => {
   const {
     currentUser,
-    logout
+    logout,
+    isLoggingOut
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
-    if (isLoggingOut) return; // Éviter les doubles clics
+    if (isLoggingOut) return;
     
     try {
-      setIsLoggingOut(true);
       console.log("Déconnexion en cours depuis StudentSidebar...");
-      await logout();
       
       toast({
-        title: "Déconnecté avec succès",
-        description: "Vous avez été déconnecté de votre compte",
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter pendant la déconnexion...",
       });
       
-      navigate("/login");
+      // Utiliser le callback pour rediriger après la déconnexion complète
+      await logout(() => {
+        navigate("/login");
+        
+        toast({
+          title: "Déconnexion réussie",
+          description: "Vous avez été déconnecté de votre compte",
+        });
+      });
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
       toast({
@@ -37,8 +44,6 @@ const StudentSidebar = () => {
         description: "Un problème est survenu. Veuillez réessayer.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoggingOut(false);
     }
   };
   

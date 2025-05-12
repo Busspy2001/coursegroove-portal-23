@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Check for existing session on mount - optimisé
   useEffect(() => {
@@ -122,12 +123,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const logout = async (callback?: () => void): Promise<void> => {
     try {
+      if (isLoggingOut) return; // Éviter les doubles appels
+      
+      setIsLoggingOut(true);
       setLoading(true);
       console.log("🚪 Début du processus de déconnexion dans AuthProvider");
       
-      // Utiliser directement supabase.auth.signOut() pour une déconnexion cohérente
+      // Vider l'état local et les caches avant la déconnexion Supabase
+      setCurrentUser(null);
+      clearUserCache();
+      console.log("🧹 Nettoyage du cache utilisateur effectué");
+      
+      // Déconnexion Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -135,21 +144,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
-      // Vider l'état local et les caches
-      setCurrentUser(null);
-      clearUserCache();
-      console.log("✅ Déconnexion réussie et cache utilisateur vidé");
+      // Vérifier que la session est bien détruite
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.warn("⚠️ La session persiste après déconnexion, tentative de nettoyage forcé");
+        localStorage.removeItem('supabase.auth.token');
+      } else {
+        console.log("✅ Session correctement détruite");
+      }
+      
+      // Délai pour assurer la synchronisation complète
+      setTimeout(() => {
+        setLoading(false);
+        setIsLoggingOut(false);
+        console.log("✅ Déconnexion réussie et nettoyage terminé");
+        
+        // Exécuter le callback de redirection si fourni
+        if (callback) {
+          console.log("🔀 Exécution du callback de redirection");
+          callback();
+        }
+      }, 300); // Délai de 300ms pour assurer la synchronisation
+      
     } catch (error) {
       console.error("❌ Erreur lors de la déconnexion dans AuthProvider:", error);
-      throw error;
-    } finally {
       setLoading(false);
+      setIsLoggingOut(false);
+      throw error;
     }
   };
 
   const value = {
     currentUser,
     loading,
+    isLoggingOut,
     login,
     register: authService.register,
     logout,

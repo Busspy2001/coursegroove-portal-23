@@ -31,8 +31,10 @@ const Navbar = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/");
+    // Utilise le callback pour rediriger seulement après déconnexion complète
+    await logout(() => {
+      navigate("/login");
+    });
   };
 
   const toggleMobileMenu = () => {
@@ -94,8 +96,6 @@ const Navbar = () => {
                 <SearchBar className="w-full" />
               </SheetContent>
             </Sheet>}
-
-          {/* Mobile Menu Button - REMOVED */}
         </nav>
 
         {/* Mobile Menu */}

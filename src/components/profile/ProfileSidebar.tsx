@@ -12,20 +12,16 @@ interface ProfileSidebarProps {
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }) => {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
   const handleLogout = async () => {
-    if (isLoggingOut) return; // Éviter les doubles clics
-    
     try {
-      setIsLoggingOut(true);
       console.log("Déconnexion du profil en cours...");
-      await onLogout();
       
       toast({
-        title: "Déconnecté avec succès",
-        description: "Vous avez été déconnecté de votre compte",
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter pendant la déconnexion...",
       });
+      
+      await onLogout();
     } catch (error) {
       console.error("Erreur lors de la déconnexion du profil:", error);
       toast({
@@ -33,8 +29,6 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
         description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoggingOut(false);
     }
   };
   
@@ -80,15 +74,10 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
             variant="ghost" 
             className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
             onClick={handleLogout}
-            disabled={isLoggingOut}
             data-profile-logout="true"
           >
-            {isLoggingOut ? (
-              <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-            ) : (
-              <LogOut className="mr-3 h-5 w-5" />
-            )}
-            {isLoggingOut ? "Déconnexion en cours..." : "Déconnexion"}
+            <LogOut className="mr-3 h-5 w-5" />
+            Déconnexion
           </Button>
         </nav>
       </div>
