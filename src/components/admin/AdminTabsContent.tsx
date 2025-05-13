@@ -11,7 +11,7 @@ import AdminUserActivity from "@/components/admin/AdminUserActivity";
 import AdminUserSupport from "@/components/admin/AdminUserSupport";
 import AdminInternalMessages from "@/components/admin/communication/AdminInternalMessages";
 import AdminFaq from "@/components/admin/communication/AdminFaq";
-import AdminNotificationsManager from "@/components/admin/notifications/AdminNotificationsManager";
+import { AdminNotificationsManager } from "@/components/admin/notifications/AdminNotificationsManager";
 import AdminActivityLog from "@/components/admin/settings/AdminActivityLog";
 import AdminMobileSettings from "@/components/admin/settings/AdminMobileSettings";
 import AdminApiSettings from "@/components/admin/settings/AdminApiSettings";

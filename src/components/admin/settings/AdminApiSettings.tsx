@@ -19,7 +19,8 @@ import {
   AlertCircle,
   CheckCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  MessageSquare
 } from "lucide-react";
 import { 
   Table, 
