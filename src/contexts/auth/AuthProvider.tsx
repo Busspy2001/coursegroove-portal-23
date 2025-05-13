@@ -4,6 +4,7 @@ import { supabase, userCache } from "@/integrations/supabase/client";
 import { AuthContextType, User, UserRole } from "./types";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
 import { authService } from "./authService";
+import { toast } from "@/hooks/use-toast";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -181,6 +182,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log("🚪 Début du processus de déconnexion dans AuthProvider");
       
+      // Notification de déconnexion en cours
+      toast({
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter pendant la déconnexion...",
+      });
+      
       // Vider l'état local et les caches avant la déconnexion Supabase
       setCurrentUser(null);
       clearUserCache();
@@ -191,6 +198,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error("❌ Erreur lors de la déconnexion:", error);
+        toast({
+          title: "Erreur de déconnexion",
+          description: error.message || "Un problème est survenu lors de la déconnexion.",
+          variant: "destructive",
+        });
         throw error;
       }
       
@@ -202,6 +214,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         console.log("✅ Session correctement détruite");
       }
+      
+      // Notification de déconnexion réussie
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
+      });
       
       // Délai pour assurer la synchronisation complète
       setTimeout(() => {

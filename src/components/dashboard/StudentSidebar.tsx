@@ -1,12 +1,10 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Home, BookOpen, Award, Star, TrendingUp, MessageSquare, Settings, LogOut, Loader2 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
 
 const StudentSidebar = () => {
   const {
@@ -23,27 +21,12 @@ const StudentSidebar = () => {
     try {
       console.log("Déconnexion en cours depuis StudentSidebar...");
       
-      toast({
-        title: "Déconnexion en cours",
-        description: "Veuillez patienter pendant la déconnexion...",
-      });
-      
       // Utiliser le callback pour rediriger après la déconnexion complète
       await logout(() => {
-        navigate("/login");
-        
-        toast({
-          title: "Déconnexion réussie",
-          description: "Vous avez été déconnecté de votre compte",
-        });
+        navigate("/login", { replace: true });
       });
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
-      toast({
-        title: "Erreur de déconnexion",
-        description: "Un problème est survenu. Veuillez réessayer.",
-        variant: "destructive",
-      });
     }
   };
   

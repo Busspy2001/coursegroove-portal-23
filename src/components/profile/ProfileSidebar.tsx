@@ -1,10 +1,10 @@
 
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { User, Shield, Bell, CreditCard, LogOut, Upload, Loader2 } from "lucide-react";
 import { User as UserType } from "@/contexts/auth/types";
-import { toast } from "@/hooks/use-toast";
 
 interface ProfileSidebarProps {
   currentUser: UserType | null;
@@ -12,23 +12,18 @@ interface ProfileSidebarProps {
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }) => {
+  const navigate = useNavigate();
+  
   const handleLogout = async () => {
     try {
       console.log("Déconnexion du profil en cours...");
       
-      toast({
-        title: "Déconnexion en cours",
-        description: "Veuillez patienter pendant la déconnexion...",
+      // Utiliser le callback pour rediriger après la déconnexion complète
+      await onLogout(() => {
+        navigate("/login", { replace: true });
       });
-      
-      await onLogout();
     } catch (error) {
       console.error("Erreur lors de la déconnexion du profil:", error);
-      toast({
-        title: "Erreur de déconnexion",
-        description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
-        variant: "destructive",
-      });
     }
   };
   

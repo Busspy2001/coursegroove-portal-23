@@ -1,8 +1,10 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Globe, Home, MessageSquare, Search, ShoppingCart, User, BookIcon, Settings } from "lucide-react";
+import { BookOpen, Globe, Home, MessageSquare, Search, ShoppingCart, User, BookIcon, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "./SearchBar";
+import { toast } from "@/hooks/use-toast";
 
 interface User {
   name?: string;
@@ -27,6 +29,26 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onClose
 }) => {
   const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    try {
+      // Fermer le menu mobile d'abord
+      onClose();
+      
+      // Notification de déconnexion en cours
+      toast({
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter pendant la déconnexion...",
+      });
+      
+      // Déconnexion avec redirection
+      await onLogout(() => {
+        navigate("/login", { replace: true });
+      });
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion depuis le menu mobile:", error);
+    }
+  };
   
   return (
     <div className="md:hidden fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-900 animate-fade-in">
@@ -152,7 +174,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <span className="font-spartan">Administration</span>
               </Link>
             )}
-            <Button variant="destructive" onClick={onLogout} className="w-full mt-4 font-spartan">
+            <Button 
+              variant="destructive" 
+              onClick={handleLogout} 
+              className="w-full mt-4 font-spartan flex items-center justify-center"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
               Déconnexion
             </Button>
           </div>

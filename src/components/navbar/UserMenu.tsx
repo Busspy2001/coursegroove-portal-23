@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
+import { Bell, ChevronDown, Home, Book, Settings, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/hooks/use-toast";
 
 interface User {
   name?: string;
@@ -33,20 +32,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     try {
       console.log("Déconnexion depuis le menu utilisateur...");
       
-      toast({
-        title: "Déconnexion en cours",
-        description: "Veuillez patienter pendant la déconnexion...",
+      // Appel à onLogout qui est logout de l'AuthProvider avec un callback pour redirection
+      await onLogout(() => {
+        navigate("/login", { replace: true });
       });
-      
-      // Appel à onLogout qui est logout de l'AuthProvider avec un callback
-      await onLogout();
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis le menu utilisateur:", error);
-      toast({
-        title: "Erreur de déconnexion",
-        description: "Un problème est survenu. Veuillez réessayer.",
-        variant: "destructive",
-      });
     }
   };
   

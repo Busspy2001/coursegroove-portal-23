@@ -30,7 +30,6 @@ import {
   LogOut,
   Loader2
 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 
 const InstructorSidebar = () => {
   const { currentUser, logout, isLoggingOut } = useAuth();
@@ -44,27 +43,12 @@ const InstructorSidebar = () => {
     try {
       console.log("Déconnexion en cours depuis InstructorSidebar...");
       
-      toast({
-        title: "Déconnexion en cours",
-        description: "Veuillez patienter pendant la déconnexion...",
-      });
-      
       // Utiliser le callback pour rediriger après déconnexion complète
       await logout(() => {
-        navigate("/login");
-        
-        toast({
-          title: "Déconnexion réussie",
-          description: "Vous avez été déconnecté de votre compte",
-        });
+        navigate("/login", { replace: true });
       });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis InstructorSidebar:", error);
-      toast({
-        title: "Erreur de déconnexion",
-        description: "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
-        variant: "destructive",
-      });
     }
   };
 
