@@ -33,7 +33,7 @@ export const authService = {
       
       if (isDemoAccount) {
         // Fast path for demo accounts - infer role directly from email
-        const inferredRole = email.includes("instructor") ? "instructor" : 
+        const inferredRole = email.includes("prof") ? "instructor" : 
                             email.includes("admin") ? "admin" : 
                             email.includes("business") ? "business_admin" : "student";
                             
@@ -43,7 +43,7 @@ export const authService = {
           email: data.user.email,
           name: data.user.user_metadata?.name || email.split('@')[0],
           role: inferredRole as any,
-          avatar: `https://api.dicebear.com/6.x/identicon/svg?seed=${email.split('@')[0]}`
+          avatar: `https://api.dicebear.com/6.x/initials/svg?seed=${email.split('@')[0]}&backgroundColor=0D9488`
         };
         
         // Store in cache for future lookups

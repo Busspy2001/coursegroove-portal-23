@@ -34,10 +34,32 @@ export const clearUserCache = () => {
 if (typeof window !== 'undefined') {
   (supabase.auth as any).admin = {
     listUsers: async () => {
-      // This is just a stub that will return empty results in the frontend
-      // Real admin functionality would require backend implementation
+      // Pour les besoins de la démo, nous simulons cette fonction
       console.log("Admin listUsers called - this is a stub for demo purposes");
       return { data: { users: [] }, error: null };
+    },
+    getUserByEmail: async (email: string) => {
+      // Tenter d'obtenir l'utilisateur via l'email
+      console.log("Récupération d'utilisateur par email:", email);
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ 
+          email, 
+          password: 'demo123' // Utiliser mot de passe démo connu
+        });
+        
+        if (error) {
+          console.log("Erreur lors de la récupération d'utilisateur par email:", error);
+          return { data: null, error };
+        }
+        
+        // Se déconnecter immédiatement pour ne pas affecter l'état d'authentification
+        await supabase.auth.signOut();
+        
+        return { data: { user: data.user }, error: null };
+      } catch (err) {
+        console.error("Erreur lors de getUserByEmail:", err);
+        return { data: null, error: err };
+      }
     },
     // Utilisation de la méthode standard de déconnexion pour assurer la cohérence
     signOut: async () => {

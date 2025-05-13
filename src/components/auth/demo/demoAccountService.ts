@@ -14,7 +14,7 @@ export const getDemoAccounts = (): DemoAccount[] => {
       password: 'demo123',
       role: 'student',
       name: 'Jean Dupont',
-      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=jean',
+      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=JD&backgroundColor=0D9488',
       description: 'Accédez à différents cours et suivez votre progression.',
       features: [
         'Parcourir le catalogue de cours',
@@ -29,7 +29,7 @@ export const getDemoAccounts = (): DemoAccount[] => {
       password: 'demo123',
       role: 'instructor',
       name: 'Marie Laurent',
-      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=marie',
+      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=ML&backgroundColor=4338CA',
       description: 'Créez et gérez des cours, interagissez avec vos étudiants.',
       features: [
         'Créer et publier des cours',
@@ -44,7 +44,7 @@ export const getDemoAccounts = (): DemoAccount[] => {
       password: 'demo123',
       role: 'admin',
       name: 'Admin Demo',
-      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=admin',
+      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=AD&backgroundColor=BE185D',
       description: 'Supervisez tous les aspects de la plateforme.',
       features: [
         'Gérer les utilisateurs et les cours',
@@ -59,7 +59,7 @@ export const getDemoAccounts = (): DemoAccount[] => {
       password: 'demo123',
       role: 'business_admin',
       name: 'Sophie Martin',
-      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=sophie',
+      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=SM&backgroundColor=D97706',
       description: 'Gérez la formation pour votre entreprise.',
       features: [
         'Gérer les utilisateurs de l\'entreprise',

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +12,7 @@ import { DemoAccountCard } from './demo/DemoAccountCard';
 import { DemoInfoAlert } from './demo/DemoInfoAlert';
 import { getDemoAccounts } from './demo/demoAccountService';
 import { DemoAccount } from './demo/types';
+import { ensureDemoAccountsExist } from './demo/initDemoAccounts';
 
 interface DemoAccountsProps {
   isLoading?: boolean;
@@ -24,9 +24,23 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
   const { loginWithDemo, isLoggingIn } = useAuth();
   const demoAccounts = getDemoAccounts();
   const [loggingInAccount, setLoggingInAccount] = useState<string | null>(null);
+  const [initializing, setInitializing] = useState(true);
   
   // État de chargement global
-  const isLoading = externalIsLoading || isLoggingIn || !!loggingInAccount;
+  const isLoading = externalIsLoading || isLoggingIn || !!loggingInAccount || initializing;
+
+  // S'assurer que les comptes démo existent au chargement du composant
+  useEffect(() => {
+    const initAccounts = async () => {
+      try {
+        await ensureDemoAccountsExist();
+      } finally {
+        setInitializing(false);
+      }
+    };
+    
+    initAccounts();
+  }, []);
 
   // Fonction de connexion optimisée avec redirection immédiate garantie
   const handleLogin = async (account: DemoAccount) => {
@@ -55,7 +69,9 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
           
           // Redirection immédiate et forcée vers le tableau de bord approprié
           // Utilisation de replace:true pour empêcher le retour à la page de login
-          navigate(destination, { replace: true });
+          setTimeout(() => {
+            navigate(destination, { replace: true });
+          }, 0);
         })
         .catch((error) => {
           console.error(`❌ Erreur de connexion démo pour ${account.role}:`, error);

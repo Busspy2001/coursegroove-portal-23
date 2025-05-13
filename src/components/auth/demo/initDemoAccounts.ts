@@ -1,0 +1,136 @@
+
+import { supabase } from "@/integrations/supabase/client";
+import { getDemoAccounts } from "./demoAccountService";
+import { toast } from "@/hooks/use-toast";
+
+/**
+ * Crée ou met à jour les comptes de démonstration dans la base de données Supabase
+ * Cette fonction s'assure que les comptes démo sont toujours disponibles
+ */
+export const initDemoAccounts = async (): Promise<boolean> => {
+  try {
+    console.log("🚀 Initialisation des comptes démo...");
+    const demoAccounts = getDemoAccounts();
+    let success = true;
+
+    // Créer ou mettre à jour chaque compte démo
+    for (const account of demoAccounts) {
+      try {
+        // Vérifier si le compte existe déjà
+        const { data: existingUsers } = await supabase.auth.admin.listUsers();
+        const userExists = existingUsers?.users && existingUsers.users.some(user => user.email === account.email);
+
+        if (!userExists) {
+          console.log(`➕ Création du compte démo: ${account.email} (${account.role})`);
+          
+          // Créer le compte
+          const { data, error } = await supabase.auth.signUp({
+            email: account.email,
+            password: account.password,
+            options: {
+              data: {
+                name: account.name,
+                is_demo: true
+              }
+            }
+          });
+
+          if (error) {
+            console.error(`❌ Erreur lors de la création du compte démo ${account.email}:`, error);
+            success = false;
+            continue;
+          }
+
+          // S'assurer que le profil est créé avec le bon rôle
+          if (data.user) {
+            const { error: profileError } = await supabase
+              .from('profiles_unified')
+              .upsert({
+                id: data.user.id,
+                full_name: account.name,
+                email: account.email,
+                role: account.role,
+                avatar_url: account.avatar,
+                is_demo: true,
+                created_at: new Date().toISOString()
+              });
+
+            if (profileError) {
+              console.error(`❌ Erreur lors de la création du profil pour ${account.email}:`, profileError);
+              success = false;
+            } else {
+              console.log(`✅ Profil créé pour ${account.email}`);
+            }
+          }
+        } else {
+          console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
+          
+          // Mettre à jour le profil pour s'assurer que le rôle est correct
+          const { data: userData } = await supabase.auth.admin.getUserByEmail(account.email);
+          
+          if (userData?.user) {
+            const { error: profileError } = await supabase
+              .from('profiles_unified')
+              .upsert({
+                id: userData.user.id,
+                full_name: account.name,
+                email: account.email,
+                role: account.role,
+                avatar_url: account.avatar,
+                is_demo: true
+              });
+
+            if (profileError) {
+              console.error(`❌ Erreur lors de la mise à jour du profil pour ${account.email}:`, profileError);
+              success = false;
+            } else {
+              console.log(`✅ Profil mis à jour pour ${account.email}`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`❌ Erreur lors du traitement du compte ${account.email}:`, error);
+        success = false;
+      }
+    }
+
+    console.log(`✅ Initialisation des comptes démo ${success ? 'réussie' : 'partiellement réussie'}`);
+    return success;
+  } catch (error) {
+    console.error("❌ Erreur lors de l'initialisation des comptes démo:", error);
+    return false;
+  }
+};
+
+/**
+ * Appelle initDemoAccounts avec gestion des erreurs et notification
+ */
+export const ensureDemoAccountsExist = async (silent: boolean = true): Promise<void> => {
+  try {
+    const success = await initDemoAccounts();
+    
+    if (!silent) {
+      if (success) {
+        toast({
+          title: "Comptes démo initialisés",
+          description: "Les comptes de démonstration sont prêts à être utilisés.",
+        });
+      } else {
+        toast({
+          title: "Initialisation partielle",
+          description: "Certains comptes démo n'ont pas pu être initialisés.",
+          variant: "destructive",
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'initialisation des comptes démo:", error);
+    if (!silent) {
+      toast({
+        title: "Erreur d'initialisation",
+        description: "Impossible d'initialiser les comptes démo.",
+        variant: "destructive",
+      });
+    }
+  }
+};

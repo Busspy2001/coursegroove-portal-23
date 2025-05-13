@@ -12,6 +12,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,6 +30,12 @@ const Login = () => {
 
     return () => clearTimeout(authCheckTimeout);
   }, [authLoading]);
+  
+  // Initialiser les comptes démo lors du chargement de la page
+  useEffect(() => {
+    // Assurer que les comptes démo sont créés dans Supabase
+    ensureDemoAccountsExist();
+  }, []);
   
   // Immediate redirection for authenticated users
   useEffect(() => {

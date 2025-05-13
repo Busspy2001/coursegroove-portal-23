@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { AuthContextType, User } from "./types";
+import { supabase, userCache } from "@/integrations/supabase/client";
+import { AuthContextType, User, UserRole } from "./types";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
 import { authService } from "./authService";
 
@@ -131,33 +131,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoggingIn(true);
     setLoading(true);
     
-    // Pre-determine the role from email to speed up processing
-    const inferredRole = email.includes("instructor") ? "instructor" : 
-                        email.includes("admin") ? "admin" : 
-                        email.includes("business") ? "business_admin" : "student";
+    // Determine demo role from email for faster processing
+    let inferredRole;
+    if (email.includes("prof")) inferredRole = "instructor";
+    else if (email.includes("admin")) inferredRole = "admin";
+    else if (email.includes("business")) inferredRole = "business_admin";
+    else inferredRole = "student";
     
     console.log(`👤 Rôle pré-déterminé pour connexion rapide: ${inferredRole}`);
     
-    try {
-      // Use the regular login method but optimize for demo accounts
-      const user = await authService.login(email, password, false);
-      console.log("✅ Connexion démo réussie, utilisateur:", user);
-      
-      // Ensure the user has the correct role based on email patterns for demo accounts
-      if (user.role !== inferredRole) {
-        console.log(`⚠️ Correction de rôle: ${user.role} → ${inferredRole}`);
-        user.role = inferredRole as any;
-      }
-      
-      setCurrentUser(user);
-      return user;
-    } catch (error) {
+    // Direct Supabase login for better performance
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email, 
+      password
+    });
+    
+    if (error) {
       console.error("❌ Erreur lors de la connexion démo:", error);
       throw error;
-    } finally {
-      setIsLoggingIn(false);
-      setLoading(false);
     }
+    
+    if (!data.user) {
+      throw new Error("Utilisateur non trouvé");
+    }
+    
+    // Fast path: construct user without DB queries
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email!,
+      name: data.user.user_metadata?.name || email.split('@')[0],
+      role: inferredRole as UserRole,
+      avatar: `https://api.dicebear.com/6.x/initials/svg?seed=${email.split('@')[0]}&backgroundColor=0D9488`
+    };
+    
+    // Cache for future access
+    userCache.set(data.user.id, user);
+    setCurrentUser(user);
+    
+    console.log("✅ Connexion démo réussie, utilisateur:", user.name, "role:", user.role);
+    return user;
   };
 
   const logout = async (callback?: () => void): Promise<void> => {
