@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminStatisticsTrends } from "@/components/admin/statistics/AdminStatisticsTrends";
+import AdminStatisticsTrends from "@/components/admin/statistics/AdminStatisticsTrends";
 
 const AdminStatisticsTrendsPage = () => {
   return (

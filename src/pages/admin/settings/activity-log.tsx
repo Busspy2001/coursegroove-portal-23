@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminActivityLog } from "@/components/admin/settings/AdminActivityLog";
+import AdminActivityLog from "@/components/admin/settings/AdminActivityLog";
 
 const AdminActivityLogPage = () => {
   return (

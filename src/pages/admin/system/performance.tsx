@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminSystemPerformance } from "@/components/admin/system/AdminSystemPerformance";
+import AdminSystemPerformance from "@/components/admin/system/AdminSystemPerformance";
 
 const AdminSystemPerformancePage = () => {
   return (

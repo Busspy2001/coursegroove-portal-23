@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminNotificationTemplates } from "@/components/admin/notifications/AdminNotificationTemplates";
+import AdminNotificationTemplates from "@/components/admin/notifications/AdminNotificationTemplates";
 
 const AdminNotificationTemplatesPage = () => {
   return (

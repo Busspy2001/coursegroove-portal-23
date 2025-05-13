@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminCourseModeration } from "@/components/admin";
+import AdminCourseModeration from "@/components/admin/AdminCourseModeration";
 
 const AdminCoursesPage = () => {
   return (

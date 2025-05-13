@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminMarketingSeo } from "@/components/admin/marketing/AdminMarketingSeo";
+import AdminMarketingSeo from "@/components/admin/marketing/AdminMarketingSeo";
 
 const AdminMarketingSeoPage = () => {
   return (

@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminMobileSettings } from "@/components/admin/settings/AdminMobileSettings";
+import AdminMobileSettings from "@/components/admin/settings/AdminMobileSettings";
 
 const AdminMobileSettingsPage = () => {
   return (

@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gauge } from "lucide-react";
-import { DashboardStatCard } from "./DashboardStatCard";
+import DashboardStatCard from "./DashboardStatCard";
 
 const AdminQuickStats = () => {
   return (
@@ -11,26 +11,34 @@ const AdminQuickStats = () => {
         <DashboardStatCard 
           title="Utilisateurs actifs"
           value="1,234"
-          delta="+12%"
-          deltaType="increase"
+          icon={Gauge}
+          iconColor="text-blue-500"
+          subtitle="+12% par rapport au mois dernier"
+          subtitleColor="text-green-500"
         />
         <DashboardStatCard 
           title="Nouveaux cours"
           value="28"
-          delta="+3"
-          deltaType="increase"
+          icon={Gauge}
+          iconColor="text-amber-500"
+          subtitle="+3 cette semaine"
+          subtitleColor="text-green-500"
         />
         <DashboardStatCard 
           title="Revenus (30j)"
           value="€9,876"
-          delta="+7.8%"
-          deltaType="increase"
+          icon={Gauge}
+          iconColor="text-green-500"
+          subtitle="+7.8% par rapport au mois dernier"
+          subtitleColor="text-green-500"
         />
         <DashboardStatCard 
           title="Entreprises"
           value="48"
-          delta="stable"
-          deltaType="unchanged"
+          icon={Gauge}
+          iconColor="text-purple-500"
+          subtitle="stable"
+          subtitleColor="text-gray-500"
         />
       </div>
       

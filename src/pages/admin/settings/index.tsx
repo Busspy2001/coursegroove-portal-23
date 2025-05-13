@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminPlatformSettings } from "@/components/admin/settings/AdminPlatformSettings";
+import AdminPlatformSettings from "@/components/admin/settings/AdminPlatformSettings";
 
 const AdminSettingsPage = () => {
   return (

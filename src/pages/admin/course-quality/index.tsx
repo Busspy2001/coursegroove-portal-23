@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminCourseQuality } from "@/components/admin/courses/AdminCourseQuality";
+import AdminCourseQuality from "@/components/admin/courses/AdminCourseQuality";
 
 const AdminCourseQualityPage = () => {
   return (

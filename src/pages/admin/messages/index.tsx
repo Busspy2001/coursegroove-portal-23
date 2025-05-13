@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminInternalMessages } from "@/components/admin/communication/AdminInternalMessages";
+import AdminInternalMessages from "@/components/admin/communication/AdminInternalMessages";
 
 const AdminInternalMessagesPage = () => {
   return (

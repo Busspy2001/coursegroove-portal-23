@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminUserRoles } from "@/components/admin/users/AdminUserRoles";
+import AdminUserRoles from "@/components/admin/users/AdminUserRoles";
 
 const AdminUserRolesPage = () => {
   return (

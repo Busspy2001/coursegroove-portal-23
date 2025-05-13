@@ -1,6 +1,6 @@
 
 import { AdminLayout } from "@/components/admin";
-import { AdminQuickStats } from "@/components/admin/dashboard/AdminQuickStats";
+import AdminQuickStats from "@/components/admin/dashboard/AdminQuickStats";
 
 const AdminQuickStatsPage = () => {
   return (
