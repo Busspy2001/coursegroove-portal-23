@@ -12,6 +12,7 @@ import {
 } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { UserRole } from "@/types/database";
 
 const AdminDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -105,16 +106,20 @@ const AdminDashboard = () => {
     );
   }
 
+  // Cast role to a valid UserRole when it's known to be a valid role at this point
+  const userRole = currentUser?.role || "student" as UserRole;
+  const userName = currentUser?.name || "";
+
   return (
     <AdminLayout>
-      <AdminHeader role={currentUser?.role || ""} name={currentUser?.name || ""} />
+      <AdminHeader role={userRole} name={userName} />
       
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <AdminTabsNavigation 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
-            userRole={currentUser?.role || ""} 
+            userRole={userRole} 
           />
           <AdminTabsContent />
         </Tabs>

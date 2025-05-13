@@ -3,7 +3,7 @@ import React from "react";
 import { UserRole } from "@/types/database";
 
 interface AdminHeaderProps {
-  role: UserRole | null;
+  role: UserRole;
   name: string | undefined;
 }
 
