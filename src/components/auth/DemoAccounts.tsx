@@ -14,7 +14,7 @@ import { UserRole } from "@/contexts/auth/types";
 export interface DemoAccount {
   email: string;
   password: string;
-  role: UserRole;
+  role: UserRole;  // Changed to UserRole type
   name: string;
 }
 
@@ -34,7 +34,7 @@ export const demoAccounts: DemoAccount[] = [
   {
     email: "admin@schoolier.com",
     password: "password123",
-    role: "admin" as UserRole,
+    role: "admin", // Now "admin" is a valid UserRole
     name: "Administrateur Démo"
   }
 ];
