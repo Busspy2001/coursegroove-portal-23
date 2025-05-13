@@ -32,7 +32,7 @@ export const demoAccounts: DemoAccount[] = [
   {
     email: "admin@schoolier.com",
     password: "password123",
-    role: "business_admin",
+    role: "admin",
     name: "Administrateur Démo"
   }
 ];
@@ -74,6 +74,24 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
         
         // Wait a bit to ensure the account is created in Supabase
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Update the role directly in the database for admin accounts
+        if (account.role === "admin" || account.role === "business_admin") {
+          // Get the user ID first
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData?.user) {
+            const { error: updateError } = await supabase
+              .from('profiles_unified')
+              .update({ role: account.role })
+              .eq('id', userData.user.id);
+              
+            if (updateError) {
+              console.error("Error updating user role:", updateError);
+            } else {
+              console.log(`Rôle mis à jour pour ${account.email}: ${account.role}`);
+            }
+          }
+        }
         
         toast({
           title: "Compte créé avec succès",
@@ -117,14 +135,19 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
       setRedirecting(true);
       
       // Déterminer la destination en fonction du rôle
-      const destinations = {
-        'instructor': '/instructor',
-        'admin': '/admin',
-        'business_admin': '/admin',
-        'student': '/dashboard'
-      };
+      let destination;
       
-      const destination = destinations[user.role as keyof typeof destinations] || '/dashboard';
+      console.log(`Utilisateur connecté avec le rôle: ${user.role}`);
+      
+      // Simplifier la logique de redirection
+      if (user.role === 'instructor') {
+        destination = '/instructor';
+      } else if (user.role === 'admin' || user.role === 'business_admin') {
+        destination = '/admin';
+      } else {
+        destination = '/dashboard';
+      }
+      
       console.log(`🚀 Redirection vers ${destination} pour l'utilisateur avec le rôle ${user.role}`);
       
       // Redirection immédiate

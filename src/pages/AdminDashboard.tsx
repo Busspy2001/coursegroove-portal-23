@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -16,15 +17,22 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   // Redirect if not authenticated or not an admin
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("AdminDashboard - Authenticated:", isAuthenticated);
+    console.log("AdminDashboard - Current user role:", currentUser?.role);
+    
     if (!isAuthenticated) {
+      console.log("Non authentifié, redirection vers login");
       navigate("/login");
-    } else if (currentUser?.role !== "admin") {
+    } else if (currentUser?.role !== "admin" && currentUser?.role !== "business_admin" && currentUser?.role !== "super_admin") {
+      console.log("Utilisateur non admin, redirection vers dashboard");
       navigate("/dashboard");
+    } else {
+      console.log("Utilisateur admin confirmé:", currentUser.role);
     }
   }, [isAuthenticated, currentUser, navigate]);
 
-  if (!isAuthenticated || currentUser?.role !== "admin") {
+  if (!isAuthenticated || (currentUser?.role !== "admin" && currentUser?.role !== "business_admin" && currentUser?.role !== "super_admin")) {
     return null; // Return nothing during redirect
   }
 
