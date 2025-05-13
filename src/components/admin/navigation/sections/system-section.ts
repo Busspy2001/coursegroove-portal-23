@@ -1,5 +1,5 @@
 
-import { Shield, FileWarning, Zap } from "lucide-react";
+import { Shield, FileWarning, Zap, AlertTriangle } from "lucide-react";
 import { AdminNavGroup } from "../types";
 
 export const systemNavigation: AdminNavGroup = {
@@ -15,6 +15,13 @@ export const systemNavigation: AdminNavGroup = {
       title: "Logs",
       path: "/admin/system/logs",
       icon: FileWarning,
+      requiredRoles: ["super_admin"],
+    },
+    {
+      title: "Alertes système",
+      path: "/admin/system/alerts",
+      icon: AlertTriangle,
+      status: "warning",
       requiredRoles: ["super_admin"],
     },
     {

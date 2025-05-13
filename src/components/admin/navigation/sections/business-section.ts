@@ -1,5 +1,5 @@
 
-import { Building, BriefcaseBusiness, UserPlus, PieChart } from "lucide-react";
+import { Building, BriefcaseBusiness, UserPlus, PieChart, List } from "lucide-react";
 import { AdminNavGroup } from "../types";
 
 export const businessNavigation: AdminNavGroup = {
@@ -8,7 +8,7 @@ export const businessNavigation: AdminNavGroup = {
     {
       title: "Liste des entreprises",
       path: "/admin/business",
-      icon: Building,
+      icon: List,
     },
     {
       title: "Plans & abonnements",

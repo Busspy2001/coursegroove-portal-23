@@ -1,5 +1,5 @@
 
-import { Users, Activity, Headphones, UserCheck } from "lucide-react";
+import { Users, Activity, Headphones, UserCheck, Flag } from "lucide-react";
 import { AdminNavGroup } from "../types";
 
 export const usersNavigation: AdminNavGroup = {
@@ -20,6 +20,12 @@ export const usersNavigation: AdminNavGroup = {
       title: "Support & signalements",
       path: "/admin/user-support",
       icon: Headphones,
+      status: "danger",
+    },
+    {
+      title: "Signalements",
+      path: "/admin/user-reports",
+      icon: Flag,
       status: "danger",
     },
     {

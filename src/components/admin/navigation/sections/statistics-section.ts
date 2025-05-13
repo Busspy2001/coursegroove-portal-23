@@ -1,5 +1,5 @@
 
-import { BarChart3, User, Users, PieChart, LineChart } from "lucide-react";
+import { BarChart3, User, Users, PieChart, LineChart, Eye } from "lucide-react";
 import { AdminNavGroup } from "../types";
 
 export const statisticsNavigation: AdminNavGroup = {
@@ -8,7 +8,7 @@ export const statisticsNavigation: AdminNavGroup = {
     {
       title: "Vue globale",
       path: "/admin/statistics",
-      icon: BarChart3,
+      icon: Eye,
     },
     {
       title: "Instructeurs",

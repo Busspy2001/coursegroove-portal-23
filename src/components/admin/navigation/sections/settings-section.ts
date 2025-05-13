@@ -1,5 +1,5 @@
 
-import { Settings, History, Network, MonitorSmartphone } from "lucide-react";
+import { Settings, History, Network, MonitorSmartphone, Shield } from "lucide-react";
 import { AdminNavGroup } from "../types";
 
 export const settingsNavigation: AdminNavGroup = {
@@ -9,6 +9,12 @@ export const settingsNavigation: AdminNavGroup = {
       title: "Configuration plateforme",
       path: "/admin/settings",
       icon: Settings,
+      requiredRoles: ["super_admin"],
+    },
+    {
+      title: "Gestion des rôles",
+      path: "/admin/settings/roles",
+      icon: Shield,
       requiredRoles: ["super_admin"],
     },
     {
