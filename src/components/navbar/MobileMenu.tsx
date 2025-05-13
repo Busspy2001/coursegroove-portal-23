@@ -44,8 +44,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       // Déconnexion sans callback
       await onLogout();
       
-      // Navigation après déconnexion
-      navigate("/login", { replace: true });
+      // Navigate with logout parameter to prevent auto-login
+      navigate("/login?logout=true", { replace: true });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis le menu mobile:", error);
     }

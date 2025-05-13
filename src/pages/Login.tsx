@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Book } from "lucide-react";
@@ -18,9 +19,29 @@ import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentUser, isAuthenticated, loading: authLoading } = useAuth();
   const isMobile = useIsMobile();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [demoInitialized, setDemoInitialized] = useState(false);
+  
+  // Only initialize demo accounts once when the login page loads
+  useEffect(() => {
+    if (!demoInitialized) {
+      // Check if we have a logout parameter to prevent immediate relogin
+      const searchParams = new URLSearchParams(location.search);
+      const isLoggedOut = searchParams.get('logout') === 'true';
+      
+      if (!isLoggedOut) {
+        // Only initialize demo accounts if we're not coming from a logout
+        ensureDemoAccountsExist();
+      } else {
+        console.log("🚫 Initialisation des comptes démo ignorée - l'utilisateur vient de se déconnecter");
+      }
+      
+      setDemoInitialized(true);
+    }
+  }, [demoInitialized, location.search]);
   
   // Optimized authentication check timeout
   useEffect(() => {
@@ -32,12 +53,6 @@ const Login = () => {
 
     return () => clearTimeout(authCheckTimeout);
   }, [authLoading]);
-  
-  // Initialiser les comptes démo lors du chargement de la page
-  useEffect(() => {
-    // Assurer que les comptes démo sont créés dans Supabase
-    ensureDemoAccountsExist();
-  }, []);
   
   // Instead of automatic redirect, show a button for authenticated users
   const handleGoToDashboard = () => {

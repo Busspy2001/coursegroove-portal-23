@@ -122,24 +122,37 @@ export const initDemoAccounts = async (): Promise<boolean> => {
 
 /**
  * Appelle initDemoAccounts avec gestion des erreurs et notification
+ * Cette version est modifiée pour ne pas essayer d'auto-connecter les comptes démo
  */
 export const ensureDemoAccountsExist = async (silent: boolean = true): Promise<void> => {
   try {
-    const success = await initDemoAccounts();
+    // First check if user is already logged in - don't create accounts if so
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!silent) {
-      if (success) {
-        toast({
-          title: "Comptes démo initialisés",
-          description: "Les comptes de démonstration sont prêts à être utilisés.",
-        });
-      } else {
-        toast({
-          title: "Initialisation partielle",
-          description: "Certains comptes démo n'ont pas pu être initialisés.",
-          variant: "destructive",
-        });
+    // Only initialize demo accounts if we're on the login or register page
+    // This prevents auto-initialization on page refresh after logout
+    const isAuthPage = window.location.pathname.includes('/login') || 
+                       window.location.pathname.includes('/register');
+    
+    if (!session && isAuthPage) {
+      const success = await initDemoAccounts();
+      
+      if (!silent) {
+        if (success) {
+          toast({
+            title: "Comptes démo initialisés",
+            description: "Les comptes de démonstration sont prêts à être utilisés.",
+          });
+        } else {
+          toast({
+            title: "Initialisation partielle",
+            description: "Certains comptes démo n'ont pas pu être initialisés.",
+            variant: "destructive",
+          });
+        }
       }
+    } else {
+      console.log("⏭️ Initialisation des comptes démo ignorée - utilisateur déjà connecté ou page non pertinente");
     }
   } catch (error) {
     console.error("Erreur lors de l'initialisation des comptes démo:", error);

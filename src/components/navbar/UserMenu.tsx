@@ -36,8 +36,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
       // Appeler onLogout sans lui passer de callback
       await onLogout();
       
-      // Utiliser navigate directement après la déconnexion
-      navigate("/login", { replace: true });
+      // Navigate with logout parameter to prevent auto-login
+      navigate("/login?logout=true", { replace: true });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis le menu utilisateur:", error);
     }

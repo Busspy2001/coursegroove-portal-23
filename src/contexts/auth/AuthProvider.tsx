@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase, userCache } from "@/integrations/supabase/client";
 import { AuthContextType, User, UserRole } from "./types";
@@ -60,7 +61,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("🚪 Déconnexion détectée");
         setCurrentUser(null);
         clearUserCache();
-        setLoading(false);
+        
+        // Clear any Supabase auth tokens from localStorage to prevent auto-login
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
+        
+        // Add a small delay before setting loading to false to ensure UI updates properly
+        setTimeout(() => {
+          setLoading(false);
+        }, 100);
       }
     });
 
@@ -192,6 +201,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearUserCache();
       console.log("🧹 Nettoyage du cache utilisateur effectué");
       
+      // Make sure to clear all local storage items related to auth
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
+      
       // Déconnexion Supabase
       const { error } = await supabase.auth.signOut();
       
@@ -210,6 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session) {
         console.warn("⚠️ La session persiste après déconnexion, tentative de nettoyage forcé");
         localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
       } else {
         console.log("✅ Session correctement détruite");
       }
