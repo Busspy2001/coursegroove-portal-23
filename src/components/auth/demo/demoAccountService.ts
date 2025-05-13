@@ -1,78 +1,72 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { DemoAccount } from "./types";
+import { v4 as uuidv4 } from 'uuid';
+import { UserRole } from '@/types/database';
+import { DemoAccount } from './types';
 
-export async function createDemoAccount(account: DemoAccount) {
-  try {
-    // Check if account exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('profiles_unified')
-      .select('*')
-      .eq('email', account.email)
-      .single();
-    
-    if (checkError && checkError.message !== 'No rows found') {
-      console.error("Error checking if user exists:", checkError);
+/**
+ * Provides pre-configured demo accounts for different user roles
+ */
+export const getDemoAccounts = (): DemoAccount[] => {
+  return [
+    {
+      id: uuidv4(),
+      email: 'etudiant@schoolier.com',
+      password: 'demo123',
+      role: 'student',
+      name: 'Jean Dupont',
+      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=jean',
+      description: 'Accédez à différents cours et suivez votre progression.',
+      features: [
+        'Parcourir le catalogue de cours',
+        'Suivre des cours et compléter des leçons',
+        'Recevoir des certificats',
+        'Interagir avec la communauté'
+      ]
+    },
+    {
+      id: uuidv4(),
+      email: 'prof@schoolier.com',
+      password: 'demo123',
+      role: 'instructor',
+      name: 'Marie Laurent',
+      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=marie',
+      description: 'Créez et gérez des cours, interagissez avec vos étudiants.',
+      features: [
+        'Créer et publier des cours',
+        'Analyser les statistiques des cours',
+        'Interagir avec les étudiants',
+        'Gérer les revenus et paiements'
+      ]
+    },
+    {
+      id: uuidv4(),
+      email: 'admin@schoolier.com',
+      password: 'demo123',
+      role: 'admin' as UserRole,
+      name: 'Admin Demo',
+      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=admin',
+      description: 'Supervisez tous les aspects de la plateforme.',
+      features: [
+        'Gérer les utilisateurs et les cours',
+        'Modérer les contenus',
+        'Accéder aux statistiques globales',
+        'Configurer les paramètres système'
+      ]
+    },
+    {
+      id: uuidv4(),
+      email: 'business@schoolier.com',
+      password: 'demo123',
+      role: 'business_admin',
+      name: 'Sophie Martin',
+      avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=sophie',
+      description: 'Gérez la formation pour votre entreprise.',
+      features: [
+        'Gérer les utilisateurs de l\'entreprise',
+        'Suivre les progrès de l\'équipe',
+        'Attribuer des cours et parcours',
+        'Analyser les résultats de formation'
+      ]
     }
-    
-    // Return true if account exists
-    if (existingUser) {
-      return true;
-    }
-    
-    console.log(`Le compte ${account.role} n'existe pas. Création en cours...`);
-    
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: account.email,
-      password: account.password,
-      options: {
-        data: {
-          name: account.name,
-        }
-      }
-    });
-    
-    if (authError) {
-      throw authError;
-    }
-    
-    // Wait a bit to ensure the account is created in Supabase
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Update the role directly in the database for admin accounts
-    if (account.role === "admin" || account.role === "super_admin" || account.role === "business_admin") {
-      // Get the user ID
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData?.user) {
-        console.log(`Mise à jour du rôle pour ${account.email} vers ${account.role}`);
-        const { error: updateError } = await supabase
-          .from('profiles_unified')
-          .update({ role: account.role })
-          .eq('id', userData.user.id);
-          
-        if (updateError) {
-          console.error("Error updating user role:", updateError);
-        } else {
-          console.log(`Rôle mis à jour pour ${account.email}: ${account.role}`);
-        }
-      }
-    }
-    
-    toast({
-      title: "Compte créé avec succès",
-      description: `Le compte ${account.name} a été créé.`,
-    });
-    
-    return true;
-  } catch (error: any) {
-    console.error("Error creating demo account:", error);
-    toast({
-      title: "Erreur lors de la création du compte",
-      description: error.message || "Une erreur s'est produite",
-      variant: "destructive",
-    });
-    return false;
-  }
-}
+  ];
+};
