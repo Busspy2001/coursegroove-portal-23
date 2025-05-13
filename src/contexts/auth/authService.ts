@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+
+import { supabase, userCache } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
 import { User } from "./types";
