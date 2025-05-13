@@ -20,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Check for existing session on mount - optimisé
   useEffect(() => {
@@ -109,6 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
     console.log("🔑 Début du processus de connexion");
+    setIsLoggingIn(true);
     setLoading(true);
     try {
       const user = await authService.login(email, password, rememberMe);
@@ -119,6 +121,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("❌ Erreur lors de la connexion:", error);
       throw error;
     } finally {
+      setIsLoggingIn(false);
+      setLoading(false);
+    }
+  };
+
+  // Implement the missing loginWithDemo method
+  const loginWithDemo = async (email: string, password: string) => {
+    console.log("🔑 Début du processus de connexion avec compte de démonstration");
+    setIsLoggingIn(true);
+    setLoading(true);
+    try {
+      // We use the regular login method but mark it as a demo account
+      const user = await authService.login(email, password, false);
+      console.log("✅ Connexion démo réussie, utilisateur:", user);
+      setCurrentUser(user);
+      return user;
+    } catch (error) {
+      console.error("❌ Erreur lors de la connexion démo:", error);
+      throw error;
+    } finally {
+      setIsLoggingIn(false);
       setLoading(false);
     }
   };
@@ -178,7 +201,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     currentUser,
     loading,
     isLoggingOut,
+    isLoggingIn,
     login,
+    loginWithDemo,
     register: authService.register,
     logout,
     resetPassword: authService.resetPassword,
