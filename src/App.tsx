@@ -41,15 +41,25 @@ const InstructorSupport = lazy(() => import("./pages/instructor/InstructorSuppor
 
 // Admin Dashboard Pages
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminQuickStats = lazy(() => import("./pages/admin/quick-stats")); // Added new route
 
 // Admin User Management Pages
 const AdminUsers = lazy(() => import("./pages/admin/users"));
 const AdminUserActivity = lazy(() => import("./pages/admin/user-activity"));
 const AdminUserReports = lazy(() => import("./pages/admin/user-reports"));
+const AdminUserSupport = lazy(() => import("./pages/admin/user-support")); // Added
+const AdminUserRoles = lazy(() => import("./pages/admin/user-roles")); // Added
+
+// Admin Courses Pages
+const AdminCourses = lazy(() => import("./pages/admin/courses")); // Added
+const AdminReviews = lazy(() => import("./pages/admin/reviews")); // Added
+const AdminCourseQuality = lazy(() => import("./pages/admin/course-quality")); // Added
+const AdminCourseCategories = lazy(() => import("./pages/admin/course-categories")); // Added
 
 // Admin Business Pages
 const AdminBusiness = lazy(() => import("./pages/admin/business"));
 const AdminBusinessPlans = lazy(() => import("./pages/admin/business/plans"));
+const AdminBusinessLicenses = lazy(() => import("./pages/admin/business/licenses")); // Added
 const AdminBusinessStatistics = lazy(() => import("./pages/admin/business/statistics"));
 
 // Admin Finance Pages
@@ -62,20 +72,36 @@ const AdminStatistics = lazy(() => import("./pages/admin/statistics"));
 const AdminStatisticsInstructors = lazy(() => import("./pages/admin/statistics/instructors"));
 const AdminStatisticsStudents = lazy(() => import("./pages/admin/statistics/students"));
 const AdminStatisticsComparison = lazy(() => import("./pages/admin/statistics/comparison"));
+const AdminStatisticsTrends = lazy(() => import("./pages/admin/statistics/trends")); // Added
 
 // Admin Marketing Pages
 const AdminMarketingEmails = lazy(() => import("./pages/admin/marketing/emails"));
 const AdminMarketingPromotions = lazy(() => import("./pages/admin/marketing/promotions"));
 const AdminMarketingAnnouncements = lazy(() => import("./pages/admin/marketing/announcements"));
+const AdminMarketingSeo = lazy(() => import("./pages/admin/marketing/seo")); // Added
+
+// Admin Communication Pages
+const AdminMessages = lazy(() => import("./pages/admin/messages")); // Added
+const AdminSupport = lazy(() => import("./pages/admin/support")); // Added
+const AdminFaq = lazy(() => import("./pages/admin/faq")); // Added
 
 // Admin Notifications Pages
 const AdminNotifications = lazy(() => import("./pages/admin/notifications"));
 const AdminNotificationsPreferences = lazy(() => import("./pages/admin/notifications/preferences"));
+const AdminNotificationsTemplates = lazy(() => import("./pages/admin/notifications/templates")); // Added
+
+// Admin Settings Pages
+const AdminSettings = lazy(() => import("./pages/admin/settings")); // Added
+const AdminSettingsRoles = lazy(() => import("./pages/admin/settings/roles")); // Added
+const AdminSettingsActivityLog = lazy(() => import("./pages/admin/settings/activity-log")); // Added
+const AdminSettingsApi = lazy(() => import("./pages/admin/settings/api")); // Added
+const AdminSettingsMobile = lazy(() => import("./pages/admin/settings/mobile")); // Added
 
 // Admin System Pages
 const AdminSystem = lazy(() => import("./pages/admin/system"));
 const AdminSystemLogs = lazy(() => import("./pages/admin/system/logs"));
 const AdminSystemAlerts = lazy(() => import("./pages/admin/system/alerts"));
+const AdminSystemPerformance = lazy(() => import("./pages/admin/system/performance")); // Added
 
 // General pages
 const About = lazy(() => import("./pages/About"));
@@ -153,17 +179,27 @@ function App() {
                   <Route path="/instructor/settings" element={<InstructorSettings />} />
                   <Route path="/instructor/support" element={<InstructorSupport />} />
                   
-                  {/* Admin Route */}
+                  {/* Admin Routes */}
                   <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/quick-stats" element={<AdminQuickStats />} />
                   
                   {/* Admin Users Routes */}
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/user-activity" element={<AdminUserActivity />} />
                   <Route path="/admin/user-reports" element={<AdminUserReports />} />
+                  <Route path="/admin/user-support" element={<AdminUserSupport />} />
+                  <Route path="/admin/user-roles" element={<AdminUserRoles />} />
+                  
+                  {/* Admin Courses Routes */}
+                  <Route path="/admin/courses" element={<AdminCourses />} />
+                  <Route path="/admin/reviews" element={<AdminReviews />} />
+                  <Route path="/admin/course-quality" element={<AdminCourseQuality />} />
+                  <Route path="/admin/course-categories" element={<AdminCourseCategories />} />
                   
                   {/* Admin Business Routes */}
                   <Route path="/admin/business" element={<AdminBusiness />} />
                   <Route path="/admin/business/plans" element={<AdminBusinessPlans />} />
+                  <Route path="/admin/business/licenses" element={<AdminBusinessLicenses />} />
                   <Route path="/admin/business/statistics" element={<AdminBusinessStatistics />} />
                   
                   {/* Admin Finance Routes */}
@@ -176,20 +212,36 @@ function App() {
                   <Route path="/admin/statistics/instructors" element={<AdminStatisticsInstructors />} />
                   <Route path="/admin/statistics/students" element={<AdminStatisticsStudents />} />
                   <Route path="/admin/statistics/comparison" element={<AdminStatisticsComparison />} />
+                  <Route path="/admin/statistics/trends" element={<AdminStatisticsTrends />} />
                   
                   {/* Admin Marketing Routes */}
                   <Route path="/admin/marketing/emails" element={<AdminMarketingEmails />} />
                   <Route path="/admin/marketing/promotions" element={<AdminMarketingPromotions />} />
                   <Route path="/admin/marketing/announcements" element={<AdminMarketingAnnouncements />} />
+                  <Route path="/admin/marketing/seo" element={<AdminMarketingSeo />} />
+                  
+                  {/* Admin Communication Routes */}
+                  <Route path="/admin/messages" element={<AdminMessages />} />
+                  <Route path="/admin/support" element={<AdminSupport />} />
+                  <Route path="/admin/faq" element={<AdminFaq />} />
                   
                   {/* Admin Notifications Routes */}
                   <Route path="/admin/notifications" element={<AdminNotifications />} />
                   <Route path="/admin/notifications/preferences" element={<AdminNotificationsPreferences />} />
+                  <Route path="/admin/notifications/templates" element={<AdminNotificationsTemplates />} />
+                  
+                  {/* Admin Settings Routes */}
+                  <Route path="/admin/settings" element={<AdminSettings />} />
+                  <Route path="/admin/settings/roles" element={<AdminSettingsRoles />} />
+                  <Route path="/admin/settings/activity-log" element={<AdminSettingsActivityLog />} />
+                  <Route path="/admin/settings/api" element={<AdminSettingsApi />} />
+                  <Route path="/admin/settings/mobile" element={<AdminSettingsMobile />} />
                   
                   {/* Admin System Routes */}
                   <Route path="/admin/system" element={<AdminSystem />} />
                   <Route path="/admin/system/logs" element={<AdminSystemLogs />} />
                   <Route path="/admin/system/alerts" element={<AdminSystemAlerts />} />
+                  <Route path="/admin/system/performance" element={<AdminSystemPerformance />} />
                   
                   {/* General Routes */}
                   <Route path="/about" element={<About />} />
