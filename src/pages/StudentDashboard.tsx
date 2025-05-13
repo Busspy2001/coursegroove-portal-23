@@ -9,7 +9,6 @@ import StudentSidebar from "@/components/dashboard/StudentSidebar";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatCards from "@/components/dashboard/StatCards";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
-import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -85,8 +84,6 @@ const StudentDashboard = () => {
                 stats={stats}
               />
             </div>
-            
-            {!isMobile && <Footer />}
           </div>
         </SidebarInset>
         

@@ -1,7 +1,6 @@
 
 import React, { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "./AdminSidebar";
 
 interface AdminLayoutProps {
@@ -20,7 +19,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     </SidebarProvider>
   );

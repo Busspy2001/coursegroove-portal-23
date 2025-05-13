@@ -1,7 +1,6 @@
 
 import React from "react";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Bell, Moon, Globe, Shield } from "lucide-react";
 
@@ -28,8 +27,6 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ children }) => {
           
           {children}
         </div>
-        
-        <Footer />
       </div>
     </SidebarInset>
   );
