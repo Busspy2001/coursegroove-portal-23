@@ -14,7 +14,7 @@ import { UserRole } from "@/contexts/auth/types";
 export interface DemoAccount {
   email: string;
   password: string;
-  role: UserRole;  // Changed to UserRole type
+  role: UserRole;  // Using the UserRole type from contexts/auth
   name: string;
 }
 
@@ -34,7 +34,7 @@ export const demoAccounts: DemoAccount[] = [
   {
     email: "admin@schoolier.com",
     password: "password123",
-    role: "admin", // Now "admin" is a valid UserRole
+    role: "admin", // This should now be a valid UserRole
     name: "Administrateur Démo"
   }
 ];
@@ -78,10 +78,11 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Update the role directly in the database for admin accounts
-        if (account.role === "admin" || account.role === "business_admin") {
+        if (account.role === "admin" || account.role === "super_admin" || account.role === "business_admin") {
           // Get the user ID first
           const { data: userData } = await supabase.auth.getUser();
           if (userData?.user) {
+            console.log(`Mise à jour du rôle pour ${account.email} vers ${account.role}`);
             const { error: updateError } = await supabase
               .from('profiles_unified')
               .update({ role: account.role })
@@ -124,6 +125,9 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
       // Try to create the account if it doesn't exist
       await createDemoAccount(account);
       
+      // Add additional logging
+      console.log(`Tentative de connexion avec le compte ${account.email}, rôle attendu: ${account.role}`);
+      
       // Timeout pour les connexions bloquées
       const loginPromise = login(account.email, account.password, true);
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -133,30 +137,36 @@ export const DemoAccounts = ({ isLoading: parentIsLoading }: { isLoading: boolea
       // Tentative de connexion avec timeout
       const user = await Promise.race([loginPromise, timeoutPromise]);
       
+      // Log user information after login
+      console.log("Utilisateur connecté:", user);
+      console.log(`Rôle après connexion: ${user.role}`);
+      
       // Connexion réussie, préparer la redirection
       setRedirecting(true);
       
       // Déterminer la destination en fonction du rôle
       let destination;
       
-      console.log(`Utilisateur connecté avec le rôle: ${user.role}`);
+      // Simplifier la logique de redirection et assurer qu'elle traite correctement les admins
+      const adminRoles = ["admin", "super_admin", "business_admin"];
       
-      // Simplifier la logique de redirection
-      if (user.role === 'instructor') {
-        destination = '/instructor';
-      } else if (user.role === 'admin' || user.role === 'business_admin') {
+      if (adminRoles.includes(user.role)) {
         destination = '/admin';
+        console.log(`🚀 Redirection vers le dashboard admin pour ${user.role}`);
+      } else if (user.role === 'instructor') {
+        destination = '/instructor';
+        console.log(`🚀 Redirection vers le dashboard instructeur`);
       } else {
         destination = '/dashboard';
+        console.log(`🚀 Redirection vers le dashboard standard`);
       }
-      
-      console.log(`🚀 Redirection vers ${destination} pour l'utilisateur avec le rôle ${user.role}`);
       
       // Redirection immédiate
       navigate(destination);
       
     } catch (error: any) {
       // Erreur de connexion
+      console.error("Erreur de connexion:", error);
       setLoginError(error.message || "Impossible de se connecter au compte de démonstration.");
       
       toast({
