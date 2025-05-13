@@ -25,27 +25,29 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
   const demoAccounts = getDemoAccounts();
   const [loggingInAccount, setLoggingInAccount] = useState<string | null>(null);
   
-  const isLoading = externalIsLoading || isLoggingIn;
+  const isLoading = externalIsLoading || isLoggingIn || !!loggingInAccount;
 
-  // Optimized login handler with immediate redirection
+  // Optimized login handler with immediate navigation intent
   const handleLogin = async (account: DemoAccount) => {
     if (isLoading) return;
     
+    // Set the loading state first
     setLoggingInAccount(account.email);
     
-    // Pre-determine destination based on role for immediate redirection
+    // Pre-determine destination based on role
     const destination = getRoleDestination(account.role);
+    console.log(`🚀 Démarrage de la connexion pour ${account.role} (${account.email}) avec redirection vers ${destination}`);
     
     try {
       // Start login process
-      loginWithDemo(account.email, account.password)
+      await loginWithDemo(account.email, account.password)
         .then(() => {
-          // No toast needed for demo accounts as we're redirecting immediately
-          console.log(`✅ Redirection immédiate vers ${destination} pour compte ${account.role}`);
-          navigate(destination);
+          console.log(`✅ Connexion réussie, redirection vers ${destination}`);
+          // Immediate redirect to appropriate dashboard
+          navigate(destination, { replace: true });
         })
         .catch((error) => {
-          console.error("Erreur de connexion démo:", error);
+          console.error("❌ Erreur de connexion démo:", error);
           toast({
             title: "Erreur de connexion",
             description: "Impossible de se connecter au compte de démonstration",
@@ -63,7 +65,8 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
       case 'student': return '/dashboard';
       case 'instructor': return '/instructor';
       case 'admin':
-      case 'super_admin':
+      case 'super_admin': 
+        return '/admin';
       case 'business_admin': 
         return '/admin';
       default: return '/dashboard';
@@ -87,7 +90,7 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'student')!}
               onLogin={handleLogin}
-              isLoading={isLoading}
+              isLoading={isLoading && loggingInAccount === demoAccounts.find(a => a.role === 'student')?.email}
             />
           </TabsContent>
           
@@ -95,7 +98,7 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'instructor')!}
               onLogin={handleLogin}
-              isLoading={isLoading}
+              isLoading={isLoading && loggingInAccount === demoAccounts.find(a => a.role === 'instructor')?.email}
             />
           </TabsContent>
           
@@ -103,7 +106,7 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'admin')!}
               onLogin={handleLogin}
-              isLoading={isLoading}
+              isLoading={isLoading && loggingInAccount === demoAccounts.find(a => a.role === 'admin')?.email}
             />
           </TabsContent>
           
@@ -111,7 +114,7 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'business_admin')!}
               onLogin={handleLogin}
-              isLoading={isLoading}
+              isLoading={isLoading && loggingInAccount === demoAccounts.find(a => a.role === 'business_admin')?.email}
             />
           </TabsContent>
         </div>

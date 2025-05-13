@@ -16,8 +16,13 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
   isLoading, 
   onLogin 
 }) => {
-  const handleLogin = () => {
-    onLogin(account);
+  // Create a more direct login handler that doesn't allow for double clicks
+  const handleLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isLoading) {
+      console.log(`📲 Login attempt for ${account.role} account: ${account.email}`);
+      onLogin(account);
+    }
   };
   
   return (
