@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Download, PieChart, BuildingSquare, Users, CalendarRange } from "lucide-react";
+import { Download, PieChart, Building2, Users, CalendarRange } from "lucide-react";
 
 export const AdminStatisticsComparison = () => {
   return (
@@ -60,7 +60,7 @@ export const AdminStatisticsComparison = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <BuildingSquare className="h-5 w-5 mr-2 text-schoolier-blue" />
+              <Building2 className="h-5 w-5 mr-2 text-schoolier-blue" />
               B2B - Clients entreprises
             </CardTitle>
           </CardHeader>

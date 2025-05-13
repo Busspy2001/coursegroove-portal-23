@@ -21,5 +21,5 @@ export const marketingNavigation: AdminNavGroup = {
       icon: Megaphone,
     },
   ],
-  requiredRoles: ["super_admin", "admin", "marketing_manager"],
+  requiredRoles: ["super_admin", "admin"], // Removed "marketing_manager" since it's not in the UserRole type
 };
