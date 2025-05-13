@@ -24,16 +24,11 @@ const AdminNavGroup: React.FC<AdminNavGroupProps> = ({
   userRole, 
   onNavigate 
 }) => {
-  // Vérifier si l'utilisateur a accès à ce groupe
-  if (!hasAccessToNavItem(userRole, group.requiredRoles)) {
-    return null;
-  }
-  
-  // Filtrer les éléments accessibles selon le rôle de l'utilisateur
+  // Filter accessible items according to user role
   const accessibleItems = group.items
     .filter(item => hasAccessToNavItem(userRole, item.requiredRoles));
     
-  // Si aucun élément n'est accessible, ne pas afficher le groupe
+  // Don't show the group if no items are accessible
   if (accessibleItems.length === 0) {
     return null;
   }

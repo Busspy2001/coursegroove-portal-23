@@ -30,6 +30,9 @@ const AdminSidebar = ({ onNavigate }: AdminSidebarProps) => {
     }
   };
   
+  console.log("Admin navigation groups:", adminNavigation.map(g => g.label));
+  console.log("Current user role:", currentUser?.role);
+  
   return (
     <Sidebar>
       <AdminSidebarHeader 
