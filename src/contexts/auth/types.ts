@@ -17,9 +17,11 @@ export interface AuthContextType {
   currentUser: User | null;
   isLoading: boolean;
   isLoggingOut: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  isLoggingIn: boolean;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
   register: (name: string, email: string, password: string, isDemoAccount?: boolean) => Promise<User>;
   logout: (callback?: () => void) => Promise<void>;
   updateUserProfile: (updatedProfile: Partial<User>) => Promise<void>;
-  loginWithDemo: (role: UserRole) => Promise<void>;
+  loginWithDemo: (email: string, password: string) => Promise<User>;
+  resetPassword?: (email: string) => Promise<void>;
 }

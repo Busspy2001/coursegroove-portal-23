@@ -14,12 +14,12 @@ import BillingTab from "@/components/profile/BillingTab";
 import { Loader2 } from "lucide-react";
 
 const Profile = () => {
-  const { currentUser, isAuthenticated, loading, logout } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("personal");
   
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       toast({
         title: "Accès non autorisé",
         description: "Vous devez être connecté pour accéder à cette page.",
@@ -27,7 +27,7 @@ const Profile = () => {
       });
       navigate("/login");
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
   
   const handleLogout = async () => {
     try {
@@ -40,7 +40,7 @@ const Profile = () => {
     }
   };
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-12 w-12 text-schoolier-blue animate-spin" />

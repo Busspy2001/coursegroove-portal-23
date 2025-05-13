@@ -18,7 +18,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -49,13 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.error("❌ Erreur lors de la récupération des données utilisateur:", error);
               setCurrentUser(null);
             } finally {
-              setLoading(false);
+              setIsLoading(false);
             }
           }, 0);
         } catch (error) {
           console.error("❌ Erreur lors de la récupération des données utilisateur:", error);
           setCurrentUser(null);
-          setLoading(false);
+          setIsLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
         console.log("🚪 Déconnexion détectée");
@@ -68,16 +68,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Add a small delay before setting loading to false to ensure UI updates properly
         setTimeout(() => {
-          setLoading(false);
+          setIsLoading(false);
         }, 100);
       }
     });
 
     // Utiliser un timeout pour éviter que la vérification bloque trop longtemps
     authTimeout = window.setTimeout(() => {
-      if (loading && !initialCheckDone) {
+      if (isLoading && !initialCheckDone) {
         console.log("⏱️ Timeout de vérification atteint, passage en mode non authentifié");
-        setLoading(false);
+        setIsLoading(false);
         setInitialCheckDone(true);
       }
     }, 2000); // 2 secondes maximum pour la vérification initiale
@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error("❌ Erreur lors de la vérification de la session:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
         setInitialCheckDone(true);
         console.log("✅ Vérification initiale de l'authentification terminée");
       }
@@ -117,10 +117,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = async (email: string, password: string, rememberMe: boolean = false) => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
     console.log("🔑 Début du processus de connexion");
     setIsLoggingIn(true);
-    setLoading(true);
+    setIsLoading(true);
     try {
       const user = await authService.login(email, password, rememberMe);
       console.log("✅ Connexion réussie, utilisateur:", user);
@@ -131,15 +131,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     } finally {
       setIsLoggingIn(false);
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   // Optimized loginWithDemo method for faster redirection
-  const loginWithDemo = async (email: string, password: string) => {
+  const loginWithDemo = async (email: string, password: string): Promise<User> => {
     console.log("🔑 Début du processus de connexion avec compte de démonstration");
     setIsLoggingIn(true);
-    setLoading(true);
+    setIsLoading(true);
     
     // Determine demo role from email for faster processing
     let inferredRole;
@@ -179,6 +179,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(user);
     
     console.log("✅ Connexion démo réussie, utilisateur:", user.name, "role:", user.role);
+    setIsLoggingIn(false);
+    setIsLoading(false);
     return user;
   };
 
@@ -187,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (isLoggingOut) return; // Éviter les doubles appels
       
       setIsLoggingOut(true);
-      setLoading(true);
+      setIsLoading(true);
       console.log("🚪 Début du processus de déconnexion dans AuthProvider");
       
       // Notification de déconnexion en cours
@@ -236,7 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Délai pour assurer la synchronisation complète
       setTimeout(() => {
-        setLoading(false);
+        setIsLoading(false);
         setIsLoggingOut(false);
         console.log("✅ Déconnexion réussie et nettoyage terminé");
         
@@ -249,21 +251,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
     } catch (error) {
       console.error("❌ Erreur lors de la déconnexion dans AuthProvider:", error);
-      setLoading(false);
+      setIsLoading(false);
       setIsLoggingOut(false);
       throw error;
     }
   };
 
+  // Placeholder for updateUserProfile
+  const updateUserProfile = async (updatedProfile: Partial<User>): Promise<void> => {
+    // Implementation details would go here
+    console.log("Update user profile called with:", updatedProfile);
+  };
+
   const value: AuthContextType = {
     currentUser,
-    loading,
+    isLoading,
     isLoggingOut,
     isLoggingIn,
     login,
     loginWithDemo,
     register: authService.register,
     logout,
+    updateUserProfile,
     resetPassword: authService.resetPassword,
     isAuthenticated: currentUser !== null && initialCheckDone,
   };

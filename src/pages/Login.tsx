@@ -20,7 +20,7 @@ import { toast } from "@/hooks/use-toast";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, isAuthenticated, loading: authLoading } = useAuth();
+  const { currentUser, isAuthenticated, isLoading } = useAuth();
   const isMobile = useIsMobile();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [demoInitialized, setDemoInitialized] = useState(false);
@@ -46,13 +46,13 @@ const Login = () => {
   // Optimized authentication check timeout
   useEffect(() => {
     const authCheckTimeout = setTimeout(() => {
-      if (authLoading) {
+      if (isLoading) {
         console.log("⏱️ Vérification d'authentification trop longue, continuons sans bloquer l'interface");
       }
     }, 1000); // Reduced from 1.5s to 1s
 
     return () => clearTimeout(authCheckTimeout);
-  }, [authLoading]);
+  }, [isLoading]);
   
   // Instead of automatic redirect, show a button for authenticated users
   const handleGoToDashboard = () => {
