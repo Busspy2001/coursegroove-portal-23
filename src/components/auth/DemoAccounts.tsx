@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
@@ -27,36 +27,46 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
   
   const isLoading = externalIsLoading || isLoggingIn;
 
-  const handleLogin = async (email: string, password: string, role: string) => {
+  // Optimized login handler with immediate redirection
+  const handleLogin = async (account: DemoAccount) => {
     if (isLoading) return;
     
-    setLoggingInAccount(email);
+    setLoggingInAccount(account.email);
+    
+    // Pre-determine destination based on role for immediate redirection
+    const destination = getRoleDestination(account.role);
     
     try {
-      await loginWithDemo(email, password);
-      
-      toast({
-        title: "Connexion réussie",
-        description: `Vous êtes connecté en tant que compte ${role} de démonstration.`,
-      });
-
-      // Redirect based on role
-      if (role === 'student') {
-        navigate('/dashboard');
-      } else if (role === 'instructor') {
-        navigate('/instructor');
-      } else if (role === 'admin' || role === 'super_admin' || role === 'business_admin') {
-        navigate('/admin');
-      }
-    } catch (error) {
-      console.error("Erreur de connexion démo:", error);
-      toast({
-        title: "Erreur de connexion",
-        description: "Impossible de se connecter au compte de démonstration",
-        variant: "destructive",
-      });
+      // Start login process
+      loginWithDemo(account.email, account.password)
+        .then(() => {
+          // No toast needed for demo accounts as we're redirecting immediately
+          console.log(`✅ Redirection immédiate vers ${destination} pour compte ${account.role}`);
+          navigate(destination);
+        })
+        .catch((error) => {
+          console.error("Erreur de connexion démo:", error);
+          toast({
+            title: "Erreur de connexion",
+            description: "Impossible de se connecter au compte de démonstration",
+            variant: "destructive",
+          });
+        });
     } finally {
       setLoggingInAccount(null);
+    }
+  };
+  
+  // Helper function to determine destination based on role
+  const getRoleDestination = (role: string): string => {
+    switch (role) {
+      case 'student': return '/dashboard';
+      case 'instructor': return '/instructor';
+      case 'admin':
+      case 'super_admin':
+      case 'business_admin': 
+        return '/admin';
+      default: return '/dashboard';
     }
   };
 

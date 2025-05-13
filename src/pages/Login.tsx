@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,38 +19,40 @@ const Login = () => {
   const isMobile = useIsMobile();
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Redirection optimisée si déjà authentifié
+  // Optimized authentication check timeout
   useEffect(() => {
-    // Ajouter un timeout pour éviter le blocage trop long sur la page de login
     const authCheckTimeout = setTimeout(() => {
       if (authLoading) {
         console.log("⏱️ Vérification d'authentification trop longue, continuons sans bloquer l'interface");
       }
-    }, 1500); // 1.5 secondes maximum pour la vérification d'auth
+    }, 1000); // Reduced from 1.5s to 1s
 
     return () => clearTimeout(authCheckTimeout);
   }, [authLoading]);
   
-  // Redirection rapide vers le tableau de bord approprié selon le rôle
+  // Immediate redirection for authenticated users
   useEffect(() => {
     if (isAuthenticated && currentUser) {
       console.log("✅ Utilisateur authentifié avec le rôle:", currentUser.role);
       setIsRedirecting(true);
       
-      // Déterminer la destination en fonction du rôle
+      // Determine destination based on role
       let destination = "/dashboard"; // Default destination
       
       if (currentUser.role === 'instructor') {
         destination = "/instructor";
         console.log("🧑‍🏫 Redirection vers le tableau de bord instructeur");
-      } else if (currentUser.role === 'admin') {
+      } else if (currentUser.role === 'admin' || currentUser.role === 'super_admin') {
         destination = "/admin";
         console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
+      } else if (currentUser.role === 'business_admin') {
+        destination = "/admin";
+        console.log("🏢 Redirection vers le tableau de bord entreprise");
       } else {
         console.log("🎓 Redirection vers le tableau de bord étudiant");
       }
       
-      // Redirection immédiate
+      // Immediate navigation without delay
       navigate(destination);
     }
   }, [isAuthenticated, currentUser, navigate]);

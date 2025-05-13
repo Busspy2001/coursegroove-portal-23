@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, User } from "./types";
@@ -126,15 +125,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Implement the missing loginWithDemo method
+  // Optimized loginWithDemo method for faster redirection
   const loginWithDemo = async (email: string, password: string) => {
     console.log("🔑 Début du processus de connexion avec compte de démonstration");
     setIsLoggingIn(true);
     setLoading(true);
+    
+    // Pre-determine the role from email to speed up processing
+    const inferredRole = email.includes("instructor") ? "instructor" : 
+                        email.includes("admin") ? "admin" : 
+                        email.includes("business") ? "business_admin" : "student";
+    
+    console.log(`👤 Rôle pré-déterminé pour connexion rapide: ${inferredRole}`);
+    
     try {
-      // We use the regular login method but mark it as a demo account
+      // Use the regular login method but optimize for demo accounts
       const user = await authService.login(email, password, false);
       console.log("✅ Connexion démo réussie, utilisateur:", user);
+      
+      // Ensure the user has the correct role based on email patterns for demo accounts
+      if (user.role !== inferredRole) {
+        console.log(`⚠️ Correction de rôle: ${user.role} → ${inferredRole}`);
+        user.role = inferredRole as any;
+      }
+      
       setCurrentUser(user);
       return user;
     } catch (error) {

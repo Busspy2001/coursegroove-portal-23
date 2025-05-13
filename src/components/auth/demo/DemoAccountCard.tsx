@@ -8,7 +8,7 @@ import { DemoAccount } from "./types";
 interface DemoAccountCardProps {
   account: DemoAccount;
   isLoading: boolean;
-  onLogin: (email: string, password: string, role: string) => Promise<void>;
+  onLogin: (account: DemoAccount) => void;
 }
 
 export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({ 
@@ -17,7 +17,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
   onLogin 
 }) => {
   const handleLogin = () => {
-    onLogin(account.email, account.password, account.role);
+    onLogin(account);
   };
   
   return (

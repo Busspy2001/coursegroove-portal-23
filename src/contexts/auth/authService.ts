@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
@@ -9,16 +8,16 @@ export const authService = {
     try {
       console.log("🔑 Tentative de connexion pour:", email);
       
-      // Reconnaitre les comptes de démonstration pour optimiser la connexion
+      // Optimize for demo accounts
       const isDemoAccount = email.includes('@schoolier.com');
       
-      // Timeout pour éviter les blocages
+      // Timeout for avoiding blocking
       const loginPromise = supabase.auth.signInWithPassword({ email, password });
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("La connexion prend trop de temps. Veuillez réessayer.")), 10000);
       });
       
-      // Course entre le login et le timeout
+      // Race between login and timeout
       const { data, error } = await Promise.race([loginPromise, timeoutPromise]) as any;
       
       if (error) {
@@ -27,16 +26,41 @@ export const authService = {
       }
       
       console.log("✅ Authentification réussie, récupération des données utilisateur");
-      const mappedUser = await mapSupabaseUser(data.user);
       
-      if (!mappedUser) {
-        console.error("❌ Impossible de récupérer les données utilisateur");
-        throw new Error("User data couldn't be retrieved");
+      // For demo accounts, optimize user mapping
+      let mappedUser: User;
+      
+      if (isDemoAccount) {
+        // Fast path for demo accounts - infer role directly from email
+        const inferredRole = email.includes("instructor") ? "instructor" : 
+                            email.includes("admin") ? "admin" : 
+                            email.includes("business") ? "business_admin" : "student";
+                            
+        // Create user object directly with minimal overhead
+        mappedUser = {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || email.split('@')[0],
+          role: inferredRole as any,
+          avatar: `https://api.dicebear.com/6.x/identicon/svg?seed=${email.split('@')[0]}`
+        };
+        
+        // Store in cache for future lookups
+        userCache.set(data.user.id, mappedUser);
+        console.log("⚡ Chemin rapide pour compte démo utilisé, rôle:", inferredRole);
+      } else {
+        // Standard path for regular accounts
+        mappedUser = await mapSupabaseUser(data.user);
+        
+        if (!mappedUser) {
+          console.error("❌ Impossible de récupérer les données utilisateur");
+          throw new Error("User data couldn't be retrieved");
+        }
       }
       
       console.log("👤 Données utilisateur récupérées avec le rôle:", mappedUser.role);
       
-      // Pour les comptes de démo, pas besoin de toast si on redirige automatiquement
+      // Skip toast for demo accounts to speed up process
       if (!isDemoAccount) {
         toast({
           title: "Connexion réussie",
