@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Info } from "lucide-react";
 import { DemoAccount } from "./types";
+import { toast } from "@/hooks/use-toast";
 
 interface DemoAccountCardProps {
   account: DemoAccount;
@@ -16,12 +17,31 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
   isLoading, 
   onLogin 
 }) => {
-  // Gestionnaire de clic optimisé pour une connexion immédiate
+  // Gestionnaire de clic optimisé avec retour d'état et notification
   const handleLogin = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Évite la propagation de l'événement
+    
     if (!isLoading) {
       console.log(`📲 Tentative de connexion pour ${account.role}: ${account.email}`);
-      onLogin(account);
+      
+      try {
+        // Notification visuelle que la connexion est en cours
+        toast({
+          title: "Connexion en cours",
+          description: `Connexion au compte ${account.name}...`,
+        });
+        
+        // Appel de la fonction de connexion
+        onLogin(account);
+      } catch (error) {
+        console.error("Erreur lors de la connexion:", error);
+        toast({
+          title: "Échec de la connexion",
+          description: "Un problème est survenu. Veuillez réessayer.",
+          variant: "destructive",
+        });
+      }
     }
   };
   
