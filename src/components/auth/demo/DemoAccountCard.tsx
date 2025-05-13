@@ -16,11 +16,11 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
   isLoading, 
   onLogin 
 }) => {
-  // Create a more direct login handler that doesn't allow for double clicks
+  // Gestionnaire de clic optimisé pour une connexion immédiate
   const handleLogin = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isLoading) {
-      console.log(`📲 Login attempt for ${account.role} account: ${account.email}`);
+      console.log(`📲 Tentative de connexion pour ${account.role}: ${account.email}`);
       onLogin(account);
     }
   };
@@ -50,7 +50,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         size="sm" 
         onClick={handleLogin}
         disabled={isLoading}
-        className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
+        className="bg-schoolier-teal hover:bg-schoolier-dark-teal font-medium"
       >
         {isLoading ? (
           <span className="flex items-center">
