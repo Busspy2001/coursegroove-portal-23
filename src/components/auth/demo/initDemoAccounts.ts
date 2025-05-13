@@ -19,7 +19,9 @@ export const initDemoAccounts = async (): Promise<boolean> => {
       try {
         // Vérifier si le compte existe déjà
         const { data: existingUsers } = await supabase.auth.admin.listUsers();
-        const userExists = existingUsers?.users && existingUsers.users.some(user => user.email === account.email);
+        const userExists = existingUsers?.users && existingUsers.users.some(user => 
+          user.email && user.email === account.email
+        );
 
         if (!userExists) {
           console.log(`➕ Création du compte démo: ${account.email} (${account.role})`);
@@ -71,7 +73,7 @@ export const initDemoAccounts = async (): Promise<boolean> => {
           console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
           
           // Trouver l'utilisateur dans la liste des utilisateurs au lieu d'utiliser getUserByEmail
-          const user = existingUsers?.users.find(u => u.email === account.email);
+          const user = existingUsers?.users.find(u => u.email && u.email === account.email);
           
           if (user) {
             // Convertir le rôle pour être compatible avec les types Supabase
