@@ -18,16 +18,7 @@ const AdminNavItem: React.FC<AdminNavItemProps> = ({ item, onNavigate }) => {
   const isActive = location.pathname === item.path;
   
   const handleClick = () => {
-    if (item.disabled) {
-      toast({
-        title: "Fonctionnalité à venir",
-        description: `La fonctionnalité "${item.title}" sera bientôt disponible.`,
-        variant: "default",
-        duration: 3000,
-      });
-      return;
-    }
-    
+    // Suppression du test disabled puisque toutes les pages sont maintenant disponibles
     if (onNavigate) {
       onNavigate(item.path);
     } else {
@@ -52,10 +43,9 @@ const AdminNavItem: React.FC<AdminNavItemProps> = ({ item, onNavigate }) => {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton 
-        tooltip={item.disabled ? `${item.title} (Bientôt disponible)` : item.title}
+        tooltip={item.title}
         isActive={isActive}
         onClick={handleClick}
-        disabled={item.disabled}
         className="w-full justify-between text-sm"
       >
         <div className="flex items-center">

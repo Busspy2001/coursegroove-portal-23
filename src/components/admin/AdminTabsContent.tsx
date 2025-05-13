@@ -9,15 +9,16 @@ import AdminFinance from "@/components/admin/AdminFinance";
 import AdminStatistics from "@/components/admin/AdminStatistics";
 import AdminUserActivity from "@/components/admin/AdminUserActivity";
 import AdminUserSupport from "@/components/admin/AdminUserSupport";
+import AdminInternalMessages from "@/components/admin/communication/AdminInternalMessages";
+import AdminFaq from "@/components/admin/communication/AdminFaq";
+import AdminNotificationsManager from "@/components/admin/notifications/AdminNotificationsManager";
+import AdminActivityLog from "@/components/admin/settings/AdminActivityLog";
+import AdminMobileSettings from "@/components/admin/settings/AdminMobileSettings";
+import AdminApiSettings from "@/components/admin/settings/AdminApiSettings";
+import AdminSystemPerformance from "@/components/admin/system/AdminSystemPerformance";
+import AdminNotificationTemplates from "@/components/admin/notifications/AdminNotificationTemplates";
 
 const AdminTabsContent = () => {
-  const DevelopmentNotice = ({ feature }: { feature: string }) => (
-    <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-800">
-      <h3 className="font-medium mb-2">Fonctionnalité en développement</h3>
-      <p>{feature} sera disponible prochainement.</p>
-    </div>
-  );
-
   return (
     <div className="p-6">
       <Tabs defaultValue="dashboard">
@@ -54,19 +55,22 @@ const AdminTabsContent = () => {
         </TabsContent>
         
         <TabsContent value="marketing">
-          <DevelopmentNotice feature="Le module marketing" />
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-800">
+            <h3 className="font-medium mb-2">Module en développement</h3>
+            <p>Le module marketing sera disponible prochainement avec toutes les fonctionnalités.</p>
+          </div>
         </TabsContent>
         
         <TabsContent value="messages">
-          <DevelopmentNotice feature="Le système de messagerie admin" />
+          <AdminInternalMessages />
         </TabsContent>
         
         <TabsContent value="notifications">
-          <DevelopmentNotice feature="La gestion des notifications" />
+          <AdminNotificationsManager />
         </TabsContent>
         
         <TabsContent value="settings">
-          <DevelopmentNotice feature="Les paramètres système" />
+          <AdminActivityLog />
         </TabsContent>
       </Tabs>
     </div>

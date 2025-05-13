@@ -19,8 +19,6 @@ export const notificationsNavigation: AdminNavGroup = {
       title: "Modèles d'emails",
       path: "/admin/notifications/templates",
       icon: FilePlus,
-      badge: "Bientôt",
-      disabled: true,
     },
   ],
   requiredRoles: ["super_admin"],

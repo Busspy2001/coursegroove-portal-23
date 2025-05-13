@@ -9,8 +9,6 @@ export const communicationNavigation: AdminNavGroup = {
       title: "Messages internes",
       path: "/admin/messages",
       icon: MessageSquare,
-      badge: "Bientôt",
-      disabled: true,
     },
     {
       title: "Support client",
@@ -21,8 +19,6 @@ export const communicationNavigation: AdminNavGroup = {
       title: "FAQ & Aide",
       path: "/admin/faq",
       icon: FileText,
-      badge: "Bientôt",
-      disabled: true,
     },
   ],
   requiredRoles: ["super_admin", "admin"],

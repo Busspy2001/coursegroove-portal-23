@@ -28,8 +28,6 @@ export const systemNavigation: AdminNavGroup = {
       title: "Performance",
       path: "/admin/system/performance",
       icon: Zap,
-      badge: "Bientôt",
-      disabled: true,
       requiredRoles: ["super_admin"],
     },
   ],
