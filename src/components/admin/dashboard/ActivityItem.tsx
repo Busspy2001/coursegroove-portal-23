@@ -8,7 +8,7 @@ export type ActivityType = "user_registration" | "course_published" | "course_re
 export interface Activity {
   id: number;
   type: ActivityType;
-  name: string;
+  name: string; // Required for all activity types
   time: string;
   author?: string;
   rating?: number;

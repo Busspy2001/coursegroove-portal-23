@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -12,17 +12,26 @@ import { useAuth } from '@/contexts/auth';
 import { DemoAccountCard } from './demo/DemoAccountCard';
 import { DemoInfoAlert } from './demo/DemoInfoAlert';
 import { getDemoAccounts } from './demo/demoAccountService';
-export type { DemoAccount } from './demo/types';
+import { DemoAccount } from './demo/types';
 
-const DemoAccounts = () => {
+interface DemoAccountsProps {
+  isLoading?: boolean;
+}
+
+const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoading }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { loginWithDemo, isLoggingIn } = useAuth();
   const demoAccounts = getDemoAccounts();
+  const [loggingInAccount, setLoggingInAccount] = useState<string | null>(null);
+  
+  const isLoading = externalIsLoading || isLoggingIn;
 
   const handleLogin = async (email: string, password: string, role: string) => {
-    if (isLoggingIn) return;
-
+    if (isLoading) return;
+    
+    setLoggingInAccount(email);
+    
     try {
       await loginWithDemo(email, password);
       
@@ -46,6 +55,8 @@ const DemoAccounts = () => {
         description: "Impossible de se connecter au compte de démonstration",
         variant: "destructive",
       });
+    } finally {
+      setLoggingInAccount(null);
     }
   };
 
@@ -66,7 +77,7 @@ const DemoAccounts = () => {
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'student')!}
               onLogin={handleLogin}
-              isLoading={isLoggingIn}
+              isLoading={isLoading}
             />
           </TabsContent>
           
@@ -74,7 +85,7 @@ const DemoAccounts = () => {
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'instructor')!}
               onLogin={handleLogin}
-              isLoading={isLoggingIn}
+              isLoading={isLoading}
             />
           </TabsContent>
           
@@ -82,7 +93,7 @@ const DemoAccounts = () => {
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'admin')!}
               onLogin={handleLogin}
-              isLoading={isLoggingIn}
+              isLoading={isLoading}
             />
           </TabsContent>
           
@@ -90,7 +101,7 @@ const DemoAccounts = () => {
             <DemoAccountCard
               account={demoAccounts.find(a => a.role === 'business_admin')!}
               onLogin={handleLogin}
-              isLoading={isLoggingIn}
+              isLoading={isLoading}
             />
           </TabsContent>
         </div>

@@ -19,7 +19,7 @@ const AdminGlobalDashboard = () => {
     { id: 1, type: "user_registration", name: "Marie Dupont", time: "Il y a 23 minutes" },
     { id: 2, type: "course_published", name: "Python pour débutants", author: "Jean Michel", time: "Il y a 2 heures" },
     { id: 3, type: "course_review", name: "Design UI/UX", rating: 5, author: "Sophie Martin", time: "Il y a 3 heures" },
-    { id: 4, type: "payment_received", amount: "149€", course: "JavaScript Avancé", time: "Il y a 5 heures" },
+    { id: 4, type: "payment_received", name: "Paiement reçu", amount: "149€", course: "JavaScript Avancé", time: "Il y a 5 heures" },
   ];
 
   return (

@@ -1,6 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '@/types/database';
+import { UserRole } from '@/contexts/auth/types';
 import { DemoAccount } from './types';
 
 /**
@@ -42,7 +42,7 @@ export const getDemoAccounts = (): DemoAccount[] => {
       id: uuidv4(),
       email: 'admin@schoolier.com',
       password: 'demo123',
-      role: 'admin' as UserRole,
+      role: 'admin',
       name: 'Admin Demo',
       avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=admin',
       description: 'Supervisez tous les aspects de la plateforme.',

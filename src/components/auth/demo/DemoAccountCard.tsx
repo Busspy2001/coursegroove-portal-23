@@ -8,16 +8,18 @@ import { DemoAccount } from "./types";
 interface DemoAccountCardProps {
   account: DemoAccount;
   isLoading: boolean;
-  loggingIn: string | null;
-  onLogin: (account: DemoAccount) => void;
+  onLogin: (email: string, password: string, role: string) => Promise<void>;
 }
 
 export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({ 
   account, 
   isLoading, 
-  loggingIn, 
   onLogin 
 }) => {
+  const handleLogin = () => {
+    onLogin(account.email, account.password, account.role);
+  };
+  
   return (
     <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
       <div>
@@ -41,11 +43,11 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
       </div>
       <Button 
         size="sm" 
-        onClick={() => onLogin(account)}
-        disabled={isLoading || loggingIn !== null}
+        onClick={handleLogin}
+        disabled={isLoading}
         className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
       >
-        {loggingIn === account.email ? (
+        {isLoading ? (
           <span className="flex items-center">
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

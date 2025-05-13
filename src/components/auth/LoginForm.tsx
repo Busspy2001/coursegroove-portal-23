@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
-import { DemoAccounts } from "./DemoAccounts";
+import DemoAccounts from "./DemoAccounts";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const LoginForm = () => {
