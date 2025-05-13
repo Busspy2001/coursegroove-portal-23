@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -90,8 +89,17 @@
     @apply border-border;
   }
 
+  html {
+    @apply scroll-smooth;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
+    min-height: 100%;
+    overflow-x: hidden;
+    position: relative;
   }
   
   /* Typography styles using League Spartan for headings */
@@ -219,5 +227,27 @@
       padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
     }
   }
-}
 
+  /* Page transition utilities */
+  .page-enter {
+    @apply opacity-0 transform translate-y-4;
+  }
+  
+  .page-enter-active {
+    @apply opacity-100 transform translate-y-0 transition-all duration-300 ease-out;
+  }
+  
+  .page-exit {
+    @apply opacity-100 transform translate-y-0;
+  }
+  
+  .page-exit-active {
+    @apply opacity-0 transform -translate-y-4 transition-all duration-200 ease-in;
+  }
+
+  /* Ensure smooth scrolling between pages */
+  .smooth-scroll {
+    @apply transition-all duration-300 ease-in-out;
+    scroll-behavior: smooth;
+  }
+}

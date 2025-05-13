@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/auth";
 import { Loader2 } from "lucide-react";
+import { Layout } from "./components/layout/Layout";
 
 // Import critical pages directly to avoid dynamic loading issues
 import Login from "./pages/Login";
@@ -88,58 +89,60 @@ function App() {
           <Router>
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
-                <Route path="/" element={<Index />} />
-                {/* Critical routes loaded directly without lazy loading */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/student" element={<StudentDashboard />} />
-                <Route path="/my-courses" element={<MyCourses />} />
-                <Route path="/my-courses/:courseId" element={<CourseProgress />} />
-                <Route path="/student/profile" element={<StudentProfile />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/courses/:courseId" element={<CourseDetails />} />
-                <Route path="/courses/create" element={<CourseCreation />} />
-                <Route path="/profile" element={<Profile />} />
-                
-                {/* Instructor Routes */}
-                <Route path="/instructor" element={<InstructorDashboard />} />
-                <Route path="/instructor/courses" element={<InstructorCourses />} />
-                <Route path="/instructor/courses/create" element={<CourseCreation />} />
-                <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
-                <Route path="/instructor/students" element={<InstructorStudents />} />
-                <Route path="/instructor/reviews" element={<InstructorReviews />} />
-                <Route path="/instructor/stats" element={<InstructorStats />} />
-                <Route path="/instructor/earnings" element={<InstructorEarnings />} />
-                <Route path="/instructor/settings" element={<InstructorSettings />} />
-                <Route path="/instructor/support" element={<InstructorSupport />} />
-                
-                {/* Admin Route */}
-                <Route path="/admin" element={<AdminDashboard />} />
-                
-                {/* General Routes */}
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/faq" element={<Faq />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/business" element={<Business />} />
-                <Route path="/teach" element={<Teach />} />
-                <Route path="/categories" element={<Categories />} />
-                <Route path="/testimonials" element={<Testimonials />} />
-                <Route path="/values" element={<Values />} />
-                <Route path="/instructors" element={<Instructors />} />
-                
-                {/* Nouvelles routes pour le tableau de bord étudiant */}
-                <Route path="/certifications" element={<Certifications />} />
-                <Route path="/favorites" element={<Favorites />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                <Route path="*" element={<NotFound />} />
+                {/* Utiliser le Layout comme wrapper pour les routes */}
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/student" element={<StudentDashboard />} />
+                  <Route path="/my-courses" element={<MyCourses />} />
+                  <Route path="/my-courses/:courseId" element={<CourseProgress />} />
+                  <Route path="/student/profile" element={<StudentProfile />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/courses/:courseId" element={<CourseDetails />} />
+                  <Route path="/courses/create" element={<CourseCreation />} />
+                  <Route path="/profile" element={<Profile />} />
+                  
+                  {/* Instructor Routes */}
+                  <Route path="/instructor" element={<InstructorDashboard />} />
+                  <Route path="/instructor/courses" element={<InstructorCourses />} />
+                  <Route path="/instructor/courses/create" element={<CourseCreation />} />
+                  <Route path="/instructor/courses/edit/:courseId" element={<CourseEditor />} />
+                  <Route path="/instructor/students" element={<InstructorStudents />} />
+                  <Route path="/instructor/reviews" element={<InstructorReviews />} />
+                  <Route path="/instructor/stats" element={<InstructorStats />} />
+                  <Route path="/instructor/earnings" element={<InstructorEarnings />} />
+                  <Route path="/instructor/settings" element={<InstructorSettings />} />
+                  <Route path="/instructor/support" element={<InstructorSupport />} />
+                  
+                  {/* Admin Route */}
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  
+                  {/* General Routes */}
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/faq" element={<Faq />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/business" element={<Business />} />
+                  <Route path="/teach" element={<Teach />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/testimonials" element={<Testimonials />} />
+                  <Route path="/values" element={<Values />} />
+                  <Route path="/instructors" element={<Instructors />} />
+                  
+                  {/* Nouvelles routes pour le tableau de bord étudiant */}
+                  <Route path="/certifications" element={<Certifications />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/progress" element={<Progress />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/settings" element={<Settings />} />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Routes>
             </Suspense>
           </Router>
