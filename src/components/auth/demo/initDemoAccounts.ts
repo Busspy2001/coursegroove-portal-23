@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getDemoAccounts } from "./demoAccountService";
 import { toast } from "@/hooks/use-toast";
+import { DemoAccount } from "./types";
 
 /**
  * Crée ou met à jour les comptes de démonstration dans la base de données Supabase
@@ -43,13 +44,17 @@ export const initDemoAccounts = async (): Promise<boolean> => {
 
           // S'assurer que le profil est créé avec le bon rôle
           if (data.user) {
+            // Convertir le rôle pour être compatible avec les types Supabase
+            const dbRole = account.role === 'admin' ? 'super_admin' : account.role;
+
+            // Insérer ou mettre à jour le profil dans profiles_unified
             const { error: profileError } = await supabase
               .from('profiles_unified')
               .upsert({
                 id: data.user.id,
                 full_name: account.name,
                 email: account.email,
-                role: account.role,
+                role: dbRole,
                 avatar_url: account.avatar,
                 is_demo: true,
                 created_at: new Date().toISOString()
@@ -65,17 +70,22 @@ export const initDemoAccounts = async (): Promise<boolean> => {
         } else {
           console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
           
-          // Mettre à jour le profil pour s'assurer que le rôle est correct
-          const { data: userData } = await supabase.auth.admin.getUserByEmail(account.email);
+          // Remplacer getUserByEmail par une méthode alternative car elle n'existe pas
+          // Nous allons rechercher l'utilisateur dans la liste des utilisateurs
+          const user = existingUsers?.users.find(u => u.email === account.email);
           
-          if (userData?.user) {
+          if (user) {
+            // Convertir le rôle pour être compatible avec les types Supabase
+            const dbRole = account.role === 'admin' ? 'super_admin' : account.role;
+
+            // Mettre à jour le profil pour s'assurer que le rôle est correct
             const { error: profileError } = await supabase
               .from('profiles_unified')
               .upsert({
-                id: userData.user.id,
+                id: user.id,
                 full_name: account.name,
                 email: account.email,
-                role: account.role,
+                role: dbRole,
                 avatar_url: account.avatar,
                 is_demo: true
               });

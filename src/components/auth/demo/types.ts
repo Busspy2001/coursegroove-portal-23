@@ -1,5 +1,8 @@
 
-import { UserRole } from "@/contexts/auth/types";
+import { Database } from "@/integrations/supabase/types";
+
+// Définir UserRole pour correspondre au type dans la base de données
+export type UserRole = Database['public']['Enums']['user_role'] | 'admin';
 
 export interface DemoAccount {
   id: string;

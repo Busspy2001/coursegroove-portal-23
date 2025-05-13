@@ -36,29 +36,30 @@ if (typeof window !== 'undefined') {
     listUsers: async () => {
       // Pour les besoins de la démo, nous simulons cette fonction
       console.log("Admin listUsers called - this is a stub for demo purposes");
-      return { data: { users: [] }, error: null };
-    },
-    getUserByEmail: async (email: string) => {
-      // Tenter d'obtenir l'utilisateur via l'email
-      console.log("Récupération d'utilisateur par email:", email);
+      
+      // Tenter de récupérer les utilisateurs via une requête à profiles_unified
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ 
-          email, 
-          password: 'demo123' // Utiliser mot de passe démo connu
-        });
-        
+        const { data, error } = await supabase
+          .from('profiles_unified')
+          .select('id, email')
+          .eq('is_demo', true);
+          
         if (error) {
-          console.log("Erreur lors de la récupération d'utilisateur par email:", error);
-          return { data: null, error };
+          console.error("Erreur lors de la récupération des utilisateurs:", error);
+          return { data: { users: [] }, error: null };
         }
         
-        // Se déconnecter immédiatement pour ne pas affecter l'état d'authentification
-        await supabase.auth.signOut();
+        // Transformer les données pour correspondre à ce qu'attendrait auth.users
+        const users = data.map(profile => ({
+          id: profile.id,
+          email: profile.email,
+          user_metadata: {}
+        }));
         
-        return { data: { user: data.user }, error: null };
+        return { data: { users }, error: null };
       } catch (err) {
-        console.error("Erreur lors de getUserByEmail:", err);
-        return { data: null, error: err };
+        console.error("Erreur dans listUsers:", err);
+        return { data: { users: [] }, error: null };
       }
     },
     // Utilisation de la méthode standard de déconnexion pour assurer la cohérence

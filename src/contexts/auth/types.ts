@@ -1,26 +1,25 @@
 
+import { Database } from "@/integrations/supabase/types";
+
+// Réutiliser le type d'énumération défini dans la base de données
+// et ajouter une valeur 'admin' supplémentaire pour la compatibilité
+export type UserRole = Database['public']['Enums']['user_role'] | 'admin';
+
 export interface User {
   id: string;
-  email?: string;
+  email: string;
   name?: string;
-  role?: UserRole;
+  role: UserRole;
   avatar?: string;
-  emailVerified?: boolean;
-  bio?: string;
-  phone?: string;
 }
 
-export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo' | 'admin';
-
 export interface AuthContextType {
-  currentUser: User | null;
-  loading: boolean;
-  isLoggingOut?: boolean;
-  isLoggingIn?: boolean;
-  isAuthenticated: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<User | null>;
-  loginWithDemo: (email: string, password: string) => Promise<User | null>;
+  user: User | null;
+  isLoading: boolean;
+  isLoggingIn: boolean;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
   register: (name: string, email: string, password: string, isDemoAccount?: boolean) => Promise<User>;
-  logout: (callback?: () => void) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  logout: () => Promise<void>;
+  loginWithDemo: (email: string, password: string) => Promise<User>;
 }
