@@ -1,4 +1,5 @@
 
+// Import at the top of the file (first ~10 lines)
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Info, AlertCircle } from "lucide-react";
