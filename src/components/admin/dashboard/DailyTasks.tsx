@@ -1,112 +1,115 @@
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, Clock, CalendarDays } from "lucide-react";
-import { type AdminTask } from "@/types/admin-types";
+import React from 'react';
+import { AdminTask } from '@/types/admin-types';
+import { CheckCircle2, Circle, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface DailyTasksProps {
   tasks: AdminTask[];
-  onCompleteTask?: (id: string, completed: boolean) => void;
-  onViewAll?: () => void;
+  onCompleteTask: (id: string, completed: boolean) => void;
+  onViewAll: () => void;
 }
 
-const DailyTasks = ({ tasks, onCompleteTask, onViewAll }: DailyTasksProps) => {
-  const getPriorityBadge = (priority: AdminTask['priority']) => {
+const DailyTasks: React.FC<DailyTasksProps> = ({ tasks, onCompleteTask, onViewAll }) => {
+  const getPriorityClass = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Haute</Badge>;
+        return 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300';
       case 'medium':
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Moyenne</Badge>;
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
       case 'low':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Basse</Badge>;
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
-  const getCategoryBadge = (category: AdminTask['category']) => {
-    const categoryMap = {
-      moderation: { label: 'Modération', color: 'bg-purple-100 text-purple-800 hover:bg-purple-100' },
-      support: { label: 'Support', color: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
-      business: { label: 'Business', color: 'bg-teal-100 text-teal-800 hover:bg-teal-100' },
-      system: { label: 'Système', color: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
-    };
-    
-    const { label, color } = categoryMap[category];
-    return <Badge className={color}>{label}</Badge>;
+  const getCategoryClass = (category: string) => {
+    switch (category) {
+      case 'moderation':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300';
+      case 'support':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300';
+      case 'business':
+        return 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300';
+      case 'system':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+      case 'finance':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+      case 'marketing':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300';
+      case 'security':
+        return 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
   };
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-md font-medium">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-blue-500" />
-            Tâches du jour
-            {tasks.filter(t => !t.completed).length > 0 && (
-              <Badge className="ml-2 bg-blue-500">{tasks.filter(t => !t.completed).length}</Badge>
-            )}
-          </div>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-medium flex justify-between items-center">
+          Tâches du jour
+          <Button variant="ghost" size="sm" className="text-xs" onClick={onViewAll}>
+            Tout voir
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </CardTitle>
-        <Button onClick={onViewAll} variant="ghost" size="sm" className="text-xs">
-          Voir tout
-        </Button>
+        <CardDescription>
+          {tasks.filter(t => !t.completed).length} tâches en attente
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {tasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-6 text-center">
-              <CheckCircle2 className="h-8 w-8 text-green-500 mb-2" />
-              <p className="text-muted-foreground">Aucune tâche pour aujourd'hui</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {tasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className={`rounded-lg border p-3 ${task.completed ? 'bg-gray-50 dark:bg-gray-900/20' : 'bg-white dark:bg-gray-800'}`}
+      <CardContent className="space-y-3 max-h-[300px] overflow-y-auto">
+        {tasks.map((task) => (
+          <div 
+            key={task.id} 
+            className={cn(
+              "flex items-start p-3 rounded-md border",
+              task.completed ? "bg-muted/40" : "bg-card"
+            )}
+          >
+            <Checkbox
+              id={`task-${task.id}`}
+              checked={task.completed}
+              onCheckedChange={(checked) => onCompleteTask(task.id, !!checked)}
+              className="mt-1"
+            />
+            <div className="ml-3 flex-1">
+              <div className="flex items-center justify-between">
+                <label 
+                  htmlFor={`task-${task.id}`}
+                  className={cn(
+                    "font-medium cursor-pointer",
+                    task.completed && "line-through text-muted-foreground"
+                  )}
                 >
-                  <div className="flex items-start gap-3">
-                    <button 
-                      className="mt-0.5 flex-shrink-0"
-                      onClick={() => onCompleteTask && onCompleteTask(task.id, !task.completed)}
-                    >
-                      {task.completed ? 
-                        <CheckCircle2 className="h-5 w-5 text-green-500" /> : 
-                        <Circle className="h-5 w-5 text-gray-300 hover:text-gray-400" />
-                      }
-                    </button>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                          {task.title}
-                        </span>
-                        <div className="flex gap-1">
-                          {getPriorityBadge(task.priority)}
-                          {getCategoryBadge(task.category)}
-                        </div>
-                      </div>
-                      <p className={`text-sm mb-2 ${task.completed ? 'line-through text-muted-foreground' : 'text-muted-foreground'}`}>
-                        {task.description}
-                      </p>
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {task.due}
-                        </div>
-                        {task.assignedTo && (
-                          <span className="text-muted-foreground">
-                            Assigné à: {task.assignedTo}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  {task.title}
+                </label>
+                <div className="flex gap-2">
+                  <span className={cn("inline-flex text-xs px-2 py-1 rounded", getPriorityClass(task.priority))}>
+                    {task.priority}
+                  </span>
+                  <span className={cn("inline-flex text-xs px-2 py-1 rounded", getCategoryClass(task.category))}>
+                    {task.category}
+                  </span>
                 </div>
-              ))}
+              </div>
+              <p className={cn(
+                "text-sm text-muted-foreground mt-1", 
+                task.completed && "line-through"
+              )}>
+                {task.description}
+              </p>
+              <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
+                <span>Échéance: {task.due}</span>
+                {task.assignedTo && <span>Assigné à: {task.assignedTo}</span>}
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

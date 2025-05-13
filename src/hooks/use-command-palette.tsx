@@ -1,140 +1,46 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   CommandDialog,
+  CommandInput,
+  CommandList,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
-  CommandList
+  CommandSeparator,
 } from '@/components/ui/command';
-import { useAuth } from '@/contexts/auth';
-import { UserRole } from '@/contexts/auth/types';
+import {
+  Users,
+  BookOpen,
+  Building,
+  CreditCard,
+  Settings,
+  BarChart3,
+  Search,
+  Shield,
+  User,
+  Tag,
+  Mail,
+  MessageSquare,
+  Bell,
+} from 'lucide-react';
 
-type CommandCategory = 'page' | 'user' | 'course' | 'business' | 'action';
-
-interface CommandItem {
-  id: string;
-  name: string;
-  category: CommandCategory;
+export type CommandPaletteAction = {
+  title: string;
   icon?: React.ReactNode;
-  onSelect: () => void;
+  action: () => void;
   keywords?: string[];
-  requiredRole?: UserRole;
-}
+};
 
-export function useCommandPalette() {
+export const useCommandPalette = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
-  const userRole = currentUser?.role || 'student';
-  
-  // Navigation pages based on role permissions
-  const getNavigationCommands = useCallback((): CommandItem[] => {
-    const pages = [
-      {
-        id: 'admin-dashboard',
-        name: 'Tableau de bord',
-        path: '/admin',
-        roles: ['admin', 'super_admin', 'business_admin']
-      },
-      {
-        id: 'users-management',
-        name: 'Utilisateurs',
-        path: '/admin/users',
-        roles: ['admin', 'super_admin', 'business_admin']
-      },
-      {
-        id: 'courses-moderation',
-        name: 'Cours à modérer',
-        path: '/admin/courses',
-        roles: ['admin', 'super_admin']
-      },
-      {
-        id: 'business-management',
-        name: 'Entreprises',
-        path: '/admin/business',
-        roles: ['business_admin', 'super_admin']
-      },
-      {
-        id: 'finance',
-        name: 'Finance',
-        path: '/admin/finance',
-        roles: ['super_admin']
-      },
-      {
-        id: 'statistics',
-        name: 'Statistiques',
-        path: '/admin/statistics',
-        roles: ['admin', 'super_admin', 'business_admin']
-      }
-    ];
-    
-    return pages
-      .filter(page => page.roles.includes(userRole))
-      .map(page => ({
-        id: page.id,
-        name: page.name,
-        category: 'page' as CommandCategory,
-        onSelect: () => {
-          navigate(page.path);
-          setOpen(false);
-        },
-        keywords: [page.name.toLowerCase()]
-      }));
-  }, [userRole, navigate]);
-  
-  // Common admin actions
-  const getActionCommands = useCallback((): CommandItem[] => {
-    const actions = [
-      {
-        id: 'approve-course',
-        name: 'Approuver un cours',
-        roles: ['admin', 'super_admin'],
-        onSelect: () => {
-          navigate('/admin/courses?filter=pending');
-          setOpen(false);
-        }
-      },
-      {
-        id: 'view-reports',
-        name: 'Voir les signalements',
-        roles: ['admin', 'super_admin', 'business_admin'],
-        onSelect: () => {
-          navigate('/admin/user-support');
-          setOpen(false);
-        }
-      },
-      {
-        id: 'logout',
-        name: 'Se déconnecter',
-        roles: ['student', 'instructor', 'admin', 'super_admin', 'business_admin'],
-        onSelect: () => {
-          // Cette fonction sera simplement un raccourci et ne déconnecte pas réellement
-          navigate('/login?logout=true');
-          setOpen(false);
-        }
-      }
-    ];
-    
-    return actions
-      .filter(action => action.roles.includes(userRole))
-      .map(action => ({
-        id: action.id,
-        name: action.name,
-        category: 'action' as CommandCategory,
-        onSelect: action.onSelect,
-        keywords: [action.name.toLowerCase()]
-      }));
-  }, [userRole, navigate]);
-  
-  // All available commands
-  const commands = [...getNavigationCommands(), ...getActionCommands()];
-  
-  useEffect(() => {
+
+  // Ouvrir avec Cmd+K / Ctrl+K
+  React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || e.key === '/') {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen(open => !open);
       }
@@ -143,40 +49,60 @@ export function useCommandPalette() {
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
   }, []);
-  
+
+  // Actions de navigation
+  const navigateTo = useCallback((path: string) => {
+    navigate(path);
+    setOpen(false);
+  }, [navigate]);
+
+  // Liste des actions disponibles
+  const actions: CommandPaletteAction[] = [
+    // Navigation vers modules principaux
+    { title: "Tableau de bord", icon: <BarChart3 className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin") },
+    { title: "Utilisateurs", icon: <Users className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/users") },
+    { title: "Cours", icon: <BookOpen className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/courses") },
+    { title: "Entreprises", icon: <Building className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/business") },
+    { title: "Finance", icon: <CreditCard className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/finance") },
+    { title: "Statistiques", icon: <BarChart3 className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/statistics") },
+    { title: "Marketing", icon: <Tag className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/marketing") },
+    { title: "Communication", icon: <MessageSquare className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/messages") },
+    { title: "Notifications", icon: <Bell className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/notifications") },
+    { title: "Paramètres", icon: <Settings className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/settings") },
+    { title: "Système", icon: <Shield className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/system") },
+    
+    // Actions rapides
+    { title: "Chercher un utilisateur", icon: <User className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/users?action=search") },
+    { title: "Modérer un cours", icon: <BookOpen className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/courses?action=moderate") },
+    { title: "Vérifier les signalements", icon: <Shield className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/user-support") },
+    { title: "Envoyer un email de masse", icon: <Mail className="mr-2 h-4 w-4" />, action: () => navigateTo("/admin/marketing/emails") },
+  ];
+
   const CommandPaletteDialog = (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Rechercher..." />
+      <CommandInput placeholder="Que voulez-vous faire ?" />
       <CommandList>
-        <CommandEmpty>Aucun résultat trouvé</CommandEmpty>
-        
+        <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
         <CommandGroup heading="Navigation">
-          {commands
-            .filter(command => command.category === 'page')
-            .map(command => (
-              <CommandItem key={command.id} onSelect={command.onSelect}>
-                {command.icon}
-                <span>{command.name}</span>
-              </CommandItem>
-            ))}
+          {actions.slice(0, 11).map((action) => (
+            <CommandItem key={action.title} onSelect={action.action}>
+              {action.icon}
+              <span>{action.title}</span>
+            </CommandItem>
+          ))}
         </CommandGroup>
-        
-        <CommandGroup heading="Actions">
-          {commands
-            .filter(command => command.category === 'action')
-            .map(command => (
-              <CommandItem key={command.id} onSelect={command.onSelect}>
-                {command.icon}
-                <span>{command.name}</span>
-              </CommandItem>
-            ))}
+        <CommandSeparator />
+        <CommandGroup heading="Actions rapides">
+          {actions.slice(11).map((action) => (
+            <CommandItem key={action.title} onSelect={action.action}>
+              {action.icon}
+              <span>{action.title}</span>
+            </CommandItem>
+          ))}
         </CommandGroup>
       </CommandList>
     </CommandDialog>
   );
-  
-  return {
-    setOpen,
-    CommandPaletteDialog
-  };
-}
+
+  return { open, setOpen, CommandPaletteDialog };
+};

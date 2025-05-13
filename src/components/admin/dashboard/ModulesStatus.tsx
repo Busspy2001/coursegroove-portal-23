@@ -1,67 +1,91 @@
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React from 'react';
+import { AdminModule } from '@/types/admin-types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  LayoutDashboard, Users, BookOpen, Building2, 
-  CreditCard, BarChart3, Shield, Bell 
-} from "lucide-react";
-import { type AdminModule, type AlertStatus } from "@/types/admin-types";
+  LayoutDashboard, Users, BookOpen, Building, 
+  CreditCard, BarChart3, Shield, MessageSquare
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface ModulesStatusProps {
   modules: AdminModule[];
 }
 
-const ModulesStatus = ({ modules }: ModulesStatusProps) => {
+const ModulesStatus: React.FC<ModulesStatusProps> = ({ modules }) => {
+  // Icônes par défaut pour les modules courants
   const getModuleIcon = (id: string) => {
-    const iconMap: Record<string, JSX.Element> = {
-      'users': <Users className="h-4 w-4" />,
-      'courses': <BookOpen className="h-4 w-4" />,
-      'business': <Building2 className="h-4 w-4" />,
-      'finance': <CreditCard className="h-4 w-4" />,
-      'statistics': <BarChart3 className="h-4 w-4" />,
-      'security': <Shield className="h-4 w-4" />,
-      'notifications': <Bell className="h-4 w-4" />,
-      'dashboard': <LayoutDashboard className="h-4 w-4" />,
+    const icons: Record<string, React.ReactNode> = {
+      'dashboard': <LayoutDashboard className="h-5 w-5" />,
+      'users': <Users className="h-5 w-5" />,
+      'courses': <BookOpen className="h-5 w-5" />,
+      'business': <Building className="h-5 w-5" />,
+      'finance': <CreditCard className="h-5 w-5" />,
+      'statistics': <BarChart3 className="h-5 w-5" />,
+      'security': <Shield className="h-5 w-5" />,
+      'notifications': <MessageSquare className="h-5 w-5" />,
     };
     
-    return iconMap[id] || <LayoutDashboard className="h-4 w-4" />;
+    return icons[id] || <LayoutDashboard className="h-5 w-5" />;
   };
   
-  const getStatusColor = (status: AlertStatus) => {
+  // Classes pour les différents status
+  const getStatusClasses = (status: string) => {
     switch (status) {
-      case 'success': return 'bg-green-500';
-      case 'warning': return 'bg-amber-500';
-      case 'danger': return 'bg-red-500';
-      default: return 'bg-gray-300';
+      case 'success':
+        return 'bg-green-500';
+      case 'warning':
+        return 'bg-yellow-500';
+      case 'danger':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-300';
     }
   };
 
   return (
-    <Card>
+    <Card className="mt-6">
       <CardHeader className="pb-2">
-        <CardTitle className="text-md font-medium">État des modules</CardTitle>
+        <CardTitle className="text-lg font-medium">État des modules</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {modules.map((module) => (
             <div 
-              key={module.id} 
-              className="rounded-lg border p-3 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-pointer transition-colors dark:hover:bg-gray-800"
+              key={module.id}
+              className="border rounded-lg p-3 flex flex-col items-center hover:bg-accent/5 transition-colors"
             >
-              <div className="relative">
-                <div className={`p-2 rounded-full bg-gray-100 dark:bg-gray-800`}>
-                  {getModuleIcon(module.id)}
+              <div className="flex justify-between items-center w-full mb-2">
+                <div className="flex items-center gap-2">
+                  {module.icon ? 
+                    <module.icon className="h-5 w-5 text-muted-foreground" /> : 
+                    getModuleIcon(module.id)
+                  }
+                  <span className="font-medium text-sm">{module.name}</span>
                 </div>
+                
                 {module.alerts > 0 && (
-                  <Badge
-                    className={`absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-4 rounded-full text-[10px] text-white ${getStatusColor(module.status)}`}
-                  >
+                  <Badge variant="outline" className="text-xs">
                     {module.alerts}
                   </Badge>
                 )}
               </div>
-              <span className="text-xs font-medium mt-2">{module.name}</span>
+              
+              <div className="w-full bg-muted rounded-full h-2 mt-2">
+                <div 
+                  className={cn("h-2 rounded-full", getStatusClasses(module.status))}
+                  style={{ width: module.status === 'success' ? '100%' : 
+                           module.status === 'warning' ? '70%' : 
+                           module.status === 'danger' ? '40%' : '90%' }}
+                ></div>
+              </div>
+              
+              <div className="text-xs text-muted-foreground mt-2 w-full text-center">
+                {module.status === 'success' ? 'OK' : 
+                 module.status === 'warning' ? 'Attention requise' : 
+                 module.status === 'danger' ? 'Action critique' : 'Normal'}
+              </div>
             </div>
           ))}
         </div>

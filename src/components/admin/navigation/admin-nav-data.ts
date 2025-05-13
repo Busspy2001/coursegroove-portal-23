@@ -2,7 +2,9 @@
 import { 
   LayoutDashboard, Users, Shield, BookOpen, Star, TrendingDown,
   Building, CreditCard, BarChart3, Tag, MessageSquare, Bell,
-  Settings, FileWarning, Search, Activity, Headphones
+  Settings, FileWarning, Search, Activity, Headphones, PieChart,
+  TrendingUp, Megaphone, Mail, Percent, Globe, User, ChevronRight,
+  Calendar, FileBarChart
 } from "lucide-react";
 import { UserRole } from "@/contexts/auth/types";
 
@@ -93,6 +95,12 @@ export const adminNavigation: AdminNavGroup[] = [
         icon: CreditCard,
         requiredRoles: ["super_admin"],
       },
+      {
+        title: "Statistiques B2B",
+        path: "/admin/business/statistics",
+        icon: PieChart,
+        requiredRoles: ["super_admin", "business_admin"],
+      },
     ],
     requiredRoles: ["super_admin", "business_admin"],
   },
@@ -104,6 +112,18 @@ export const adminNavigation: AdminNavGroup[] = [
         path: "/admin/finance",
         icon: CreditCard,
       },
+      {
+        title: "Revenus & Répartition",
+        path: "/admin/finance/revenue",
+        icon: TrendingUp,
+        requiredRoles: ["super_admin"],
+      },
+      {
+        title: "Rapports",
+        path: "/admin/finance/reports",
+        icon: FileBarChart,
+        requiredRoles: ["super_admin"],
+      },
     ],
     requiredRoles: ["super_admin"],
   },
@@ -111,9 +131,27 @@ export const adminNavigation: AdminNavGroup[] = [
     label: "Statistiques",
     items: [
       {
-        title: "Statistiques",
+        title: "Vue globale",
         path: "/admin/statistics",
         icon: BarChart3,
+      },
+      {
+        title: "Instructeurs",
+        path: "/admin/statistics/instructors",
+        icon: User,
+        requiredRoles: ["super_admin"],
+      },
+      {
+        title: "Étudiants",
+        path: "/admin/statistics/students",
+        icon: Users,
+        requiredRoles: ["super_admin"],
+      },
+      {
+        title: "B2C vs B2B",
+        path: "/admin/statistics/comparison",
+        icon: PieChart,
+        requiredRoles: ["super_admin"],
       },
     ],
   },
@@ -121,10 +159,25 @@ export const adminNavigation: AdminNavGroup[] = [
     label: "Marketing",
     items: [
       {
-        title: "Marketing",
-        path: "/admin/marketing",
-        icon: Tag,
-        badge: "Beta",
+        title: "Campagnes emails",
+        path: "/admin/marketing/emails",
+        icon: Mail,
+        badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "Promotions",
+        path: "/admin/marketing/promotions",
+        icon: Percent,
+        badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "Annonces ciblées",
+        path: "/admin/marketing/announcements",
+        icon: Megaphone,
+        badge: "Bientôt",
+        disabled: true,
       },
     ],
     requiredRoles: ["super_admin"],
@@ -133,10 +186,38 @@ export const adminNavigation: AdminNavGroup[] = [
     label: "Communication",
     items: [
       {
-        title: "Messages",
+        title: "Messages internes",
         path: "/admin/messages",
         icon: MessageSquare,
         badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "Support client",
+        path: "/admin/support",
+        icon: Headphones,
+        badge: "Bientôt",
+        disabled: true,
+      },
+    ],
+    requiredRoles: ["super_admin", "admin"],
+  },
+  {
+    label: "Notifications",
+    items: [
+      {
+        title: "Gestion & historique",
+        path: "/admin/notifications",
+        icon: Bell,
+        badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "Préférences",
+        path: "/admin/notifications/preferences",
+        icon: Bell,
+        badge: "Bientôt",
+        disabled: true,
       },
     ],
     requiredRoles: ["super_admin"],
@@ -145,21 +226,24 @@ export const adminNavigation: AdminNavGroup[] = [
     label: "Système",
     items: [
       {
-        title: "Notifications",
-        path: "/admin/notifications",
-        icon: Bell,
-        badge: "Bientôt",
-      },
-      {
         title: "Paramètres",
         path: "/admin/settings",
         icon: Settings,
+        requiredRoles: ["super_admin"],
       },
       {
         title: "Système & Sécurité",
         path: "/admin/system",
         icon: Shield,
         badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "Logs",
+        path: "/admin/system/logs",
+        icon: FileWarning,
+        badge: "Bientôt",
+        disabled: true,
       },
     ],
     requiredRoles: ["super_admin"],

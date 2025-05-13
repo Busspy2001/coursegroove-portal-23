@@ -6,9 +6,14 @@ import DailyTasks from "./dashboard/DailyTasks";
 import ModulesStatus from "./dashboard/ModulesStatus";
 import { AdminAlert, AdminTask, AdminModule } from "@/types/admin-types";
 import { toast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminGlobalDashboard = () => {
-  // Mock data - in a real implementation, this would come from Supabase
+  // État actif pour les onglets du dashboard
+  const [activeTab, setActiveTab] = useState("today");
+  
+  // Données mock - dans une implémentation réelle, ces données viendraient de Supabase
   const stats = {
     totalUsers: 1245,
     newUsersToday: 32,
@@ -32,9 +37,12 @@ const AdminGlobalDashboard = () => {
     { id: 2, type: "course_published", name: "Python pour débutants", author: "Jean Michel", time: "Il y a 2 heures" },
     { id: 3, type: "course_review", name: "Design UI/UX", rating: 5, author: "Sophie Martin", time: "Il y a 3 heures" },
     { id: 4, type: "payment_received", name: "Paiement reçu", amount: "149€", course: "JavaScript Avancé", time: "Il y a 5 heures" },
+    { id: 5, type: "business_signup", name: "TechCorp SAS", time: "Il y a 8 heures" },
+    { id: 6, type: "user_support", name: "Demande de remboursement", author: "Lucas Bernard", time: "Il y a 12 heures" },
+    { id: 7, type: "system_alert", name: "Pic d'utilisation serveur", time: "Hier, 17:42" },
   ];
 
-  // Mock alerts data
+  // Données mock pour les alertes
   const [alerts, setAlerts] = useState<AdminAlert[]>([
     {
       id: "1",
@@ -65,10 +73,20 @@ const AdminGlobalDashboard = () => {
       read: true,
       actionRequired: false,
       category: "course"
+    },
+    {
+      id: "4",
+      title: "Nouvelle entreprise",
+      message: "LearningCorp a rejoint Schoolier en tant que client business. 25 licences activées.",
+      status: "success",
+      date: "Aujourd'hui, 11:30",
+      read: false,
+      actionRequired: false,
+      category: "business"
     }
   ]);
 
-  // Mock tasks data
+  // Données mock pour les tâches
   const [tasks, setTasks] = useState<AdminTask[]>([
     {
       id: "1",
@@ -106,10 +124,19 @@ const AdminGlobalDashboard = () => {
       due: "Aujourd'hui, 11:00",
       completed: true,
       category: "system"
+    },
+    {
+      id: "5",
+      title: "Audit sécurité mensuel",
+      description: "Vérification des logs d'accès et des vulnérabilités",
+      priority: "high",
+      due: "Demain, 10:00",
+      completed: false,
+      category: "security"
     }
   ]);
 
-  // Mock modules status
+  // État des modules
   const modules: AdminModule[] = [
     { id: "users", name: "Utilisateurs", alerts: 2, status: "warning" },
     { id: "courses", name: "Cours", alerts: 5, status: "danger" },
@@ -149,10 +176,44 @@ const AdminGlobalDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold tracking-tight mb-6">Tableau de bord global</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold tracking-tight">Tableau de bord global</h2>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+          <TabsList className="grid w-full grid-cols-3 h-9">
+            <TabsTrigger value="today" className="text-xs">Aujourd'hui</TabsTrigger>
+            <TabsTrigger value="week" className="text-xs">Cette semaine</TabsTrigger>
+            <TabsTrigger value="month" className="text-xs">Ce mois</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
       
       {/* Key metrics */}
-      <StatsGrid stats={stats} />
+      <TabsContent value="today" className="m-0">
+        <StatsGrid stats={stats} />
+      </TabsContent>
+      
+      <TabsContent value="week" className="m-0">
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistiques hebdomadaires</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[200px] flex items-center justify-center text-muted-foreground">
+            Graphiques de performance sur 7 jours (non implémenté)
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="month" className="m-0">
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistiques mensuelles</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[200px] flex items-center justify-center text-muted-foreground">
+            Graphiques de performance sur 30 jours (non implémenté)
+          </CardContent>
+        </Card>
+      </TabsContent>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Alertes critiques */}
