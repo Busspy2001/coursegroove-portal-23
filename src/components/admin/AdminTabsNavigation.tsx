@@ -4,7 +4,7 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   LayoutDashboard, Users, BookOpen, Building2, 
   CreditCard, BarChart3, Megaphone, MessageSquare,
-  Bell, Settings
+  Bell, Settings, Activity, Headphones
 } from "lucide-react";
 
 interface AdminTabsNavigationProps {
@@ -23,6 +23,16 @@ const AdminTabsNavigation = ({ activeTab, setActiveTab }: AdminTabsNavigationPro
       <TabsTrigger value="users" className="flex items-center px-4 py-3 border-b-2 border-transparent data-[state=active]:border-schoolier-teal rounded-none">
         <Users className="h-4 w-4 mr-2" />
         Utilisateurs
+      </TabsTrigger>
+      
+      <TabsTrigger value="user-activity" className="flex items-center px-4 py-3 border-b-2 border-transparent data-[state=active]:border-schoolier-teal rounded-none">
+        <Activity className="h-4 w-4 mr-2" />
+        Activité
+      </TabsTrigger>
+      
+      <TabsTrigger value="user-support" className="flex items-center px-4 py-3 border-b-2 border-transparent data-[state=active]:border-schoolier-teal rounded-none">
+        <Headphones className="h-4 w-4 mr-2" />
+        Support
       </TabsTrigger>
       
       <TabsTrigger value="courses" className="flex items-center px-4 py-3 border-b-2 border-transparent data-[state=active]:border-schoolier-teal rounded-none">

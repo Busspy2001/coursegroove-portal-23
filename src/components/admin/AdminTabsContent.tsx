@@ -7,6 +7,8 @@ import AdminCourseModeration from "@/components/admin/AdminCourseModeration";
 import AdminBusinessManagement from "@/components/admin/AdminBusinessManagement";
 import AdminFinance from "@/components/admin/AdminFinance";
 import AdminStatistics from "@/components/admin/AdminStatistics";
+import AdminUserActivity from "@/components/admin/AdminUserActivity";
+import AdminUserSupport from "@/components/admin/AdminUserSupport";
 
 const AdminTabsContent = () => {
   const DevelopmentNotice = ({ feature }: { feature: string }) => (
@@ -25,6 +27,14 @@ const AdminTabsContent = () => {
         
         <TabsContent value="users">
           <AdminUserManagement />
+        </TabsContent>
+        
+        <TabsContent value="user-activity">
+          <AdminUserActivity />
+        </TabsContent>
+        
+        <TabsContent value="user-support">
+          <AdminUserSupport />
         </TabsContent>
         
         <TabsContent value="courses">
