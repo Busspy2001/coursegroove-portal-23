@@ -1,6 +1,6 @@
 
 import React from "react";
-import { TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import AdminGlobalDashboard from "@/components/admin/AdminGlobalDashboard";
 import AdminUserManagement from "@/components/admin/AdminUserManagement";
 import AdminCourseModeration from "@/components/admin/AdminCourseModeration";
@@ -18,45 +18,47 @@ const AdminTabsContent = () => {
 
   return (
     <div className="p-6">
-      <TabsContent value="dashboard">
-        <AdminGlobalDashboard />
-      </TabsContent>
-      
-      <TabsContent value="users">
-        <AdminUserManagement />
-      </TabsContent>
-      
-      <TabsContent value="courses">
-        <AdminCourseModeration />
-      </TabsContent>
-      
-      <TabsContent value="business">
-        <AdminBusinessManagement />
-      </TabsContent>
-      
-      <TabsContent value="finance">
-        <AdminFinance />
-      </TabsContent>
-      
-      <TabsContent value="statistics">
-        <AdminStatistics />
-      </TabsContent>
-      
-      <TabsContent value="marketing">
-        <DevelopmentNotice feature="Le module marketing" />
-      </TabsContent>
-      
-      <TabsContent value="messages">
-        <DevelopmentNotice feature="Le système de messagerie admin" />
-      </TabsContent>
-      
-      <TabsContent value="notifications">
-        <DevelopmentNotice feature="La gestion des notifications" />
-      </TabsContent>
-      
-      <TabsContent value="settings">
-        <DevelopmentNotice feature="Les paramètres système" />
-      </TabsContent>
+      <Tabs defaultValue="dashboard">
+        <TabsContent value="dashboard">
+          <AdminGlobalDashboard />
+        </TabsContent>
+        
+        <TabsContent value="users">
+          <AdminUserManagement />
+        </TabsContent>
+        
+        <TabsContent value="courses">
+          <AdminCourseModeration />
+        </TabsContent>
+        
+        <TabsContent value="business">
+          <AdminBusinessManagement />
+        </TabsContent>
+        
+        <TabsContent value="finance">
+          <AdminFinance />
+        </TabsContent>
+        
+        <TabsContent value="statistics">
+          <AdminStatistics />
+        </TabsContent>
+        
+        <TabsContent value="marketing">
+          <DevelopmentNotice feature="Le module marketing" />
+        </TabsContent>
+        
+        <TabsContent value="messages">
+          <DevelopmentNotice feature="Le système de messagerie admin" />
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+          <DevelopmentNotice feature="La gestion des notifications" />
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <DevelopmentNotice feature="Les paramètres système" />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

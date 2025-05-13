@@ -5,11 +5,13 @@ import { useAuth } from "@/contexts/auth";
 import { toast } from "@/hooks/use-toast";
 import { AdminLayout } from "@/components/admin";
 import { AdminHeader } from "@/components/admin";
+import { AdminTabsNavigation } from "@/components/admin";
 import { AdminTabsContent } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search } from "lucide-react";
 import { UserRole } from "@/contexts/auth/types";
 import { useCommandPalette } from "@/hooks/use-command-palette";
+import { Tabs } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -122,8 +124,11 @@ const AdminDashboard = () => {
         </Button>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <AdminTabsContent />
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <AdminTabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+          <AdminTabsContent />
+        </Tabs>
       </div>
       
       {/* Command Dialog for global search */}
