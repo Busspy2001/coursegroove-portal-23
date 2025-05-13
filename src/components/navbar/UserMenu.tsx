@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Home, Book, Settings, User, LogOut } from "lucide-react";
@@ -32,10 +33,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     try {
       console.log("Déconnexion depuis le menu utilisateur...");
       
-      // Appel à onLogout qui est logout de l'AuthProvider avec un callback pour redirection
-      await onLogout(() => {
-        navigate("/login", { replace: true });
-      });
+      // Appeler onLogout sans lui passer de callback
+      await onLogout();
+      
+      // Utiliser navigate directement après la déconnexion
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis le menu utilisateur:", error);
     }

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -43,10 +44,11 @@ const InstructorSidebar = () => {
     try {
       console.log("Déconnexion en cours depuis InstructorSidebar...");
       
-      // Utiliser le callback pour rediriger après déconnexion complète
-      await logout(() => {
-        navigate("/login", { replace: true });
-      });
+      // Appeler logout sans lui passer de callback
+      await logout();
+      
+      // Rediriger après la déconnexion
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis InstructorSidebar:", error);
     }

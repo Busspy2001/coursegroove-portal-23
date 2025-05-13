@@ -41,10 +41,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         description: "Veuillez patienter pendant la déconnexion...",
       });
       
-      // Déconnexion avec redirection
-      await onLogout(() => {
-        navigate("/login", { replace: true });
-      });
+      // Déconnexion sans callback
+      await onLogout();
+      
+      // Navigation après déconnexion
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erreur lors de la déconnexion depuis le menu mobile:", error);
     }

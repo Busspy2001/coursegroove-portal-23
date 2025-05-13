@@ -18,10 +18,12 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
     try {
       console.log("Déconnexion du profil en cours...");
       
-      // Utiliser le callback pour rediriger après la déconnexion complète
-      await onLogout(() => {
-        navigate("/login", { replace: true });
-      });
+      // Appeler onLogout sans lui passer de callback
+      // Ce sera la responsabilité du composant parent de gérer la redirection
+      await onLogout();
+      
+      // Utiliser navigate directement après la déconnexion
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erreur lors de la déconnexion du profil:", error);
     }
