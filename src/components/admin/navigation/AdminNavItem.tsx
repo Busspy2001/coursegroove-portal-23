@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { AdminNavItem as AdminNavItemType } from './types';
+import { toast } from '@/hooks/use-toast';
 
 interface AdminNavItemProps {
   item: AdminNavItemType;
@@ -16,7 +18,15 @@ const AdminNavItem: React.FC<AdminNavItemProps> = ({ item, onNavigate }) => {
   const isActive = location.pathname === item.path;
   
   const handleClick = () => {
-    if (item.disabled) return;
+    if (item.disabled) {
+      toast({
+        title: "Fonctionnalité à venir",
+        description: `La fonctionnalité "${item.title}" sera bientôt disponible.`,
+        variant: "default",
+        duration: 3000,
+      });
+      return;
+    }
     
     if (onNavigate) {
       onNavigate(item.path);
@@ -42,19 +52,24 @@ const AdminNavItem: React.FC<AdminNavItemProps> = ({ item, onNavigate }) => {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton 
-        tooltip={item.title}
+        tooltip={item.disabled ? `${item.title} (Bientôt disponible)` : item.title}
         isActive={isActive}
         onClick={handleClick}
         disabled={item.disabled}
+        className="w-full justify-between text-sm"
       >
-        <item.icon className="mr-2 h-4 w-4" />
-        <span>{item.title}</span>
-        {item.status && getStatusBadge(item.status)}
-        {item.badge && (
-          <Badge variant="outline" className="ml-auto text-xs">
-            {item.badge}
-          </Badge>
-        )}
+        <div className="flex items-center">
+          <item.icon className="mr-2 h-4 w-4" />
+          <span>{item.title}</span>
+        </div>
+        <div className="flex items-center ml-2">
+          {item.status && getStatusBadge(item.status)}
+          {item.badge && (
+            <Badge variant="outline" className="ml-auto text-xs">
+              {item.badge}
+            </Badge>
+          )}
+        </div>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
