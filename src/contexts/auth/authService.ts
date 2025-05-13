@@ -2,7 +2,7 @@
 import { supabase, userCache } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mapSupabaseUser, clearUserCache } from "./authUtils";
-import { User } from "./types";
+import { User, UserRole } from "./types";
 
 export const authService = {
   login: async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
@@ -40,9 +40,9 @@ export const authService = {
         // Create user object directly with minimal overhead
         mappedUser = {
           id: data.user.id,
-          email: data.user.email,
+          email: data.user.email!,
           name: data.user.user_metadata?.name || email.split('@')[0],
-          role: inferredRole as any,
+          role: inferredRole as UserRole,
           avatar: `https://api.dicebear.com/6.x/initials/svg?seed=${email.split('@')[0]}&backgroundColor=0D9488`
         };
         
@@ -92,7 +92,7 @@ export const authService = {
       
       // Manually filter for the user with matching email
       const userExists = users && users.length > 0 && 
-                         users.some(user => user.email === email);
+                         users.some(user => user.email && user.email === email);
       
       if (userExists) {
         console.log("👤 L'utilisateur existe déjà, pas besoin de le créer à nouveau");
@@ -158,7 +158,7 @@ export const authService = {
         
         // Create a profile in the profiles_unified table
         const { error: profileError } = await (supabase
-          .from('profiles_unified' as unknown as never)
+          .from('profiles_unified')
           .insert({
             id: data.user.id,
             full_name: name,
@@ -167,7 +167,7 @@ export const authService = {
             avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`,
             is_demo: isDemoAccount,
             created_at: new Date().toISOString()
-          } as unknown as never));
+          } as any));
         
         if (profileError) {
           console.error("Profile creation error:", profileError);

@@ -58,7 +58,7 @@ export const initDemoAccounts = async (): Promise<boolean> => {
                 avatar_url: account.avatar,
                 is_demo: true,
                 created_at: new Date().toISOString()
-              });
+              } as any);
 
             if (profileError) {
               console.error(`❌ Erreur lors de la création du profil pour ${account.email}:`, profileError);
@@ -70,8 +70,7 @@ export const initDemoAccounts = async (): Promise<boolean> => {
         } else {
           console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
           
-          // Remplacer getUserByEmail par une méthode alternative car elle n'existe pas
-          // Nous allons rechercher l'utilisateur dans la liste des utilisateurs
+          // Trouver l'utilisateur dans la liste des utilisateurs au lieu d'utiliser getUserByEmail
           const user = existingUsers?.users.find(u => u.email === account.email);
           
           if (user) {
@@ -88,7 +87,7 @@ export const initDemoAccounts = async (): Promise<boolean> => {
                 role: dbRole,
                 avatar_url: account.avatar,
                 is_demo: true
-              });
+              } as any);
 
             if (profileError) {
               console.error(`❌ Erreur lors de la mise à jour du profil pour ${account.email}:`, profileError);

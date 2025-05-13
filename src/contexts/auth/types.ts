@@ -11,15 +11,19 @@ export interface User {
   name?: string;
   role: UserRole;
   avatar?: string;
+  bio?: string;
+  phone?: string;
 }
 
 export interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
+  currentUser: User | null;
+  loading: boolean;
+  isLoggingOut: boolean;
   isLoggingIn: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
   register: (name: string, email: string, password: string, isDemoAccount?: boolean) => Promise<User>;
   resetPassword: (email: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (callback?: () => void) => Promise<void>;
   loginWithDemo: (email: string, password: string) => Promise<User>;
+  isAuthenticated: boolean;
 }
