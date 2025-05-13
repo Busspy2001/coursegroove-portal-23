@@ -1,5 +1,5 @@
 
-import { Mail, Percent, Megaphone, Globe } from "lucide-react";
+import { Megaphone, Percent, Mail } from "lucide-react";
 import { AdminNavGroup } from "../types";
 
 export const marketingNavigation: AdminNavGroup = {
@@ -9,7 +9,6 @@ export const marketingNavigation: AdminNavGroup = {
       title: "Campagnes emails",
       path: "/admin/marketing/emails",
       icon: Mail,
-      badge: "Nouveau",
     },
     {
       title: "Promotions",
@@ -21,13 +20,6 @@ export const marketingNavigation: AdminNavGroup = {
       path: "/admin/marketing/announcements",
       icon: Megaphone,
     },
-    {
-      title: "SEO & visibilité",
-      path: "/admin/marketing/seo",
-      icon: Globe,
-      badge: "Bientôt",
-      disabled: true,
-    },
   ],
-  requiredRoles: ["super_admin"],
+  requiredRoles: ["super_admin", "admin", "marketing_manager"],
 };

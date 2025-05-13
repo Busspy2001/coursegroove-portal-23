@@ -1,87 +1,129 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, Clock, PieChart, LineChart } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, LineChart, BookOpen, Clock, Award } from "lucide-react";
 
 export const AdminStudentStatistics = () => {
   return (
     <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
+        <div>
+          <h2 className="text-xl font-semibold">Statistiques étudiants</h2>
+          <p className="text-muted-foreground">Analyse détaillée des comportements et performances des étudiants</p>
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center space-y-0">
+            <Users className="w-4 h-4 mr-2 text-schoolier-teal" />
             <CardTitle className="text-sm font-medium text-muted-foreground">Total étudiants</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center">
-              <Users className="h-5 w-5 text-schoolier-blue mr-2" />
-              <div className="text-2xl font-bold">24,856</div>
-            </div>
+            <div className="text-2xl font-bold">24,892</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Certifications obtenues</CardTitle>
+          <CardHeader className="pb-2 flex flex-row items-center space-y-0">
+            <BookOpen className="w-4 h-4 mr-2 text-schoolier-teal" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Cours par étudiant</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center">
-              <GraduationCap className="h-5 w-5 text-schoolier-teal mr-2" />
-              <div className="text-2xl font-bold">8,329</div>
-            </div>
+            <div className="text-2xl font-bold">2.8</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Temps moyen d'apprentissage</CardTitle>
+          <CardHeader className="pb-2 flex flex-row items-center space-y-0">
+            <Clock className="w-4 h-4 mr-2 text-schoolier-teal" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Tps moyen apprentissage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 text-amber-500 mr-2" />
-              <div className="text-2xl font-bold">4.2h / sem.</div>
-            </div>
+            <div className="text-2xl font-bold">4.2h</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Taux de complétion</CardTitle>
+          <CardHeader className="pb-2 flex flex-row items-center space-y-0">
+            <Award className="w-4 h-4 mr-2 text-schoolier-teal" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Taux de certification</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">68%</div>
+            <div className="text-2xl font-bold">48%</div>
           </CardContent>
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <LineChart className="mr-2 h-5 w-5 text-schoolier-blue" />
-              Évolution des inscriptions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-80 flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <p>Graphique en développement</p>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="engagement" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="demographics">Démographie</TabsTrigger>
+          <TabsTrigger value="progression">Progression</TabsTrigger>
+          <TabsTrigger value="retention">Rétention</TabsTrigger>
+        </TabsList>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <PieChart className="mr-2 h-5 w-5 text-schoolier-teal" />
-              Répartition démographique
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-80 flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <p>Graphique en développement</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="engagement" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Engagement étudiant sur la plateforme</CardTitle>
+            </CardHeader>
+            <CardContent className="h-80">
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-muted-foreground">
+                  <p>Graphique en développement</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="demographics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Données démographiques</CardTitle>
+            </CardHeader>
+            <CardContent className="h-80">
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-muted-foreground">
+                  <p>Graphique en développement</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="progression" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Courbes de progression</CardTitle>
+            </CardHeader>
+            <CardContent className="h-80">
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-muted-foreground">
+                  <p>Graphique en développement</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="retention" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analyse de rétention</CardTitle>
+            </CardHeader>
+            <CardContent className="h-80">
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-muted-foreground">
+                  <p>Graphique en développement</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

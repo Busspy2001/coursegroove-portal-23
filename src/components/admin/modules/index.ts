@@ -1,6 +1,14 @@
 
-export { default as UsersModule } from './UsersModule';
-export { default as CoursesModule } from './CoursesModule';
-export { default as BusinessModule } from './BusinessModule';
-export { default as FinanceModule } from './FinanceModule';
-export { default as StatisticsModule } from './StatisticsModule';
+import BusinessModule from "./BusinessModule";
+import CoursesModule from "./CoursesModule";
+import FinanceModule from "./FinanceModule";
+import StatisticsModule from "./StatisticsModule";
+import UsersModule from "./UsersModule";
+
+export {
+  BusinessModule,
+  CoursesModule,
+  FinanceModule,
+  StatisticsModule,
+  UsersModule
+};

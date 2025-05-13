@@ -23,5 +23,5 @@ export const financeNavigation: AdminNavGroup = {
       requiredRoles: ["super_admin"],
     },
   ],
-  requiredRoles: ["super_admin"],
+  requiredRoles: ["super_admin", "admin"],
 };
