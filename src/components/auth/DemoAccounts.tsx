@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
-import { UserRole } from "@/contexts/auth";
+import { UserRole } from "@/contexts/auth/types";
 
 export interface DemoAccount {
   email: string;
