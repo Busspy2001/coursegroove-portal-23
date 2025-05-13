@@ -1,6 +1,6 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { useUserData } from "@/hooks/use-user-data";
 import { Loader2 } from "lucide-react";
@@ -12,22 +12,45 @@ import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 
 const StudentDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { loading, stats, enrolledCourses, achievements, refetch } = useUserData();
   const isMobile = useIsMobile();
+  const [showAuthWarning, setShowAuthWarning] = useState(false);
 
-  // Redirect if not authenticated
-  React.useEffect(() => {
+  // Show authentication warning instead of redirecting
+  useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login");
+      console.log("⚠️ Utilisateur non authentifié sur le tableau de bord étudiant");
+      setShowAuthWarning(true);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated]);
 
-  if (!isAuthenticated) {
-    return null; // Return nothing during redirect
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  // Authentication warning
+  if (showAuthWarning) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="container flex-grow flex items-center justify-center">
+          <div className="max-w-md w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-center">
+            <Loader2 className="h-12 w-12 text-schoolier-blue animate-spin mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-4">Connexion requise</h2>
+            <p className="text-muted-foreground mb-6">
+              Vous devez être connecté pour accéder à votre tableau de bord étudiant.
+            </p>
+            <Button onClick={handleLogin} className="bg-schoolier-teal hover:bg-schoolier-dark-teal">
+              Se connecter
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

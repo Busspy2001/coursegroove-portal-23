@@ -1,6 +1,6 @@
 
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { useUserData } from "@/hooks/use-user-data";
 import { Loader2 } from "lucide-react";
@@ -12,36 +12,93 @@ import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
-// Remove framer-motion dependency for now to simplify
 const Dashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { loading, stats, enrolledCourses, achievements, refetch } = useUserData();
   const isMobile = useIsMobile();
+  const [showAuthWarning, setShowAuthWarning] = useState(false);
 
-  // Redirect if not authenticated
+  // Show authentication warning instead of redirecting
   useEffect(() => {
     if (!isAuthenticated) {
-      console.log("⚠️ Utilisateur non authentifié, redirection vers la page de connexion");
-      navigate("/login");
+      console.log("⚠️ Utilisateur non authentifié sur le tableau de bord");
+      setShowAuthWarning(true);
     }
-  }, [isAuthenticated, navigate]);
-  
-  // Redirect to role-specific dashboard if needed
-  useEffect(() => {
-    if (currentUser?.role === 'instructor') {
-      console.log("👨‍🏫 Redirection vers tableau de bord instructeur");
-      navigate('/instructor');
-    } else if (currentUser?.role === 'admin') {
-      console.log("👨‍💼 Redirection vers tableau de bord administrateur");
-      navigate('/admin');
-    }
-    // For 'student' role we stay on this page
-  }, [currentUser, navigate]);
+  }, [isAuthenticated]);
 
-  if (!isAuthenticated) {
-    return null; // Return nothing during redirect
+  // Show role warning instead of redirecting
+  const shouldShowRoleWarning = () => {
+    return isAuthenticated && currentUser && 
+      (currentUser.role === 'instructor' || currentUser.role === 'admin');
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const getRoleSpecificDashboard = () => {
+    if (currentUser?.role === 'instructor') return "/instructor";
+    if (currentUser?.role === 'admin') return "/admin";
+    return "/dashboard";
+  };
+
+  // Authentication warning
+  if (showAuthWarning) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="container flex-grow flex items-center justify-center">
+          <div className="max-w-md w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-center">
+            <Loader2 className="h-12 w-12 text-schoolier-blue animate-spin mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-4">Connexion requise</h2>
+            <p className="text-muted-foreground mb-6">
+              Vous devez être connecté pour accéder à votre tableau de bord.
+            </p>
+            <Button onClick={handleLogin} className="bg-schoolier-teal hover:bg-schoolier-dark-teal">
+              Se connecter
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Role warning (instead of redirect)
+  if (shouldShowRoleWarning()) {
+    const roleDashboard = getRoleSpecificDashboard();
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="container flex-grow flex items-center justify-center">
+          <div className="max-w-md w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-center">
+            <h2 className="text-2xl font-bold mb-4">Tableau de bord spécifique</h2>
+            <p className="text-muted-foreground mb-6">
+              En tant que {currentUser?.role === 'instructor' ? 'instructeur' : 'administrateur'}, 
+              vous disposez d'un tableau de bord spécifique.
+            </p>
+            <Button 
+              onClick={() => navigate(roleDashboard)}
+              className="bg-schoolier-teal hover:bg-schoolier-dark-teal mb-3"
+            >
+              Accéder à mon tableau de bord
+            </Button>
+            <div>
+              <Button 
+                variant="outline"
+                onClick={() => toast({ 
+                  title: "Information", 
+                  description: "Vous pouvez rester sur cette page, mais certaines fonctionnalités pourraient ne pas être disponibles."
+                })}
+              >
+                Rester sur cette page
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

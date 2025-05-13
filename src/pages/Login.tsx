@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,8 @@ import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,32 +40,29 @@ const Login = () => {
     ensureDemoAccountsExist();
   }, []);
   
-  // Immediate redirection for authenticated users
-  useEffect(() => {
-    if (isAuthenticated && currentUser) {
-      console.log("✅ Utilisateur authentifié avec le rôle:", currentUser.role);
-      setIsRedirecting(true);
-      
-      // Determine destination based on role
-      let destination = "/dashboard"; // Default destination
-      
-      if (currentUser.role === 'instructor') {
-        destination = "/instructor";
-        console.log("🧑‍🏫 Redirection vers le tableau de bord instructeur");
-      } else if (currentUser.role === 'admin' || currentUser.role === 'super_admin') {
-        destination = "/admin";
-        console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
-      } else if (currentUser.role === 'business_admin') {
-        destination = "/admin";
-        console.log("🏢 Redirection vers le tableau de bord entreprise");
-      } else {
-        console.log("🎓 Redirection vers le tableau de bord étudiant");
-      }
-      
-      // Immediate navigation without delay
-      navigate(destination);
+  // Instead of automatic redirect, show a button for authenticated users
+  const handleGoToDashboard = () => {
+    setIsRedirecting(true);
+    
+    // Determine destination based on role
+    let destination = "/dashboard"; // Default destination
+    
+    if (currentUser?.role === 'instructor') {
+      destination = "/instructor";
+      console.log("🧑‍🏫 Redirection vers le tableau de bord instructeur");
+    } else if (currentUser?.role === 'admin' || currentUser?.role === 'super_admin') {
+      destination = "/admin";
+      console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
+    } else if (currentUser?.role === 'business_admin') {
+      destination = "/admin";
+      console.log("🏢 Redirection vers le tableau de bord entreprise");
+    } else {
+      console.log("🎓 Redirection vers le tableau de bord étudiant");
     }
-  }, [isAuthenticated, currentUser, navigate]);
+    
+    // Immediate navigation without delay
+    navigate(destination);
+  };
   
   const handleTabChange = (value: string) => {
     if (value === "register") {
@@ -78,47 +78,64 @@ const Login = () => {
         <div className="max-w-5xl w-full flex">
           {/* Left side: Login form */}
           <Card className="w-full md:w-1/2 shadow-2xl">
-            {isRedirecting && (
-              <div className="m-4 bg-green-50 text-green-800 border border-green-200 rounded-md p-3 flex items-center">
-                <svg className="animate-spin h-5 w-5 mr-2 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Vous êtes déjà connecté. Redirection vers votre tableau de bord...</span>
+            {isAuthenticated && currentUser && (
+              <div className="m-4 bg-green-50 text-green-800 border border-green-200 rounded-md p-4 flex flex-col items-center">
+                <p className="mb-3">Vous êtes connecté en tant que <span className="font-bold">{currentUser.name}</span></p>
+                <p className="text-sm mb-4">Rôle: <span className="font-semibold">{currentUser.role}</span></p>
+                
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="bg-white hover:bg-gray-100"
+                    onClick={() => toast({ title: "Information", description: "Vous êtes déjà connecté. Vous pouvez accéder à votre tableau de bord ou vous déconnecter." })}
+                  >
+                    Rester sur cette page
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleGoToDashboard}
+                    className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
+                    disabled={isRedirecting}
+                  >
+                    {isRedirecting ? "Redirection..." : "Accéder à mon tableau de bord"}
+                  </Button>
+                </div>
               </div>
             )}
             
-            <Tabs defaultValue="login" className="w-full" onValueChange={handleTabChange}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Connexion</TabsTrigger>
-                <TabsTrigger value="register">Inscription</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <CardHeader>
-                  <div className="flex items-center justify-center mb-4">
-                    <Book className="h-10 w-10 text-schoolier-teal" />
-                    <span className="text-2xl font-bold ml-2">Schoolier</span>
-                  </div>
-                  <CardTitle className="text-2xl text-center">Connexion à votre compte</CardTitle>
-                  <CardDescription className="text-center">
-                    Entrez vos identifiants pour accéder à vos cours
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <LoginForm />
-                  <Separator className="my-4" />
-                  <SocialLoginButtons />
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-4">
-                  <p className="text-center text-sm text-muted-foreground">
-                    Pas encore de compte ?{" "}
-                    <Link to="/register" className="text-schoolier-blue hover:underline">
-                      S'inscrire
-                    </Link>
-                  </p>
-                </CardFooter>
-              </TabsContent>
-            </Tabs>
+            {!isAuthenticated && (
+              <Tabs defaultValue="login" className="w-full" onValueChange={handleTabChange}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="login">Connexion</TabsTrigger>
+                  <TabsTrigger value="register">Inscription</TabsTrigger>
+                </TabsList>
+                <TabsContent value="login">
+                  <CardHeader>
+                    <div className="flex items-center justify-center mb-4">
+                      <Book className="h-10 w-10 text-schoolier-teal" />
+                      <span className="text-2xl font-bold ml-2">Schoolier</span>
+                    </div>
+                    <CardTitle className="text-2xl text-center">Connexion à votre compte</CardTitle>
+                    <CardDescription className="text-center">
+                      Entrez vos identifiants pour accéder à vos cours
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <LoginForm />
+                    <Separator className="my-4" />
+                    <SocialLoginButtons />
+                  </CardContent>
+                  <CardFooter className="flex flex-col space-y-4">
+                    <p className="text-center text-sm text-muted-foreground">
+                      Pas encore de compte ?{" "}
+                      <Link to="/register" className="text-schoolier-blue hover:underline">
+                        S'inscrire
+                      </Link>
+                    </p>
+                  </CardFooter>
+                </TabsContent>
+              </Tabs>
+            )}
           </Card>
           
           {/* Right side: Image and text (hidden on mobile) */}
