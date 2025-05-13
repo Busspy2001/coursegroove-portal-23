@@ -1,7 +1,7 @@
 
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
-export type UserRole = "student" | "instructor" | "admin" | "business_admin";
+export type UserRole = "student" | "instructor" | "admin" | "business_admin" | "super_admin";
 
 export interface User {
   id: string;
@@ -9,6 +9,8 @@ export interface User {
   name?: string;
   avatar?: string;
   role: UserRole;
+  bio?: string;
+  phone?: string;
 }
 
 export interface AuthContextType {
@@ -19,7 +21,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
   loginWithDemo: (email: string, password: string) => Promise<User>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: (callback?: () => void) => Promise<void>; // Add callback parameter
+  register: (name: string, email: string, password: string, isDemoAccount?: boolean) => Promise<User>;
+  logout: (callback?: () => void) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }

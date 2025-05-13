@@ -12,7 +12,7 @@ import {
 } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { UserRole } from "@/types/database";
+import { UserRole } from "@/contexts/auth/types";
 
 const AdminDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
