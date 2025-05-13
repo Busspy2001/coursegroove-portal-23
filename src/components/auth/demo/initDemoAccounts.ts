@@ -19,8 +19,13 @@ export const initDemoAccounts = async (): Promise<boolean> => {
       try {
         // Vérifier si le compte existe déjà
         const { data: existingUsers } = await supabase.auth.admin.listUsers();
-        const userExists = existingUsers?.users && existingUsers.users.some(user => 
-          user.email && user.email === account.email
+        
+        // Add explicit type assertion to help TypeScript understand the structure
+        type SupabaseUser = { id: string; email?: string | null; user_metadata?: Record<string, any> };
+        const users = existingUsers?.users as SupabaseUser[] | undefined;
+        
+        const userExists = users && users.some(user => 
+          typeof user.email === 'string' && user.email === account.email
         );
 
         if (!userExists) {
@@ -73,7 +78,9 @@ export const initDemoAccounts = async (): Promise<boolean> => {
           console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
           
           // Trouver l'utilisateur dans la liste des utilisateurs au lieu d'utiliser getUserByEmail
-          const user = existingUsers?.users.find(u => u.email && u.email === account.email);
+          const user = users && users.find(u => 
+            typeof u.email === 'string' && u.email === account.email
+          );
           
           if (user) {
             // Convertir le rôle pour être compatible avec les types Supabase
