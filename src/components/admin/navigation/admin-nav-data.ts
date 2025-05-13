@@ -4,7 +4,12 @@ import {
   Building, CreditCard, BarChart3, Tag, MessageSquare, Bell,
   Settings, FileWarning, Search, Activity, Headphones, PieChart,
   TrendingUp, Megaphone, Mail, Percent, Globe, User, ChevronRight,
-  Calendar, FileBarChart
+  Calendar, FileBarChart, ListChecks, Eye, AlertTriangle,
+  BarChart, FileText, FilePlus, Download, Briefcase, UserCheck,
+  BriefcaseBusiness, Gauge, UsersRound, UserRound, LineChart, 
+  UserPlus, LucideIcon, CircleDollarSign, DollarSign, ClipboardList,
+  Heart, CheckCircle2, Ban, AlertOctagon, Lock, Cog, History,
+  Timer, Network, Zap, MonitorSmartphone
 } from "lucide-react";
 import { UserRole } from "@/contexts/auth/types";
 
@@ -27,6 +32,7 @@ export interface AdminNavGroup {
 }
 
 export const adminNavigation: AdminNavGroup[] = [
+  // Vue d'ensemble
   {
     label: "Vue d'ensemble",
     items: [
@@ -36,8 +42,15 @@ export const adminNavigation: AdminNavGroup[] = [
         icon: LayoutDashboard,
         status: "success",
       },
+      {
+        title: "Statistiques rapides",
+        path: "/admin/quick-stats",
+        icon: Gauge,
+      },
     ],
   },
+
+  // Utilisateurs
   {
     label: "Utilisateurs",
     items: [
@@ -58,8 +71,16 @@ export const adminNavigation: AdminNavGroup[] = [
         icon: Headphones,
         status: "danger",
       },
+      {
+        title: "Gestion des rôles",
+        path: "/admin/user-roles",
+        icon: UserCheck,
+        requiredRoles: ["super_admin"],
+      },
     ],
   },
+
+  // Cours
   {
     label: "Cours",
     items: [
@@ -79,21 +100,35 @@ export const adminNavigation: AdminNavGroup[] = [
         path: "/admin/course-quality",
         icon: TrendingDown,
       },
+      {
+        title: "Catégories & tags",
+        path: "/admin/course-categories",
+        icon: Tag,
+        requiredRoles: ["super_admin", "admin"],
+      },
     ],
   },
+
+  // Entreprises
   {
-    label: "Business",
+    label: "Entreprises",
     items: [
       {
-        title: "Entreprises clientes",
+        title: "Liste des entreprises",
         path: "/admin/business",
         icon: Building,
       },
       {
         title: "Plans & abonnements",
         path: "/admin/business/plans",
-        icon: CreditCard,
+        icon: BriefcaseBusiness,
         requiredRoles: ["super_admin"],
+      },
+      {
+        title: "Utilisation des licences",
+        path: "/admin/business/licenses",
+        icon: UserPlus,
+        requiredRoles: ["super_admin", "business_admin"],
       },
       {
         title: "Statistiques B2B",
@@ -104,6 +139,8 @@ export const adminNavigation: AdminNavGroup[] = [
     ],
     requiredRoles: ["super_admin", "business_admin"],
   },
+
+  // Finance
   {
     label: "Finance",
     items: [
@@ -115,7 +152,13 @@ export const adminNavigation: AdminNavGroup[] = [
       {
         title: "Revenus & Répartition",
         path: "/admin/finance/revenue",
-        icon: TrendingUp,
+        icon: CircleDollarSign,
+        requiredRoles: ["super_admin"],
+      },
+      {
+        title: "Paiements instructeurs",
+        path: "/admin/finance/instructor-payments",
+        icon: DollarSign,
         requiredRoles: ["super_admin"],
       },
       {
@@ -127,6 +170,8 @@ export const adminNavigation: AdminNavGroup[] = [
     ],
     requiredRoles: ["super_admin"],
   },
+
+  // Statistiques
   {
     label: "Statistiques",
     items: [
@@ -153,8 +198,16 @@ export const adminNavigation: AdminNavGroup[] = [
         icon: PieChart,
         requiredRoles: ["super_admin"],
       },
+      {
+        title: "Tendances & prévisions",
+        path: "/admin/statistics/trends",
+        icon: LineChart,
+        requiredRoles: ["super_admin"],
+      },
     ],
   },
+
+  // Marketing
   {
     label: "Marketing",
     items: [
@@ -162,26 +215,30 @@ export const adminNavigation: AdminNavGroup[] = [
         title: "Campagnes emails",
         path: "/admin/marketing/emails",
         icon: Mail,
-        badge: "Bientôt",
-        disabled: true,
+        badge: "Nouveau",
       },
       {
         title: "Promotions",
         path: "/admin/marketing/promotions",
         icon: Percent,
-        badge: "Bientôt",
-        disabled: true,
       },
       {
         title: "Annonces ciblées",
         path: "/admin/marketing/announcements",
         icon: Megaphone,
+      },
+      {
+        title: "SEO & visibilité",
+        path: "/admin/marketing/seo",
+        icon: Globe,
         badge: "Bientôt",
         disabled: true,
       },
     ],
     requiredRoles: ["super_admin"],
   },
+
+  // Communication
   {
     label: "Communication",
     items: [
@@ -196,12 +253,19 @@ export const adminNavigation: AdminNavGroup[] = [
         title: "Support client",
         path: "/admin/support",
         icon: Headphones,
+      },
+      {
+        title: "FAQ & Aide",
+        path: "/admin/faq",
+        icon: FileText,
         badge: "Bientôt",
         disabled: true,
       },
     ],
     requiredRoles: ["super_admin", "admin"],
   },
+
+  // Notifications
   {
     label: "Notifications",
     items: [
@@ -209,41 +273,81 @@ export const adminNavigation: AdminNavGroup[] = [
         title: "Gestion & historique",
         path: "/admin/notifications",
         icon: Bell,
-        badge: "Bientôt",
-        disabled: true,
       },
       {
         title: "Préférences",
         path: "/admin/notifications/preferences",
         icon: Bell,
+      },
+      {
+        title: "Modèles d'emails",
+        path: "/admin/notifications/templates",
+        icon: FilePlus,
         badge: "Bientôt",
         disabled: true,
       },
     ],
     requiredRoles: ["super_admin"],
   },
+
+  // Paramètres
   {
-    label: "Système",
+    label: "Paramètres",
     items: [
       {
-        title: "Paramètres",
+        title: "Configuration plateforme",
         path: "/admin/settings",
         icon: Settings,
         requiredRoles: ["super_admin"],
       },
       {
+        title: "Journal d'activité",
+        path: "/admin/settings/activity-log",
+        icon: History,
+        badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "API & webhooks",
+        path: "/admin/settings/api",
+        icon: Network,
+        badge: "Bientôt",
+        disabled: true,
+      },
+      {
+        title: "Adaptabilité mobile",
+        path: "/admin/settings/mobile",
+        icon: MonitorSmartphone,
+        badge: "Bientôt",
+        disabled: true,
+      },
+    ],
+    requiredRoles: ["super_admin"],
+  },
+
+  // Système & Sécurité
+  {
+    label: "Système",
+    items: [
+      {
         title: "Système & Sécurité",
         path: "/admin/system",
         icon: Shield,
-        badge: "Bientôt",
-        disabled: true,
+        requiredRoles: ["super_admin"],
       },
       {
         title: "Logs",
         path: "/admin/system/logs",
         icon: FileWarning,
+        requiredRoles: ["super_admin"],
+      },
+      {
+        title: "Performance",
+        path: "/admin/system/performance",
+        icon: Zap,
         badge: "Bientôt",
         disabled: true,
+        requiredRoles: ["super_admin"],
       },
     ],
     requiredRoles: ["super_admin"],

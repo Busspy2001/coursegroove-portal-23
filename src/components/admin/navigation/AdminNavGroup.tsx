@@ -28,21 +28,28 @@ const AdminNavGroup: React.FC<AdminNavGroupProps> = ({
   if (!hasAccessToNavItem(userRole, group.requiredRoles)) {
     return null;
   }
+  
+  // Filtrer les éléments accessibles selon le rôle de l'utilisateur
+  const accessibleItems = group.items
+    .filter(item => hasAccessToNavItem(userRole, item.requiredRoles));
+    
+  // Si aucun élément n'est accessible, ne pas afficher le groupe
+  if (accessibleItems.length === 0) {
+    return null;
+  }
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {group.items
-            .filter(item => hasAccessToNavItem(userRole, item.requiredRoles))
-            .map(item => (
-              <AdminNavItem
-                key={item.path}
-                item={item}
-                onNavigate={onNavigate}
-              />
-            ))}
+          {accessibleItems.map(item => (
+            <AdminNavItem
+              key={item.path}
+              item={item}
+              onNavigate={onNavigate}
+            />
+          ))}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
