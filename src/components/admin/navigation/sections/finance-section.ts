@@ -17,12 +17,6 @@ export const financeNavigation: AdminNavGroup = {
       requiredRoles: ["super_admin"],
     },
     {
-      title: "Paiements instructeurs",
-      path: "/admin/finance/instructor-payments",
-      icon: DollarSign,
-      requiredRoles: ["super_admin"],
-    },
-    {
       title: "Rapports",
       path: "/admin/finance/reports",
       icon: FileBarChart,
