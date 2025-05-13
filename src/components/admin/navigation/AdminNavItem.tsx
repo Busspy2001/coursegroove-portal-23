@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { AdminNavItem as AdminNavItemType } from './admin-nav-data';
+import { AdminNavItem as AdminNavItemType } from './types';
 
 interface AdminNavItemProps {
   item: AdminNavItemType;
