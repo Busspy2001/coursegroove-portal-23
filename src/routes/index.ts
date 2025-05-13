@@ -4,6 +4,7 @@ import { authRoutes } from "./authRoutes";
 import { studentRoutes } from "./studentRoutes";
 import { instructorRoutes } from "./instructorRoutes";
 import { adminRoutes } from "./adminRoutes";
+import { businessRoutes } from "./businessRoutes";
 import { Route } from "react-router-dom";
 
 // Combine all routes into a single array
@@ -12,5 +13,6 @@ export const appRoutes = [
   ...generalRoutes, 
   ...studentRoutes,
   ...instructorRoutes,
-  ...adminRoutes
+  ...adminRoutes,
+  ...businessRoutes
 ];
