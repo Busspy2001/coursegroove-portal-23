@@ -1,7 +1,8 @@
 
 import React, { ReactNode } from "react";
-import Navbar from "@/components/Navbar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Footer from "@/components/Footer";
+import AdminSidebar from "./AdminSidebar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -9,13 +10,19 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="container px-4 py-8 flex-grow">
-        {children}
+    <SidebarProvider>
+      <div className="min-h-screen flex flex-col w-full">
+        <div className="flex flex-1">
+          <AdminSidebar />
+          <div className="flex-1">
+            <div className="container px-4 py-8 flex-grow">
+              {children}
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </SidebarProvider>
   );
 };
 

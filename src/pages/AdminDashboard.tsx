@@ -2,25 +2,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { Tabs } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { 
-  AdminLayout, 
-  AdminHeader, 
-  AdminTabsNavigation, 
-  AdminTabsContent 
-} from "@/components/admin";
+import { AdminLayout } from "@/components/admin";
+import { AdminHeader } from "@/components/admin";
+import { AdminTabsContent } from "@/components/admin";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { UserRole } from "@/contexts/auth/types";
+import { useCommandPalette } from "@/hooks/use-command-palette";
 
 const AdminDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showAuthWarning, setShowAuthWarning] = useState(false);
   const [showRoleWarning, setShowRoleWarning] = useState(false);
+  const { setOpen: setCommandOpen, CommandPaletteDialog } = useCommandPalette();
 
   // Show warnings instead of redirecting
   useEffect(() => {
@@ -44,9 +41,6 @@ const AdminDashboard = () => {
     }
     
     console.log(`Utilisateur admin confirmé: ${currentUser?.role}`);
-    
-    // Set super admin status for conditional rendering
-    setIsSuperAdmin(currentUser.role === "super_admin");
     
     // Welcome toast for admin users
     toast({
@@ -107,23 +101,33 @@ const AdminDashboard = () => {
   }
 
   // Cast role to a valid UserRole when it's known to be a valid role at this point
-  const userRole = currentUser?.role || "student" as UserRole;
+  const userRole = currentUser?.role as UserRole;
   const userName = currentUser?.name || "";
 
   return (
     <AdminLayout>
-      <AdminHeader role={userRole} name={userName} />
-      
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <AdminTabsNavigation 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            userRole={userRole} 
-          />
-          <AdminTabsContent />
-        </Tabs>
+      <div className="flex items-center justify-between mb-8">
+        <AdminHeader role={userRole} name={userName} />
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="flex items-center gap-2" 
+          onClick={() => setCommandOpen(true)}
+        >
+          <Search className="h-4 w-4" />
+          <span className="hidden sm:inline">Recherche rapide</span>
+          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </Button>
       </div>
+      
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <AdminTabsContent />
+      </div>
+      
+      {/* Command Dialog for global search */}
+      {CommandPaletteDialog}
     </AdminLayout>
   );
 };
