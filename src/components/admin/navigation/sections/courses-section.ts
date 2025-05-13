@@ -15,17 +15,6 @@ export const coursesNavigation: AdminNavGroup = {
       title: "Avis & notes",
       path: "/admin/reviews",
       icon: Star,
-    },
-    {
-      title: "Qualité & anomalies",
-      path: "/admin/course-quality",
-      icon: TrendingDown,
-    },
-    {
-      title: "Catégories & tags",
-      path: "/admin/course-categories",
-      icon: Tag,
-      requiredRoles: ["super_admin", "admin"],
-    },
+    }
   ],
 };

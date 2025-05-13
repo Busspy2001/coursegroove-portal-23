@@ -9,7 +9,7 @@ import {
 import { 
   AdminNavGroup as AdminNavGroupType, 
   hasAccessToNavItem
-} from './admin-nav-data';
+} from './types';
 import AdminNavItem from './AdminNavItem';
 import { UserRole } from '@/contexts/auth/types';
 
