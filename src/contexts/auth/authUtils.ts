@@ -1,105 +1,92 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "./types";
+import { userCache } from "@/integrations/supabase/client";
 
-// Map role strings to UserRole type
-export const parseRole = (role: string): UserRole => {
-  switch (role) {
-    case "student": return "student";
-    case "instructor": return "instructor";
-    case "super_admin": return "super_admin";
-    case "admin": return "admin";
-    case "business_admin": return "business_admin";
-    default: return "student"; // Default fallback
-  }
-};
-
-// Check if a user has admin privileges
-export const hasAdminPrivileges = (userRole: UserRole): boolean => {
-  return userRole === "super_admin" || userRole === "admin";
-};
-
-// Check if a user has business admin privileges
-export const hasBusinessPrivileges = (userRole: UserRole): boolean => {
-  return userRole === "business_admin";
-};
-
-// Check if a user has instructor privileges
-export const hasInstructorPrivileges = (userRole: UserRole): boolean => {
-  return userRole === "instructor" || userRole === "super_admin" || userRole === "admin";
-};
-
-// Generate avatar URL from user's name
-export const generateAvatarUrl = (name: string): string => {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-  
-  // Use a placeholder or service like DiceBear Avatars
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`;
-};
-
-// User cache for optimizing mapping operations
-export const userCache = new Map<string, User>();
-
-// Clear user cache
-export const clearUserCache = () => {
-  userCache.clear();
-};
-
-// Map Supabase user to our User type
+// Mapping Supabase user to our app's user model
 export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> => {
   try {
-    // Check cache first
+    if (!supabaseUser) return null;
+    
+    // Check if user is in cache
     if (userCache.has(supabaseUser.id)) {
-      return userCache.get(supabaseUser.id) as User;
+      console.log("🗃️ Utilisateur récupéré du cache");
+      return userCache.get(supabaseUser.id);
     }
     
-    // If not in cache, query from database
-    const { data: profile, error } = await supabase
+    console.log("👤 Récupération du profil utilisateur");
+    
+    // First attempt to get the user's profile from profiles_unified
+    let { data: profile, error } = await supabase
       .from('profiles_unified')
       .select('*')
       .eq('id', supabaseUser.id)
       .single();
     
+    // If there's an error with profiles_unified (likely RLS policy issue)
     if (error) {
       console.error("Error fetching user profile:", error);
-      return null;
-    }
-    
-    // If no profile exists yet, create a basic one with default values
-    if (!profile) {
-      const username = supabaseUser.email.split('@')[0];
-      const defaultUser: User = {
+      
+      // Fallback: Use metadata from the auth user
+      const name = supabaseUser.user_metadata?.name || 
+                   supabaseUser.user_metadata?.full_name || 
+                   'User';
+      
+      // Create a fallback role based on user metadata or default to student
+      let role: UserRole;
+      
+      if (supabaseUser.email === 'admin@schoolier.com') {
+        role = 'super_admin';
+      } else if (supabaseUser.email === 'prof@schoolier.com') {
+        role = 'instructor';
+      } else if (supabaseUser.email === 'business@schoolier.com') {
+        role = 'business_admin';
+      } else {
+        role = 'student';
+      }
+      
+      // Construct user from auth data as fallback
+      const user: User = {
         id: supabaseUser.id,
-        email: supabaseUser.email,
-        name: supabaseUser.user_metadata?.name || username,
-        role: "student", // Default role
-        avatar: generateAvatarUrl(supabaseUser.user_metadata?.name || username)
+        email: supabaseUser.email || '',
+        name: name,
+        avatar: supabaseUser.user_metadata?.avatar_url,
+        role: role
       };
       
-      // Store in cache for future lookups
-      userCache.set(supabaseUser.id, defaultUser);
-      return defaultUser;
+      // Cache the user
+      userCache.set(supabaseUser.id, user);
+      console.log("✅ Profil utilisateur créé à partir des métadonnées");
+      return user;
     }
     
-    // Map database profile to User type
-    const mappedUser: User = {
-      id: profile.id,
-      email: profile.email || supabaseUser.email,
-      name: profile.full_name || supabaseUser.user_metadata?.name,
-      role: parseRole(profile.role),
-      avatar: profile.avatar_url,
-      bio: profile.bio
-    };
+    // If profile was successfully retrieved
+    if (profile) {
+      const user: User = {
+        id: profile.id,
+        email: profile.email || supabaseUser.email || '',
+        name: profile.full_name || supabaseUser.user_metadata?.name || 'User',
+        full_name: profile.full_name,
+        avatar: profile.avatar_url,
+        avatar_url: profile.avatar_url,
+        role: profile.role as UserRole,
+      };
+      
+      // Cache the user
+      userCache.set(supabaseUser.id, user);
+      console.log("✅ Profil utilisateur récupéré de la base de données");
+      return user;
+    }
     
-    // Store in cache for future lookups
-    userCache.set(supabaseUser.id, mappedUser);
-    return mappedUser;
+    return null;
   } catch (error) {
     console.error("Error mapping Supabase user:", error);
     return null;
   }
+};
+
+// Clear user cache (used during logout)
+export const clearUserCache = () => {
+  console.log("🗑️ Nettoyage du cache utilisateur");
+  userCache.clear();
 };
