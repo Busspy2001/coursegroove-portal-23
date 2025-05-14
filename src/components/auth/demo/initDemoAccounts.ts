@@ -44,7 +44,13 @@ export const initDemoAccounts = async (): Promise<boolean> => {
           }
         } else {
           // Si on a pu accéder à listUsers, on vérifie là-dedans
-          const userExists = existingUser?.users?.some(user => user.email === account.email);
+          // Utilisation de type casting pour résoudre le problème de typage
+          interface UserObject {
+            email?: string;
+          }
+          
+          const users = existingUser?.users as UserObject[] | undefined;
+          const userExists = users?.some(user => user.email === account.email);
           
           if (userExists) {
             console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
