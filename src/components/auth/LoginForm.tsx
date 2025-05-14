@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/auth";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import SocialLoginButtons from "./SocialLoginButtons";
+import { SocialLoginButtons } from "./SocialLoginButtons";
 
 // Validation schema
 const loginSchema = z.object({

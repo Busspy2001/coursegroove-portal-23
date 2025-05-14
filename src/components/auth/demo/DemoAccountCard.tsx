@@ -9,13 +9,13 @@ import { toast } from "@/hooks/use-toast";
 interface DemoAccountCardProps {
   account: DemoAccount;
   isLoading: boolean;
-  onLogin: (account: DemoAccount) => void;
+  onClick: (account: DemoAccount) => void;
 }
 
 export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({ 
   account, 
   isLoading, 
-  onLogin 
+  onClick 
 }) => {
   // Gestionnaire de clic optimisé avec retour d'état et notification
   const handleLogin = (e: React.MouseEvent) => {
@@ -33,7 +33,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         });
         
         // Appel de la fonction de connexion
-        onLogin(account);
+        onClick(account);
       } catch (error) {
         console.error("Erreur lors de la connexion:", error);
         toast({

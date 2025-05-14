@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 
 // Components
 import StudentDashboard from "./StudentDashboard";
-import Layout from "@/components/layout/Layout";
+import { Layout } from "@/components/layout/Layout";
 
 const Dashboard = () => {
   const { currentUser, isAuthenticated, isLoading } = useAuth();
@@ -30,7 +30,7 @@ const Dashboard = () => {
     // Redirect based on role
     if (currentUser.role === "instructor") {
       navigate("/instructor", { replace: true });
-    } else if (currentUser.role === "super_admin") {
+    } else if (currentUser.role === "super_admin" || currentUser.role === "admin") {
       navigate("/admin", { replace: true });
     } else if (currentUser.role === "business_admin") {
       navigate("/entreprise", { replace: true });

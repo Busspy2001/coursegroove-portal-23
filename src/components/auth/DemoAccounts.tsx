@@ -1,12 +1,12 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/auth";
-import DemoAccountCard from "./demo/DemoAccountCard";
+import { DemoAccountCard } from "./demo/DemoAccountCard";
 import { initDemoAccounts } from "./demo/initDemoAccounts";
 import { DemoAccount } from "./demo/types";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import DemoInfoAlert from "./demo/DemoInfoAlert";
+import { DemoInfoAlert } from "./demo/DemoInfoAlert";
 
 // Get demo accounts data
 const demoAccounts = initDemoAccounts();
@@ -26,7 +26,7 @@ const DemoAccounts = () => {
 
   const studentAccounts = demoAccounts.filter(account => account.role === "student");
   const instructorAccounts = demoAccounts.filter(account => account.role === "instructor");
-  const adminAccounts = demoAccounts.filter(account => account.role === "super_admin");
+  const adminAccounts = demoAccounts.filter(account => account.role === "super_admin" || account.role === "admin");
   const businessAccounts = demoAccounts.filter(account => account.role === "business_admin");
 
   return (

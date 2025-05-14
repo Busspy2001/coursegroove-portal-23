@@ -50,6 +50,8 @@ const AdminSidebarHeader: React.FC<AdminSidebarHeaderProps> = ({
         return 'Super Admin';
       case 'business_admin':
         return 'Business Admin';
+      case 'admin':
+        return 'Admin';
       default:
         return role.charAt(0).toUpperCase() + role.slice(1);
     }
