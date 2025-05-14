@@ -39,7 +39,6 @@ const profileFormSchema = z.object({
   bio: z.string().max(500, {
     message: "La biographie ne doit pas dépasser 500 caractères.",
   }).optional(),
-  phone: z.string().optional(),
   avatar: z.string().optional(),
 });
 
@@ -57,7 +56,6 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ currentUser }) => {
     name: currentUser?.name || "",
     email: currentUser?.email || "",
     bio: currentUser?.bio || "",
-    phone: currentUser?.phone || "",
     avatar: currentUser?.avatar || "",
   };
 
@@ -121,19 +119,6 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ currentUser }) => {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="votre-email@exemple.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={profileForm.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Téléphone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+33 6 00 00 00 00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

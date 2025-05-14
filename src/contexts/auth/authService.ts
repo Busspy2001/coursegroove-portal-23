@@ -72,7 +72,7 @@ export const loginUser = async (email: string, password: string): Promise<User> 
     // If there's no profile yet, create one
     if (!profile) {
       // Convert the role for Supabase database compatibility
-      const dbRole = 'student';
+      const dbRole: "student" | "instructor" | "super_admin" | "business_admin" | "demo" = "student";
       
       const newProfile = {
         id: data.user.id,
@@ -157,7 +157,7 @@ export const registerUser = async (name: string, email: string, password: string
     
     if (!profile) {
       // Create profile manually with the correct role type for database
-      const dbRole = 'student';
+      const dbRole: "student" | "instructor" | "super_admin" | "business_admin" | "demo" = "student";
       
       const newProfile = {
         id: data.user.id,
