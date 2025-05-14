@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, BookOpen, Award } from "lucide-react";
+import { Users, Clock, BookOpen, Award, Building2 } from "lucide-react";
 import { OverviewMetricCard } from "./OverviewMetricCard";
 import { OverviewActivityCard } from "./OverviewActivityCard";
 import { OverviewChart } from "./OverviewChart";
@@ -13,28 +13,28 @@ const BusinessOverview = () => {
       title: "Employés formés",
       value: "124",
       change: "+12%",
-      changeType: "positive",
+      changeType: "positive" as "positive",
       icon: Users
     },
     {
       title: "Heures de formation",
       value: "1,420",
       change: "+5%",
-      changeType: "positive",
+      changeType: "positive" as "positive",
       icon: Clock
     },
     {
       title: "Formations actives",
       value: "32",
       change: "-3",
-      changeType: "negative",
+      changeType: "negative" as "negative",
       icon: BookOpen
     },
     {
       title: "Certifications obtenues",
       value: "87",
       change: "+15",
-      changeType: "positive",
+      changeType: "positive" as "positive",
       icon: Award
     }
   ];

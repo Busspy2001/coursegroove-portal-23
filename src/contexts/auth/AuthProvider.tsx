@@ -267,14 +267,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     currentUser,
     isLoading,
     isLoggingOut,
-    isLoggingIn,
+    isAuthenticated: currentUser !== null && initialCheckDone,
     login,
     loginWithDemo,
+    isLoggingIn,
     register: authService.register,
     logout,
     updateUserProfile,
-    resetPassword: authService.resetPassword,
-    isAuthenticated: currentUser !== null && initialCheckDone,
+    resetPassword: authService.resetPassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

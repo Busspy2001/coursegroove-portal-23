@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface Course {
   id: number;
@@ -103,9 +104,8 @@ export const CourseCard = ({ course }: CourseCardProps) => {
           <span className="text-sm">{course.completionRate}%</span>
         </div>
         <Progress 
-          value={course.completionRate} 
-          className="h-1.5 mt-1" 
-          indicatorClassName={getProgressColor(course.completionRate)}
+          value={course.completionRate}
+          className={cn("h-1.5 mt-1", getProgressColor(course.completionRate))}
         />
       </CardContent>
       <CardFooter className="justify-between border-t p-4 bg-gray-50">

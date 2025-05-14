@@ -90,16 +90,20 @@ const BusinessSidebar = () => {
     }
   ];
 
+  // Handle both name formats (name and full_name)
+  const userName = currentUser?.full_name || currentUser?.name || "Entreprise";
+  const userAvatar = currentUser?.avatar_url || currentUser?.avatar;
+
   return (
     <Sidebar>
       <SidebarHeader className="flex justify-start items-center p-4 bg-gray-50 dark:bg-gray-800">
         <Avatar className="h-10 w-10 mr-2 bg-schoolier-blue">
-          <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.full_name} />
-          <AvatarFallback>{getInitials(currentUser?.full_name)}</AvatarFallback>
+          <AvatarImage src={userAvatar} alt={userName} />
+          <AvatarFallback>{getInitials(userName)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
           <span className="font-medium text-sm">
-            {currentUser?.full_name || "Entreprise"}
+            {userName}
           </span>
           <span className="text-xs text-muted-foreground">Administrateur</span>
         </div>
