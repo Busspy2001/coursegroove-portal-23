@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/auth";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { SocialLoginButtons } from "./SocialLoginButtons";
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 // Validation schema
 const loginSchema = z.object({
@@ -23,6 +22,7 @@ const loginSchema = z.object({
 export function LoginForm() {
   const { login, isLoggingIn } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   
   // Form setup with React Hook Form and Zod validation
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -46,101 +46,96 @@ export function LoginForm() {
   };
 
   return (
-    <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <FormControl>
-                  <Input placeholder="votre@email.com" {...field} />
+                  <Input placeholder="votre@email.com" className="pl-10" {...field} />
                 </FormControl>
                 <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mot de passe</FormLabel>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <FormControl>
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    className="pl-10" 
+                    {...field} 
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+        
+        <div className="flex items-center justify-between">
+          <FormField
+            control={form.control}
+            name="rememberMe"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="text-sm font-normal">
+                  Se souvenir de moi
+                </FormLabel>
               </FormItem>
             )}
           />
           
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mot de passe</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="flex items-center justify-between">
-            <FormField
-              control={form.control}
-              name="rememberMe"
-              render={({ field }) => (
-                <FormItem className="flex items-center space-x-2">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel className="text-sm font-normal">
-                    Se souvenir de moi
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
-            
-            <Link
-              to="/mot-de-passe-oublie"
-              className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Mot de passe oublié?
-            </Link>
-          </div>
-          
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoggingIn}
-          >
-            {isLoggingIn ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Connexion en cours...
-              </>
-            ) : (
-              "Se connecter"
-            )}
-          </Button>
-        </form>
-      </Form>
-      
-      <div className="my-4 flex items-center">
-        <div className="flex-grow border-t"></div>
-        <span className="mx-4 text-sm text-gray-500">ou</span>
-        <div className="flex-grow border-t"></div>
-      </div>
-      
-      <SocialLoginButtons />
-      
-      <div className="mt-4 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Pas encore inscrit?{" "}
           <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+            to="/forgot-password"
+            className="text-sm text-schoolier-blue hover:underline"
           >
-            Créer un compte
+            Mot de passe oublié?
           </Link>
-        </p>
-      </div>
-    </>
+        </div>
+        
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoggingIn}
+        >
+          {isLoggingIn ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connexion en cours...
+            </>
+          ) : (
+            "Se connecter"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
 
