@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -50,7 +49,7 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
     setLoggingInAccount(account.email);
     
     // Prédéterminer la destination basée sur le rôle
-    const destination = getRoleDestination(account.role);
+    const destination = getDestinationByRole(account.role);
     console.log(`🚀 Démarrage de la connexion pour ${account.role} (${account.email}) avec redirection vers ${destination}`);
     
     try {
@@ -82,16 +81,17 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
     }
   };
   
-  // Fonction utilitaire pour déterminer la destination en fonction du rôle
-  const getRoleDestination = (role: string): string => {
-    switch (role) {
-      case 'student': return '/dashboard';
-      case 'instructor': return '/instructor';
-      case 'admin':
+  // Détermine le chemin de destination basé sur le rôle
+  const getDestinationByRole = (role: string) => {
+    switch(role) {
+      case 'instructor': 
+        return '/instructor';
+      case 'student': 
+        return '/dashboard';
       case 'super_admin': 
         return '/admin';
       case 'business_admin': 
-        return '/business';
+        return '/entreprise';  // Mis à jour pour utiliser le chemin français
       default: return '/dashboard';
     }
   };

@@ -1,28 +1,28 @@
 
-export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo' | 'admin';
+export type UserRole = 'student' | 'instructor' | 'super_admin' | 'business_admin';
 
 export interface User {
   id: string;
   email: string;
-  name: string;
-  role: UserRole;
+  email_verified?: boolean;
+  name?: string;
+  full_name?: string;
+  avatar_url?: string;
   avatar?: string;
-  avatar_url?: string;  // Added for compatibility 
-  full_name?: string;   // Added for compatibility
-  bio?: string;         // Added for user profile
-  phone?: string;       // Added for user profile
+  role: UserRole;
+  bio?: string;
+  phone?: string;
+  created_at?: string;
 }
 
 export interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
-  logout: (callback?: () => void) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<User>;
-  resetPassword: (email: string) => Promise<void>;
-  updateUserProfile: (data: Partial<User>) => Promise<void>;
   isLoggingOut: boolean;
-  loginWithDemo?: (email: string, password: string) => Promise<User>; // Added for demo login
-  isLoggingIn?: boolean; // Added for login status tracking
+  isLoggingIn?: boolean;
+  login: (email: string, password: string, callback?: () => void) => Promise<void>;
+  loginWithDemo?: (account: any, callback?: () => void) => Promise<void>;
+  register: (email: string, password: string, name: string, callback?: () => void) => Promise<void>;
+  logout: (callback?: () => void) => Promise<void>;
 }
