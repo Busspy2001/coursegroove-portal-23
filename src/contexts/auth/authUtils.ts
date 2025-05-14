@@ -43,6 +43,8 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         role = 'business_admin';
       } else if (supabaseUser.email?.includes('employee')) {
         role = 'employee';
+      } else if (supabaseUser.email?.includes('admin')) {
+        role = 'admin';
       }
       
       // Construct user from auth data as fallback
