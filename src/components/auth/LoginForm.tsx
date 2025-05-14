@@ -1,139 +1,147 @@
 
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/auth";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
-import DemoAccounts from "./DemoAccounts";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import SocialLoginButtons from "./SocialLoginButtons";
 
-export const LoginForm = () => {
-  const { login } = useAuth();
+// Validation schema
+const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Mot de passe de 6 caractères minimum"),
+  rememberMe: z.boolean().optional(),
+});
+
+export function LoginForm() {
+  const { login, isLoggingIn } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true); // Default to true for better UX
-  const [loginError, setLoginError] = useState<string | null>(null);
+  
+  // Form setup with React Hook Form and Zod validation
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+  });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setLoginError(null);
-    
+  // Handle form submission
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
-      const user = await login(email, password, rememberMe);
-      
-      toast({
-        title: "Connexion réussie !",
-        description: "Bienvenue sur Schoolier.",
+      await login(values.email, values.password, () => {
+        console.log("Connexion réussie");
       });
-      
-      console.log("🚀 Utilisateur connecté avec le rôle:", user.role);
-      
-      // Redirection selon le rôle
-      if (user.role === 'instructor') {
-        console.log("👨‍🏫 Redirection vers tableau de bord instructeur");
-        navigate('/instructor');
-      } else if (user.role === 'admin') {
-        console.log("👨‍💼 Redirection vers tableau de bord administrateur");
-        navigate('/admin');
-      } else {
-        console.log("🎓 Redirection vers tableau de bord étudiant");
-        navigate("/dashboard");
-      }
     } catch (error: any) {
-      console.error("Login error:", error);
-      
-      // Handle specific error messages
-      if (error.message?.includes("Email not confirmed")) {
-        setLoginError("Votre email n'a pas été confirmé. Veuillez vérifier votre boîte mail ou utiliser un compte de démonstration ci-dessous.");
-      } else {
-        setLoginError(error.message || "Vérifiez vos identifiants et réessayez.");
-      }
-      
-      toast({
-        title: "Erreur de connexion",
-        description: "Vérifiez vos identifiants et réessayez.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.error("Erreur de connexion:", error);
     }
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <div className="space-y-4">
-        {loginError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <AlertDescription>{loginError}</AlertDescription>
-          </Alert>
-        )}
-      
-        <div className="space-y-2">
-          <Label htmlFor="email">Adresse email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-            <Input
-              id="email"
-              type="email"
-              placeholder="votre@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="votre@email.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mot de passe</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Mot de passe</Label>
-            <Link to="/forgot-password" className="text-sm text-schoolier-blue hover:underline">
-              Mot de passe oublié ?
+            <FormField
+              control={form.control}
+              name="rememberMe"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="text-sm font-normal">
+                    Se souvenir de moi
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+            
+            <Link
+              to="/mot-de-passe-oublie"
+              className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Mot de passe oublié?
             </Link>
           </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-            >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="remember" 
-            checked={rememberMe} 
-            onCheckedChange={(checked) => setRememberMe(checked as boolean)} 
-          />
-          <Label htmlFor="remember" className="cursor-pointer">Se souvenir de moi</Label>
-        </div>
-        <Button type="submit" className="w-full bg-schoolier-teal hover:bg-schoolier-dark-teal" disabled={isLoading}>
-          {isLoading ? "Connexion en cours..." : "Se connecter"}
-        </Button>
+          
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoggingIn}
+          >
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Connexion en cours...
+              </>
+            ) : (
+              "Se connecter"
+            )}
+          </Button>
+        </form>
+      </Form>
+      
+      <div className="my-4 flex items-center">
+        <div className="flex-grow border-t"></div>
+        <span className="mx-4 text-sm text-gray-500">ou</span>
+        <div className="flex-grow border-t"></div>
       </div>
-
-      <DemoAccounts isLoading={isLoading} />
-    </form>
+      
+      <SocialLoginButtons />
+      
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Pas encore inscrit?{" "}
+          <Link
+            to="/register"
+            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Créer un compte
+          </Link>
+        </p>
+      </div>
+    </>
   );
-};
+}
+
+export default LoginForm;

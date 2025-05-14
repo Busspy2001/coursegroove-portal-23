@@ -1,18 +1,16 @@
 
-export type UserRole = 'student' | 'instructor' | 'super_admin' | 'business_admin';
+export type UserRole = "student" | "instructor" | "super_admin" | "business_admin";
 
 export interface User {
   id: string;
   email: string;
-  email_verified?: boolean;
   name?: string;
-  full_name?: string;
-  avatar_url?: string;
+  full_name?: string; // Support both name formats
   avatar?: string;
+  avatar_url?: string; // Support both avatar formats
   role: UserRole;
   bio?: string;
   phone?: string;
-  created_at?: string;
 }
 
 export interface AuthContextType {
@@ -20,9 +18,10 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isLoggingOut: boolean;
-  isLoggingIn?: boolean;
+  isLoggingIn: boolean; // Add this property
   login: (email: string, password: string, callback?: () => void) => Promise<void>;
-  loginWithDemo?: (account: any, callback?: () => void) => Promise<void>;
+  loginWithDemo: (account: any, callback?: () => void) => Promise<void>; // Add this method
   register: (email: string, password: string, name: string, callback?: () => void) => Promise<void>;
   logout: (callback?: () => void) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }

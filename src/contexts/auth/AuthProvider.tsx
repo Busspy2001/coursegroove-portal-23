@@ -1,281 +1,197 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { supabase, userCache } from "@/integrations/supabase/client";
-import { AuthContextType, User, UserRole } from "./types";
-import { mapSupabaseUser, clearUserCache } from "./authUtils";
-import { authService } from "./authService";
-import { toast } from "@/hooks/use-toast";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { toast } from '@/hooks/use-toast';
+import { User, AuthContextType } from './types';
+import * as authService from './authService';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Context
+const AuthContext = createContext<AuthContextType>({
+  currentUser: null,
+  isAuthenticated: false,
+  isLoading: true,
+  isLoggingOut: false,
+  isLoggingIn: false,
+  login: async () => {},
+  loginWithDemo: async () => {},
+  register: async () => {},
+  logout: async () => {},
+  resetPassword: async () => {},
+});
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Provider component
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
-  // Check for existing session on mount - optimisé
+  // Check if the user is authenticated on component mount
   useEffect(() => {
-    console.log("🚀 Initialisation de l'AuthProvider");
-    
-    let authTimeout: number | undefined;
-    
-    // Set up auth state listener first to prevent missing auth events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Changement d'état d'authentification:", event);
-      
-      // Gérer le changement d'état d'authentification
-      if (session) {
-        try {
-          // Utiliser setTimeout pour éviter les deadlocks potentiels
-          setTimeout(async () => {
-            console.log("✅ Session trouvée, récupération des données utilisateur");
-            try {
-              const mappedUser = await mapSupabaseUser(session.user);
-              if (mappedUser) {
-                console.log("👤 Données utilisateur récupérées, rôle:", mappedUser.role);
-                setCurrentUser(mappedUser);
-              }
-            } catch (error) {
-              console.error("❌ Erreur lors de la récupération des données utilisateur:", error);
-              setCurrentUser(null);
-            } finally {
-              setIsLoading(false);
-            }
-          }, 0);
-        } catch (error) {
-          console.error("❌ Erreur lors de la récupération des données utilisateur:", error);
-          setCurrentUser(null);
-          setIsLoading(false);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        console.log("🚪 Déconnexion détectée");
-        setCurrentUser(null);
-        clearUserCache();
-        
-        // Clear any Supabase auth tokens from localStorage to prevent auto-login
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
-        
-        // Add a small delay before setting loading to false to ensure UI updates properly
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 100);
-      }
-    });
-
-    // Utiliser un timeout pour éviter que la vérification bloque trop longtemps
-    authTimeout = window.setTimeout(() => {
-      if (isLoading && !initialCheckDone) {
-        console.log("⏱️ Timeout de vérification atteint, passage en mode non authentifié");
-        setIsLoading(false);
-        setInitialCheckDone(true);
-      }
-    }, 2000); // 2 secondes maximum pour la vérification initiale
-
-    // Then check for existing session
-    const checkUser = async () => {
+    const checkAuth = async () => {
       try {
-        console.log("🔍 Vérification de l'existence d'une session");
-        // Get the current session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
-          console.log("✅ Session existante trouvée");
-          const mappedUser = await mapSupabaseUser(session.user);
-          if (mappedUser) {
-            setCurrentUser(mappedUser);
-            console.log("👤 Utilisateur connecté avec le rôle:", mappedUser.role);
-          }
-        } else {
-          console.log("ℹ️ Aucune session existante trouvée");
+        setIsLoading(true);
+        const user = await authService.getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
+          setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error("❌ Erreur lors de la vérification de la session:", error);
+        console.error("Error checking authentication:", error);
       } finally {
         setIsLoading(false);
-        setInitialCheckDone(true);
-        console.log("✅ Vérification initiale de l'authentification terminée");
       }
     };
 
-    checkUser();
-    
-    return () => {
-      console.log("🔄 Désinscription des événements d'authentification");
-      subscription.unsubscribe();
-      if (authTimeout) clearTimeout(authTimeout);
-    };
+    checkAuth();
   }, []);
 
-  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
-    console.log("🔑 Début du processus de connexion");
-    setIsLoggingIn(true);
-    setIsLoading(true);
+  // Login function
+  const login = async (email: string, password: string, callback?: () => void) => {
     try {
-      const user = await authService.login(email, password, rememberMe);
-      console.log("✅ Connexion réussie, utilisateur:", user);
+      setIsLoggingIn(true);
+      const user = await authService.loginUser(email, password);
       setCurrentUser(user);
-      return user;
-    } catch (error) {
-      console.error("❌ Erreur lors de la connexion:", error);
+      setIsAuthenticated(true);
+      
+      // Success toast
+      toast({
+        title: "Connexion réussie",
+        description: `Bienvenue, ${user.name || user.email}!`,
+      });
+      
+      if (callback) callback();
+      return;
+    } catch (error: any) {
+      console.error("Login error:", error);
+      // Error toast
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Vérifiez vos identifiants et réessayez.",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoggingIn(false);
-      setIsLoading(false);
     }
   };
 
-  // Optimized loginWithDemo method for faster redirection
-  const loginWithDemo = async (email: string, password: string): Promise<User> => {
-    console.log("🔑 Début du processus de connexion avec compte de démonstration");
-    setIsLoggingIn(true);
-    setIsLoading(true);
-    
-    // Determine demo role from email for faster processing
-    let inferredRole;
-    if (email.includes("prof")) inferredRole = "instructor";
-    else if (email.includes("admin")) inferredRole = "admin";
-    else if (email.includes("business")) inferredRole = "business_admin";
-    else inferredRole = "student";
-    
-    console.log(`👤 Rôle pré-déterminé pour connexion rapide: ${inferredRole}`);
-    
-    // Direct Supabase login for better performance
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email, 
-      password
-    });
-    
-    if (error) {
-      console.error("❌ Erreur lors de la connexion démo:", error);
-      throw error;
-    }
-    
-    if (!data.user) {
-      throw new Error("Utilisateur non trouvé");
-    }
-    
-    // Fast path: construct user without DB queries
-    const user: User = {
-      id: data.user.id,
-      email: data.user.email!,
-      name: data.user.user_metadata?.name || email.split('@')[0],
-      role: inferredRole as UserRole,
-      avatar: `https://api.dicebear.com/6.x/initials/svg?seed=${email.split('@')[0]}&backgroundColor=0D9488`
-    };
-    
-    // Cache for future access
-    userCache.set(data.user.id, user);
-    setCurrentUser(user);
-    
-    console.log("✅ Connexion démo réussie, utilisateur:", user.name, "role:", user.role);
-    setIsLoggingIn(false);
-    setIsLoading(false);
-    return user;
-  };
-
-  const logout = async (callback?: () => void): Promise<void> => {
+  // Login with demo account
+  const loginWithDemo = async (account: any, callback?: () => void) => {
     try {
-      if (isLoggingOut) return; // Éviter les doubles appels
+      setIsLoggingIn(true);
+      const { email, password } = account;
+      const user = await authService.loginUser(email, password);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
       
-      setIsLoggingOut(true);
-      setIsLoading(true);
-      console.log("🚪 Début du processus de déconnexion dans AuthProvider");
-      
-      // Notification de déconnexion en cours
       toast({
-        title: "Déconnexion en cours",
-        description: "Veuillez patienter pendant la déconnexion...",
+        title: "Connexion démo réussie",
+        description: `Vous êtes connecté en tant que ${user.name || user.email} (${user.role}).`,
       });
       
-      // Vider l'état local et les caches avant la déconnexion Supabase
-      setCurrentUser(null);
-      clearUserCache();
-      console.log("🧹 Nettoyage du cache utilisateur effectué");
-      
-      // Make sure to clear all local storage items related to auth
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
-      
-      // Déconnexion Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("❌ Erreur lors de la déconnexion:", error);
-        toast({
-          title: "Erreur de déconnexion",
-          description: error.message || "Un problème est survenu lors de la déconnexion.",
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
-      // Vérifier que la session est bien détruite
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.warn("⚠️ La session persiste après déconnexion, tentative de nettoyage forcé");
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
-      } else {
-        console.log("✅ Session correctement détruite");
-      }
-      
-      // Notification de déconnexion réussie
+      if (callback) callback();
+      return;
+    } catch (error: any) {
+      console.error("Demo login error:", error);
       toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès.",
+        title: "Erreur de connexion démo",
+        description: error.message || "Un problème est survenu avec ce compte de démonstration.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // Register function
+  const register = async (email: string, password: string, name: string, callback?: () => void) => {
+    try {
+      const user = await authService.registerUser(name, email, password);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      
+      toast({
+        title: "Compte créé avec succès",
+        description: "Bienvenue sur Schoolier!",
       });
       
-      // Délai pour assurer la synchronisation complète
-      setTimeout(() => {
-        setIsLoading(false);
-        setIsLoggingOut(false);
-        console.log("✅ Déconnexion réussie et nettoyage terminé");
-        
-        // Exécuter le callback de redirection si fourni
-        if (callback) {
-          console.log("🔀 Exécution du callback de redirection");
-          callback();
-        }
-      }, 300); // Délai de 300ms pour assurer la synchronisation
-      
-    } catch (error) {
-      console.error("❌ Erreur lors de la déconnexion dans AuthProvider:", error);
-      setIsLoading(false);
-      setIsLoggingOut(false);
+      if (callback) callback();
+      return;
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Erreur d'inscription",
+        description: error.message || "Impossible de créer votre compte. Veuillez réessayer.",
+        variant: "destructive",
+      });
       throw error;
     }
   };
 
-  // Placeholder for updateUserProfile
-  const updateUserProfile = async (updatedProfile: Partial<User>): Promise<void> => {
-    // Implementation details would go here
-    console.log("Update user profile called with:", updatedProfile);
+  // Logout function
+  const logout = async (callback?: () => void) => {
+    try {
+      setIsLoggingOut(true);
+      await authService.logoutUser();
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      
+      if (callback) callback();
+      return;
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: error.message || "Un problème est survenu lors de la déconnexion.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
-  const value: AuthContextType = {
+  // Reset password
+  const resetPassword = async (email: string) => {
+    try {
+      await authService.resetUserPassword(email);
+      toast({
+        title: "Email envoyé",
+        description: "Si un compte existe avec cette adresse, vous recevrez un email de réinitialisation.",
+      });
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      toast({
+        title: "Erreur de réinitialisation",
+        description: error.message || "Impossible d'envoyer l'email de réinitialisation.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // Context value to be provided
+  const contextValue: AuthContextType = {
     currentUser,
+    isAuthenticated,
     isLoading,
     isLoggingOut,
-    isAuthenticated: currentUser !== null && initialCheckDone,
+    isLoggingIn,
     login,
     loginWithDemo,
-    isLoggingIn,
-    register: authService.register,
+    register,
     logout,
-    updateUserProfile,
-    resetPassword: authService.resetPassword
+    resetPassword,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
+
+// Custom hook to use auth context
+export const useAuth = () => useContext(AuthContext);
