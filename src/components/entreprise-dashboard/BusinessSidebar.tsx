@@ -73,6 +73,11 @@ const BusinessSidebar = () => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
   
+  const handleNavigation = (path: string) => {
+    console.log(`Navigating to: ${path}`);
+    navigate(path);
+  };
+  
   const menuGroups = [
     {
       label: "Gestion",
@@ -184,7 +189,7 @@ const BusinessSidebar = () => {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton 
-                      onClick={() => navigate(item.path)}
+                      onClick={() => handleNavigation(item.path)}
                       tooltip={item.tooltip}
                       isActive={isActive(item.path)}
                       className="w-full justify-start"
@@ -198,7 +203,7 @@ const BusinessSidebar = () => {
                         {item.subItems.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.path}>
                             <SidebarMenuSubButton
-                              onClick={() => navigate(subItem.path)}
+                              onClick={() => handleNavigation(subItem.path)}
                               isActive={isActive(subItem.path)}
                             >
                               {subItem.path.includes('ajouter') ? (
@@ -226,7 +231,7 @@ const BusinessSidebar = () => {
             variant="outline" 
             size="sm"
             className="flex-1 justify-start"
-            onClick={() => navigate('/support')}
+            onClick={() => handleNavigation('/support')}
           >
             <HelpCircle className="mr-2 h-4 w-4" />
             Aide
