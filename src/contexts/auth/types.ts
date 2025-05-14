@@ -11,6 +11,7 @@ export interface User {
   role: UserRole;
   bio?: string;
   phone?: string;
+  is_demo?: boolean; // Add this field to the User type
 }
 
 export interface AuthContextType {

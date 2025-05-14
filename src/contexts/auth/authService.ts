@@ -1,64 +1,119 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { mapSupabaseUser, clearUserCache } from "./authUtils";
-import { User, UserRole } from "./types";
+import { User } from "./types";
 
-// Getting the current logged in user
+/**
+ * Get the current authenticated user
+ */
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (error || !user) {
-      console.error("Error getting current user:", error);
+    if (!session) {
       return null;
     }
     
-    return mapSupabaseUser(user);
+    // Get the user profile from profiles_unified table
+    const { data: profile, error } = await supabase
+      .from('profiles_unified')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+      
+    if (error) throw error;
+    
+    // Combine auth user and profile data
+    return {
+      id: session.user.id,
+      email: session.user.email || '',
+      name: profile?.full_name || '',
+      full_name: profile?.full_name || '',
+      avatar: profile?.avatar_url || '',
+      avatar_url: profile?.avatar_url || '',
+      role: profile?.role || 'student',
+      bio: profile?.bio || '',
+      phone: profile?.phone || '',
+      is_demo: profile?.is_demo || false
+    };
   } catch (error) {
-    console.error("Error in getCurrentUser:", error);
+    console.error("Error getting current user:", error);
     return null;
   }
 };
 
-// Login a user with email and password
+/**
+ * Login a user with email and password
+ */
 export const loginUser = async (email: string, password: string): Promise<User> => {
   try {
-    console.log("🔑 Tentative de connexion pour:", email);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
-    const { data, error } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password 
-    });
+    if (error) throw error;
     
-    if (error) {
-      console.error("❌ Erreur d'authentification:", error);
-      throw error;
+    if (!data.user) {
+      throw new Error("User not found");
     }
     
-    console.log("✅ Authentification réussie, récupération des données utilisateur");
+    // Get the user profile from profiles_unified table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles_unified')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+      
+    if (profileError) throw profileError;
     
-    const mappedUser = await mapSupabaseUser(data.user);
-    
-    if (!mappedUser) {
-      console.error("❌ Impossible de récupérer les données utilisateur");
-      throw new Error("User data couldn't be retrieved");
+    // If there's no profile yet, create one
+    if (!profile) {
+      const newProfile = {
+        id: data.user.id,
+        full_name: data.user.user_metadata.name || '',
+        email: data.user.email,
+        role: 'student',
+        avatar_url: data.user.user_metadata.avatar_url || ''
+      };
+      
+      const { error: insertError } = await supabase
+        .from('profiles_unified')
+        .insert(newProfile);
+        
+      if (insertError) throw insertError;
+      
+      return {
+        id: data.user.id,
+        email: data.user.email || '',
+        name: newProfile.full_name,
+        full_name: newProfile.full_name,
+        avatar: newProfile.avatar_url,
+        avatar_url: newProfile.avatar_url,
+        role: newProfile.role,
+        is_demo: false
+      };
     }
     
-    console.log("👤 Données utilisateur récupérées avec le rôle:", mappedUser.role);
-    
-    return mappedUser;
+    // Combine auth user and profile data
+    return {
+      id: data.user.id,
+      email: data.user.email || '',
+      name: profile.full_name || '',
+      full_name: profile.full_name || '',
+      avatar: profile.avatar_url || '',
+      avatar_url: profile.avatar_url || '',
+      role: profile.role || 'student',
+      bio: profile.bio || '',
+      phone: profile.phone || '',
+      is_demo: profile.is_demo || false
+    };
   } catch (error: any) {
-    console.error("❌ Erreur de connexion:", error);
     throw error;
   }
 };
 
-// Register a new user
+/**
+ * Register a new user
+ */
 export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
   try {
-    console.log("🔑 Tentative d'inscription pour:", email);
-    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -69,80 +124,86 @@ export const registerUser = async (name: string, email: string, password: string
       }
     });
     
-    if (error) {
-      console.error("Registration error:", error);
-      throw error;
-    }
+    if (error) throw error;
     
     if (!data.user) {
-      throw new Error("Registration failed");
+      throw new Error("User registration failed");
     }
     
-    try {
-      // Create a profile in the profiles_unified table
-      const { error: profileError } = await supabase
+    // The handle_new_user trigger will create the profile
+    // But we'll check and create manually if needed
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles_unified')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+      
+    if (profileError && profileError.code !== 'PGRST116') {
+      // PGRST116 is "no rows returned" - that's expected if the trigger didn't run yet
+      throw profileError;
+    }
+    
+    if (!profile) {
+      // Create profile manually
+      const newProfile = {
+        id: data.user.id,
+        full_name: name,
+        email: email,
+        role: 'student'
+      };
+      
+      const { error: insertError } = await supabase
         .from('profiles_unified')
-        .insert({
-          id: data.user.id,
-          full_name: name,
-          email: email,
-          role: 'student',
-          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff`
-        });
+        .insert(newProfile);
         
-      if (profileError) {
-        console.error("Profile creation error:", profileError);
-      } else {
-        console.log("✅ Profil créé avec succès");
-      }
-    } catch (profileInsertError) {
-      console.error("Error during profile insertion:", profileInsertError);
+      if (insertError) throw insertError;
+      
+      return {
+        id: data.user.id,
+        email: data.user.email || '',
+        name: name,
+        full_name: name,
+        role: 'student',
+        is_demo: false
+      };
     }
     
-    const mappedUser = await mapSupabaseUser(data.user);
-    
-    if (!mappedUser) {
-      throw new Error("User data couldn't be retrieved after registration");
-    }
-    
-    return mappedUser;
+    // Return user data
+    return {
+      id: data.user.id,
+      email: data.user.email || '',
+      name: profile.full_name || name,
+      full_name: profile.full_name || name,
+      avatar: profile.avatar_url || '',
+      avatar_url: profile.avatar_url || '',
+      role: profile.role || 'student',
+      is_demo: profile.is_demo || false
+    };
   } catch (error: any) {
-    console.error("Registration error:", error);
     throw error;
   }
 };
 
-// Logout the current user
+/**
+ * Logout the current user
+ */
 export const logoutUser = async (): Promise<void> => {
   try {
-    console.log("🚪 Tentative de déconnexion");
-    
     const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      console.error("❌ Erreur lors de la déconnexion:", error);
-      throw error;
-    }
-    
-    console.log("✅ Déconnexion réussie");
-    
-    clearUserCache();
+    if (error) throw error;
   } catch (error: any) {
-    console.error("❌ Erreur de déconnexion:", error);
     throw error;
   }
 };
 
-// Reset user password
+/**
+ * Send a reset password email
+ */
 export const resetUserPassword = async (email: string): Promise<void> => {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) throw error;
   } catch (error: any) {
-    console.error("Reset password error:", error);
     throw error;
   }
 };

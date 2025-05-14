@@ -19,6 +19,7 @@ const BusinessDashboard = () => {
   // Modification pour autoriser l'accès aux comptes de démo ou aux administrateurs d'entreprise
   const isAllowedRole = currentUser?.role === "business_admin" || 
                        currentUser?.role === "admin" || 
+                       currentUser?.role === "super_admin" || 
                        currentUser?.is_demo === true;
   
   // Vérifier si l'utilisateur a un rôle autorisé
