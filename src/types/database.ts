@@ -1,7 +1,8 @@
+
 // These types represent the database structures we've created
 // They're used as a workaround since we can't modify the auto-generated types.ts
 
-export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo' | 'admin';
+export type UserRole = 'super_admin' | 'business_admin' | 'student' | 'instructor' | 'demo' | 'admin' | 'employee';
 
 export interface ProfilesUnified {
   id: string;
