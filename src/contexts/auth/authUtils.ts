@@ -98,7 +98,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         avatar_url: profile.avatar_url,
         role: appRole,
         bio: profile.bio,
-        phone: profile.phone,
+        phone: profile.phone || undefined,
         is_demo: profile.is_demo || false
       };
       
