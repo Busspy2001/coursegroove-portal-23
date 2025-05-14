@@ -71,12 +71,16 @@ export const loginUser = async (email: string, password: string): Promise<User> 
     
     // If there's no profile yet, create one
     if (!profile) {
+      // Convert the role for Supabase database compatibility
+      const dbRole = 'student';
+      
       const newProfile = {
         id: data.user.id,
         full_name: data.user.user_metadata.name || '',
         email: data.user.email,
-        role: 'student' as UserRole,
-        avatar_url: data.user.user_metadata.avatar_url || ''
+        role: dbRole,
+        avatar_url: data.user.user_metadata.avatar_url || '',
+        is_demo: false
       };
       
       const { error: insertError } = await supabase
@@ -92,7 +96,7 @@ export const loginUser = async (email: string, password: string): Promise<User> 
         full_name: newProfile.full_name,
         avatar: newProfile.avatar_url,
         avatar_url: newProfile.avatar_url,
-        role: newProfile.role,
+        role: 'student',
         is_demo: false
       };
     }
@@ -152,12 +156,14 @@ export const registerUser = async (name: string, email: string, password: string
     }
     
     if (!profile) {
-      // Create profile manually with the correct role type
+      // Create profile manually with the correct role type for database
+      const dbRole = 'student';
+      
       const newProfile = {
         id: data.user.id,
         full_name: name,
         email: email,
-        role: 'student' as UserRole,
+        role: dbRole,
         is_demo: false
       };
       
@@ -172,7 +178,7 @@ export const registerUser = async (name: string, email: string, password: string
         email: data.user.email || '',
         name: name,
         full_name: name,
-        role: newProfile.role,
+        role: 'student',
         is_demo: false
       };
     }

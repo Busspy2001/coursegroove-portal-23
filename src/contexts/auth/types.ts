@@ -10,7 +10,6 @@ export interface User {
   avatar_url?: string; // Support both avatar formats
   role: UserRole;
   bio?: string;
-  phone?: string;
   is_demo?: boolean; // Add this field to the User type
 }
 
