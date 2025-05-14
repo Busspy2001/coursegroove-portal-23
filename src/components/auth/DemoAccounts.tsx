@@ -7,6 +7,8 @@ import { DemoAccount } from "./demo/types";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DemoInfoAlert } from "./demo/DemoInfoAlert";
+import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
 
 // Get demo accounts data directly from the service
 const demoAccounts = getDemoAccounts();
@@ -29,66 +31,123 @@ const DemoAccounts = () => {
   const adminAccounts = demoAccounts.filter(account => account.role === "super_admin" || account.role === "admin");
   const businessAccounts = demoAccounts.filter(account => account.role === "business_admin");
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-4"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <DemoInfoAlert />
       
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Étudiant</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {studentAccounts.map((account) => (
-            <DemoAccountCard
-              key={account.email}
-              account={account}
-              onClick={() => handleDemoLogin(account)}
-              isLoading={isLoggingIn}
-            />
-          ))}
-        </div>
-      </div>
+      <motion.div className="space-y-4" variants={containerVariants}>
+        <motion.div className="space-y-2" variants={sectionVariants}>
+          <div className="flex items-center">
+            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Étudiant</h4>
+            <Separator className="flex-grow ml-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {studentAccounts.map((account) => (
+              <motion.div 
+                key={account.email} 
+                variants={sectionVariants}
+                whileHover={{ scale: 1.02 }}
+              >
+                <DemoAccountCard
+                  account={account}
+                  onClick={() => handleDemoLogin(account)}
+                  isLoading={isLoggingIn}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Instructeur</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {instructorAccounts.map((account) => (
-            <DemoAccountCard
-              key={account.email}
-              account={account}
-              onClick={() => handleDemoLogin(account)}
-              isLoading={isLoggingIn}
-            />
-          ))}
-        </div>
-      </div>
+        <motion.div className="space-y-2" variants={sectionVariants}>
+          <div className="flex items-center">
+            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Instructeur</h4>
+            <Separator className="flex-grow ml-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {instructorAccounts.map((account) => (
+              <motion.div 
+                key={account.email} 
+                variants={sectionVariants}
+                whileHover={{ scale: 1.02 }}
+              >
+                <DemoAccountCard
+                  account={account}
+                  onClick={() => handleDemoLogin(account)}
+                  isLoading={isLoggingIn}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {adminAccounts.map((account) => (
-            <DemoAccountCard
-              key={account.email}
-              account={account}
-              onClick={() => handleDemoLogin(account)}
-              isLoading={isLoggingIn}
-            />
-          ))}
-        </div>
-      </div>
+        <motion.div className="space-y-2" variants={sectionVariants}>
+          <div className="flex items-center">
+            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin</h4>
+            <Separator className="flex-grow ml-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {adminAccounts.map((account) => (
+              <motion.div 
+                key={account.email} 
+                variants={sectionVariants}
+                whileHover={{ scale: 1.02 }}
+              >
+                <DemoAccountCard
+                  account={account}
+                  onClick={() => handleDemoLogin(account)}
+                  isLoading={isLoggingIn}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Entreprise</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {businessAccounts.map((account) => (
-            <DemoAccountCard
-              key={account.email}
-              account={account}
-              onClick={() => handleDemoLogin(account)}
-              isLoading={isLoggingIn}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+        <motion.div className="space-y-2" variants={sectionVariants}>
+          <div className="flex items-center">
+            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Entreprise</h4>
+            <Separator className="flex-grow ml-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {businessAccounts.map((account) => (
+              <motion.div 
+                key={account.email} 
+                variants={sectionVariants}
+                whileHover={{ scale: 1.02 }}
+              >
+                <DemoAccountCard
+                  account={account}
+                  onClick={() => handleDemoLogin(account)}
+                  isLoading={isLoggingIn}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
