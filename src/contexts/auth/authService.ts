@@ -1,6 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "./types";
+import { User, UserRole } from "./types";
+import { Database } from "@/integrations/supabase/types";
+
+// Type for the profiles_unified table
+type ProfileUnified = Database['public']['Tables']['profiles_unified']['Row'];
 
 /**
  * Get the current authenticated user
@@ -22,6 +26,9 @@ export const getCurrentUser = async (): Promise<User | null> => {
       
     if (error) throw error;
     
+    // Convert database role to our application role type
+    const userRole = profile?.role as UserRole;
+    
     // Combine auth user and profile data
     return {
       id: session.user.id,
@@ -30,9 +37,8 @@ export const getCurrentUser = async (): Promise<User | null> => {
       full_name: profile?.full_name || '',
       avatar: profile?.avatar_url || '',
       avatar_url: profile?.avatar_url || '',
-      role: profile?.role || 'student',
+      role: userRole || 'student',
       bio: profile?.bio || '',
-      phone: profile?.phone || '',
       is_demo: profile?.is_demo || false
     };
   } catch (error) {
@@ -69,7 +75,7 @@ export const loginUser = async (email: string, password: string): Promise<User> 
         id: data.user.id,
         full_name: data.user.user_metadata.name || '',
         email: data.user.email,
-        role: 'student',
+        role: 'student' as UserRole,
         avatar_url: data.user.user_metadata.avatar_url || ''
       };
       
@@ -91,6 +97,9 @@ export const loginUser = async (email: string, password: string): Promise<User> 
       };
     }
     
+    // Convert database role to our application role type
+    const userRole = profile.role as UserRole;
+    
     // Combine auth user and profile data
     return {
       id: data.user.id,
@@ -99,9 +108,8 @@ export const loginUser = async (email: string, password: string): Promise<User> 
       full_name: profile.full_name || '',
       avatar: profile.avatar_url || '',
       avatar_url: profile.avatar_url || '',
-      role: profile.role || 'student',
+      role: userRole || 'student',
       bio: profile.bio || '',
-      phone: profile.phone || '',
       is_demo: profile.is_demo || false
     };
   } catch (error: any) {
@@ -144,12 +152,13 @@ export const registerUser = async (name: string, email: string, password: string
     }
     
     if (!profile) {
-      // Create profile manually
+      // Create profile manually with the correct role type
       const newProfile = {
         id: data.user.id,
         full_name: name,
         email: email,
-        role: 'student'
+        role: 'student' as UserRole,
+        is_demo: false
       };
       
       const { error: insertError } = await supabase
@@ -163,10 +172,13 @@ export const registerUser = async (name: string, email: string, password: string
         email: data.user.email || '',
         name: name,
         full_name: name,
-        role: 'student',
+        role: newProfile.role,
         is_demo: false
       };
     }
+    
+    // Convert database role to our application role type
+    const userRole = profile.role as UserRole;
     
     // Return user data
     return {
@@ -176,7 +188,7 @@ export const registerUser = async (name: string, email: string, password: string
       full_name: profile.full_name || name,
       avatar: profile.avatar_url || '',
       avatar_url: profile.avatar_url || '',
-      role: profile.role || 'student',
+      role: userRole || 'student',
       is_demo: profile.is_demo || false
     };
   } catch (error: any) {
