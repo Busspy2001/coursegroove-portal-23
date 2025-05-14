@@ -44,7 +44,7 @@ export const initDemoAccounts = async (): Promise<boolean> => {
           }
         } else {
           // Si on a pu accéder à listUsers, on vérifie là-dedans
-          const userExists = existingUser?.users.some(user => user.email === account.email);
+          const userExists = existingUser?.users?.some(user => user.email === account.email);
           
           if (userExists) {
             console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);

@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { User, AuthContextType } from './types';
 import * as authService from './authService';
 import { clearUserCache } from './authUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 // Context
 const AuthContext = createContext<AuthContextType>({
