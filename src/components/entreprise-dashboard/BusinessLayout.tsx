@@ -13,8 +13,8 @@ const BusinessLayout = ({ children }: BusinessLayoutProps) => {
       <div className="min-h-screen flex flex-col w-full">
         <div className="flex flex-1">
           <BusinessSidebar />
-          <div className="flex-1">
-            <div className="container px-4 py-8 flex-grow">
+          <div className="flex-1 bg-gray-50 dark:bg-gray-800">
+            <div className="container px-4 py-6 md:py-8 flex-grow max-w-7xl mx-auto">
               {children}
             </div>
           </div>
