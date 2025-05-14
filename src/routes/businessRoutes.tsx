@@ -7,12 +7,8 @@ import { Navigate } from "react-router-dom";
 // Business Routes with French URL paths
 export const businessRoutes: RouteObject[] = [
   {
-    path: "/entreprise",
-    element: <BusinessDashboard />,
-  },
-  {
     path: "/entreprise/*",
-    element: <BusinessDashboard />
+    element: <BusinessDashboard />,
   },
   // Redirect from English route to French route
   {

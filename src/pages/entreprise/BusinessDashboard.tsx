@@ -9,13 +9,20 @@ import BusinessDepartments from "@/components/entreprise-dashboard/departments/B
 import BusinessTrainings from "@/components/entreprise-dashboard/trainings/BusinessTrainings";
 import BusinessStatistics from "@/components/entreprise-dashboard/statistics/BusinessStatistics";
 import BusinessSettings from "@/components/entreprise-dashboard/settings/BusinessSettings";
+import BusinessBilling from "@/components/entreprise-dashboard/billing/BusinessBilling";
 import { toast } from "@/hooks/use-toast";
+import { UserRole } from "@/contexts/auth/types";
 
 const BusinessDashboard = () => {
   const { currentUser } = useAuth();
   
-  // Vérifier si l'utilisateur est un administrateur d'entreprise
-  if (!currentUser || currentUser.role !== "business_admin") {
+  // Modification pour autoriser l'accès aux comptes de démo ou aux administrateurs d'entreprise
+  const isAllowedRole = currentUser?.role === "business_admin" || 
+                       currentUser?.role === "admin" || 
+                       currentUser?.is_demo === true;
+  
+  // Vérifier si l'utilisateur a un rôle autorisé
+  if (!currentUser || !isAllowedRole) {
     toast({
       title: "Accès refusé",
       description: "Vous devez être connecté en tant qu'administrateur d'entreprise pour accéder à ce tableau de bord.",
@@ -23,6 +30,8 @@ const BusinessDashboard = () => {
     });
     return <Navigate to="/login" replace />;
   }
+  
+  console.log("Utilisateur autorisé à accéder au dashboard entreprise:", currentUser);
   
   return (
     <BusinessLayout>
@@ -32,6 +41,7 @@ const BusinessDashboard = () => {
         <Route path="departements/*" element={<BusinessDepartments />} />
         <Route path="formations/*" element={<BusinessTrainings />} />
         <Route path="statistiques/*" element={<BusinessStatistics />} />
+        <Route path="facturation/*" element={<BusinessBilling />} />
         <Route path="parametres/*" element={<BusinessSettings />} />
         <Route path="*" element={<Navigate to="/entreprise" replace />} />
       </Routes>
