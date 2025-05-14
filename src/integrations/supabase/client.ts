@@ -41,7 +41,7 @@ if (typeof window !== 'undefined') {
       try {
         const { data, error } = await supabase
           .from('profiles_unified')
-          .select('id, email')
+          .select('id, email, is_demo')
           .eq('is_demo', true);
           
         if (error) {
@@ -53,7 +53,7 @@ if (typeof window !== 'undefined') {
         const users = data.map(profile => ({
           id: profile.id,
           email: profile.email,
-          user_metadata: {}
+          user_metadata: { is_demo: true }
         }));
         
         return { data: { users }, error: null };

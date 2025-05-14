@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { toast } from '@/hooks/use-toast';
 import { User, AuthContextType } from './types';
 import * as authService from './authService';
+import { clearUserCache } from './authUtils';
 
 // Context
 const AuthContext = createContext<AuthContextType>({
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (user) {
           setCurrentUser(user);
           setIsAuthenticated(true);
+          console.log("🔓 Utilisateur authentifié:", user.email, "Rôle:", user.role);
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -43,7 +45,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Setup auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("🔄 Changement d'état d'authentification:", event);
+        
+        // Using setTimeout to prevent infinite recursion with RLS policies
+        setTimeout(async () => {
+          if (session) {
+            const user = await authService.getCurrentUser();
+            if (user) {
+              setCurrentUser(user);
+              setIsAuthenticated(true);
+              console.log("👤 Utilisateur mis à jour:", user.email, "Rôle:", user.role);
+            }
+          } else {
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            clearUserCache();
+          }
+          
+          setIsLoading(false);
+        }, 0);
+      }
+    );
+
     checkAuth();
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Login function
@@ -134,6 +166,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async (callback?: () => void) => {
     try {
       setIsLoggingOut(true);
+      // Clear cache before logout to prevent stale data
+      clearUserCache();
       await authService.logoutUser();
       setCurrentUser(null);
       setIsAuthenticated(false);

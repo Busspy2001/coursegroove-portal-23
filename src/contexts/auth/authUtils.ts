@@ -33,7 +33,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
                    'User';
       
       // Create a fallback role based on user metadata or default to student
-      let role: UserRole;
+      let role: UserRole = 'student';
       
       if (supabaseUser.email === 'admin@schoolier.com') {
         role = 'super_admin';
@@ -41,8 +41,8 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         role = 'instructor';
       } else if (supabaseUser.email === 'business@schoolier.com') {
         role = 'business_admin';
-      } else {
-        role = 'student';
+      } else if (supabaseUser.email?.includes('employee')) {
+        role = 'employee';
       }
       
       // Construct user from auth data as fallback
@@ -50,8 +50,11 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         id: supabaseUser.id,
         email: supabaseUser.email || '',
         name: name,
+        full_name: name,
         avatar: supabaseUser.user_metadata?.avatar_url,
-        role: role
+        avatar_url: supabaseUser.user_metadata?.avatar_url,
+        role: role,
+        is_demo: supabaseUser.user_metadata?.is_demo || false
       };
       
       // Cache the user
@@ -62,6 +65,30 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
     
     // If profile was successfully retrieved
     if (profile) {
+      // Convertir le rôle de la base de données en type UserRole pour l'application
+      // Cela permet d'éviter les problèmes de type entre Supabase et notre app
+      let appRole: UserRole;
+      
+      switch(profile.role) {
+        case 'super_admin':
+          appRole = 'super_admin';
+          break;
+        case 'business_admin':
+          appRole = 'business_admin';
+          break;
+        case 'instructor':
+          appRole = 'instructor';
+          break;
+        case 'employee':
+          appRole = 'employee';
+          break;
+        case 'demo':
+          appRole = 'demo';
+          break;
+        default:
+          appRole = 'student';
+      }
+      
       const user: User = {
         id: profile.id,
         email: profile.email || supabaseUser.email || '',
@@ -69,7 +96,10 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         full_name: profile.full_name,
         avatar: profile.avatar_url,
         avatar_url: profile.avatar_url,
-        role: profile.role as UserRole,
+        role: appRole,
+        bio: profile.bio,
+        phone: profile.phone,
+        is_demo: profile.is_demo || false
       };
       
       // Cache the user
