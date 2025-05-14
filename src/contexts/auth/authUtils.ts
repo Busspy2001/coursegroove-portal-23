@@ -85,6 +85,9 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         case 'demo':
           appRole = 'demo';
           break;
+        case 'admin':
+          appRole = 'admin';
+          break;
         default:
           appRole = 'student';
       }
