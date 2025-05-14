@@ -2,14 +2,14 @@
 import React from "react";
 import { useAuth } from "@/contexts/auth";
 import { DemoAccountCard } from "./demo/DemoAccountCard";
-import { initDemoAccounts } from "./demo/initDemoAccounts";
+import { getDemoAccounts } from "./demo/demoAccountService";
 import { DemoAccount } from "./demo/types";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DemoInfoAlert } from "./demo/DemoInfoAlert";
 
-// Get demo accounts data
-const demoAccounts = initDemoAccounts();
+// Get demo accounts data directly from the service
+const demoAccounts = getDemoAccounts();
 
 const DemoAccounts = () => {
   const { loginWithDemo, isLoggingIn } = useAuth();
