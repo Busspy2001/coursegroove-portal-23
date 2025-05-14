@@ -405,6 +405,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_demo: boolean | null
+          phone: string | null
           role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
@@ -416,6 +417,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_demo?: boolean | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
@@ -427,6 +429,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_demo?: boolean | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: [
@@ -645,6 +648,8 @@ export type Database = {
         | "student"
         | "instructor"
         | "demo"
+        | "admin"
+        | "employee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -766,6 +771,8 @@ export const Constants = {
         "student",
         "instructor",
         "demo",
+        "admin",
+        "employee",
       ],
     },
   },
