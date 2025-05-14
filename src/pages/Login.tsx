@@ -68,7 +68,7 @@ const Login = () => {
       destination = "/admin";
       console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
     } else if (currentUser?.role === 'business_admin') {
-      destination = "/admin";
+      destination = "/business";
       console.log("🏢 Redirection vers le tableau de bord entreprise");
     } else {
       console.log("🎓 Redirection vers le tableau de bord étudiant");

@@ -91,7 +91,7 @@ const DemoAccounts: React.FC<DemoAccountsProps> = ({ isLoading: externalIsLoadin
       case 'super_admin': 
         return '/admin';
       case 'business_admin': 
-        return '/admin';
+        return '/business';
       default: return '/dashboard';
     }
   };
