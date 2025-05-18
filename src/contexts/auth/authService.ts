@@ -54,6 +54,42 @@ export const loginUser = async (email: string, password: string): Promise<User> 
 };
 
 /**
+ * Register a new user with name, email and password
+ */
+export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
+  try {
+    // Register the user with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        },
+      },
+    });
+    
+    if (error) throw error;
+    
+    if (!data.user) {
+      throw new Error("Failed to create user");
+    }
+    
+    // Map the user to our application's User type
+    const user = await mapSupabaseUser(data.user);
+    
+    if (!user) {
+      throw new Error("Failed to map user profile");
+    }
+    
+    return user;
+  } catch (error: any) {
+    console.error("Registration error:", error);
+    throw error;
+  }
+};
+
+/**
  * Logout the current user with enhanced cleanup and token removal
  */
 export const logoutUser = async (): Promise<void> => {
