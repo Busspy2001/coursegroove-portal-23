@@ -56,102 +56,245 @@ export const demoAccounts: DemoAccount[] = [
   }
 ];
 
+// Variable to prevent multiple simultaneous initializations
+let isInitializing = false;
+let initializationPromise: Promise<void> | null = null;
+
 export const isDemoAccount = (email: string): boolean => {
+  if (!email) return false;
   return demoAccounts.some(account => account.email.toLowerCase() === email.toLowerCase());
+};
+
+// Get demo account info by email
+export const getDemoAccountInfo = (email: string): DemoAccount | null => {
+  if (!email) return null;
+  return demoAccounts.find(account => account.email.toLowerCase() === email.toLowerCase()) || null;
 };
 
 // Make sure the demo accounts exist in the database
 export const ensureDemoAccountsExist = async (): Promise<void> => {
-  try {
-    for (const account of demoAccounts) {
-      // Check if account exists
-      const { data: existingUser } = await supabase
-        .from('profiles_unified')
-        .select('id, email, role, is_demo')
-        .eq('email', account.email)
-        .single();
+  // If initialization is already in progress, return the existing promise
+  if (isInitializing && initializationPromise) {
+    console.log("Initialization already in progress, reusing existing promise");
+    return initializationPromise;
+  }
 
-      // If account doesn't exist or needs updating
-      if (!existingUser) {
-        console.log(`Creating demo account for ${account.email}`);
-        
-        // For simplicity in a demo, we're directly creating entries in profiles_unified
-        // In a real app, we would create auth users properly
-        const { data, error } = await supabase
-          .from('profiles_unified')
-          .insert({
-            id: crypto.randomUUID(), // Generate a random UUID
-            email: account.email,
-            full_name: account.name,
-            role: account.role as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo",
-            is_demo: true,
-            avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
-          })
-          .select();
-          
-        if (error) {
-          console.error(`Error creating demo account for ${account.email}:`, error);
-        } else if (data && data[0]) {
-          console.log(`Demo account created for ${account.email}`);
-          
-          // If it's a business admin, create a company for them
-          if (account.role === 'business_admin') {
-            const { data: companyData, error: companyError } = await supabase
-              .from('companies')
+  isInitializing = true;
+  
+  // Create a new initialization promise
+  initializationPromise = (async () => {
+    try {
+      console.log("Starting demo accounts initialization...");
+      
+      for (const account of demoAccounts) {
+        try {
+          // Check if account exists with non-recursive query to avoid infinite loops
+          const { data: existingUser, error: queryError } = await supabase
+            .from('profiles_unified')
+            .select('id, email, role, is_demo')
+            .eq('email', account.email)
+            .maybeSingle();
+            
+          if (queryError) {
+            console.error(`Error checking existing user for ${account.email}:`, queryError);
+            continue;
+          }
+
+          // If account doesn't exist or needs updating
+          if (!existingUser) {
+            console.log(`Creating demo account for ${account.email}`);
+            
+            // Generate a deterministic UUID from the email to avoid duplicates across retries
+            const tempId = crypto.randomUUID();
+            
+            // For simplicity in a demo, we're directly creating entries in profiles_unified
+            const { data, error } = await supabase
+              .from('profiles_unified')
               .insert({
-                name: `Entreprise de ${account.name}`,
-                admin_id: data[0].id
+                id: tempId,
+                email: account.email,
+                full_name: account.name,
+                role: account.role,
+                is_demo: true,
+                avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
               })
               .select();
               
-            if (companyError) {
-              console.error(`Error creating company for ${account.email}:`, companyError);
-            } else if (companyData && companyData[0]) {
-              // Update the user with the company ID
-              await supabase
-                .from('profiles_unified')
-                .update({ company_id: companyData[0].id })
-                .eq('id', data[0].id);
-                
-              // Create some departments
-              const departments = [
-                { name: 'Marketing', description: 'Département marketing' },
-                { name: 'IT', description: 'Département informatique' },
-                { name: 'RH', description: 'Ressources Humaines' }
-              ];
+            if (error) {
+              console.error(`Error creating demo account for ${account.email}:`, error);
+            } else if (data && data[0]) {
+              console.log(`Demo account created for ${account.email} with ID: ${data[0].id}`);
               
-              for (const dept of departments) {
-                await supabase
-                  .from('company_departments')
-                  .insert({
-                    name: dept.name,
-                    description: dept.description,
-                    company_id: companyData[0].id,
-                    position: departments.indexOf(dept) + 1
-                  });
+              // If it's a business admin, create a company for them
+              if (account.role === 'business_admin') {
+                await createCompanyForDemoUser(data[0].id, account.name);
               }
             }
+          } else {
+            console.log(`Demo account for ${account.email} already exists (ID: ${existingUser.id})`);
+            
+            // Update the existing account if needed
+            if (!existingUser.is_demo || existingUser.role !== account.role) {
+              await supabase
+                .from('profiles_unified')
+                .update({
+                  is_demo: true,
+                  role: account.role
+                })
+                .eq('id', existingUser.id);
+                
+              console.log(`Updated demo status for ${account.email}`);
+            }
+            
+            // If it's a business admin, ensure they have a company
+            if (account.role === 'business_admin') {
+              await ensureCompanyForBusinessAdmin(existingUser.id, account.name);
+            }
           }
+        } catch (error) {
+          console.error(`Error processing demo account ${account.email}:`, error);
         }
-      } else if (existingUser && (!existingUser.is_demo || existingUser.role !== account.role)) {
-        // Update the existing account with correct demo status and role
-        await supabase
-          .from('profiles_unified')
-          .update({
-            is_demo: true,
-            role: account.role as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo"
-          })
-          .eq('id', existingUser.id);
-          
-        console.log(`Updated demo status for ${account.email}`);
+      }
+      
+      // Ensure employee@schoolier.com is associated with a company
+      await associateEmployeeWithCompany();
+      console.log("Demo account initialization completed successfully");
+      
+    } catch (error) {
+      console.error("Error ensuring demo accounts exist:", error);
+    } finally {
+      isInitializing = false;
+    }
+  })();
+  
+  return initializationPromise;
+};
+
+// Create a company for a business admin demo user
+const createCompanyForDemoUser = async (userId: string, userName: string) => {
+  try {
+    // First check if user already has a company
+    const { data: existingCompany } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('admin_id', userId)
+      .maybeSingle();
+      
+    if (existingCompany) {
+      console.log(`User ${userId} already has company ${existingCompany.id}`);
+      return existingCompany.id;
+    }
+    
+    // Create new company if none exists
+    const { data: companyData, error: companyError } = await supabase
+      .from('companies')
+      .insert({
+        name: `Entreprise de ${userName}`,
+        admin_id: userId
+      })
+      .select();
+      
+    if (companyError) {
+      console.error(`Error creating company for user ${userId}:`, companyError);
+      return null;
+    }
+    
+    if (companyData && companyData[0]) {
+      const companyId = companyData[0].id;
+      
+      // Update the user with the company ID
+      await supabase
+        .from('profiles_unified')
+        .update({ company_id: companyId })
+        .eq('id', userId);
+        
+      // Create sample departments
+      await createSampleDepartments(companyId);
+      
+      return companyId;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error creating company for user ${userId}:`, error);
+    return null;
+  }
+};
+
+// Ensure a business admin has a company
+const ensureCompanyForBusinessAdmin = async (userId: string, userName: string) => {
+  try {
+    // Check if user already has company_id in their profile
+    const { data: userProfile } = await supabase
+      .from('profiles_unified')
+      .select('company_id')
+      .eq('id', userId)
+      .single();
+      
+    if (userProfile?.company_id) {
+      // Verify the company exists
+      const { data: existingCompany } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('id', userProfile.company_id)
+        .maybeSingle();
+        
+      if (existingCompany) {
+        console.log(`Business admin ${userId} already has company ${existingCompany.id}`);
+        return existingCompany.id;
       }
     }
     
-    // Ensure employee@schoolier.com is associated with a company
-    await associateEmployeeWithCompany();
+    // If no valid company found, create a new one
+    return await createCompanyForDemoUser(userId, userName);
     
   } catch (error) {
-    console.error("Error ensuring demo accounts exist:", error);
+    console.error(`Error ensuring company for business admin ${userId}:`, error);
+    return null;
+  }
+};
+
+// Create sample departments for a company
+const createSampleDepartments = async (companyId: string) => {
+  try {
+    // Check if departments already exist for this company
+    const { data: existingDepts, error: deptCheckError } = await supabase
+      .from('company_departments')
+      .select('id')
+      .eq('company_id', companyId);
+      
+    if (deptCheckError) {
+      console.error(`Error checking existing departments for company ${companyId}:`, deptCheckError);
+      return;
+    }
+    
+    // Skip if departments already exist
+    if (existingDepts && existingDepts.length > 0) {
+      console.log(`Company ${companyId} already has ${existingDepts.length} departments`);
+      return;
+    }
+    
+    // Create departments
+    const departments = [
+      { name: 'Marketing', description: 'Département marketing' },
+      { name: 'IT', description: 'Département informatique' },
+      { name: 'RH', description: 'Ressources Humaines' }
+    ];
+    
+    for (const dept of departments) {
+      await supabase
+        .from('company_departments')
+        .insert({
+          name: dept.name,
+          description: dept.description,
+          company_id: companyId,
+          position: departments.indexOf(dept) + 1
+        });
+    }
+    
+    console.log(`Created ${departments.length} departments for company ${companyId}`);
+  } catch (error) {
+    console.error(`Error creating departments for company ${companyId}:`, error);
   }
 };
 
@@ -161,55 +304,95 @@ const associateEmployeeWithCompany = async () => {
     // Get the employee account
     const { data: employee } = await supabase
       .from('profiles_unified')
-      .select('id')
+      .select('id, company_id')
       .eq('email', 'employee@schoolier.com')
-      .single();
+      .maybeSingle();
       
-    if (!employee) return;
+    if (!employee) {
+      console.log("Employee demo account not found");
+      return;
+    }
+    
+    // If employee already has a company, check if it's valid
+    if (employee.company_id) {
+      const { data: companyCheck } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('id', employee.company_id)
+        .maybeSingle();
+        
+      if (companyCheck) {
+        // Employee already has a valid company
+        console.log(`Employee already associated with company ${employee.company_id}`);
+        await ensureEmployeeInCompany(employee.id, employee.company_id);
+        return;
+      }
+    }
     
     // Get a business admin account
     const { data: businessAdmin } = await supabase
       .from('profiles_unified')
       .select('id, company_id')
       .eq('email', 'business@schoolier.com')
-      .single();
+      .maybeSingle();
       
-    if (!businessAdmin || !businessAdmin.company_id) return;
+    if (!businessAdmin || !businessAdmin.company_id) {
+      console.log("Could not find business admin account or company to associate employee with");
+      return;
+    }
     
     // Update employee with company_id
     await supabase
       .from('profiles_unified')
       .update({ company_id: businessAdmin.company_id })
       .eq('id', employee.id);
-      
+    
+    console.log(`Updated employee to be associated with company ${businessAdmin.company_id}`);
+    
+    await ensureEmployeeInCompany(employee.id, businessAdmin.company_id);
+    
+  } catch (error) {
+    console.error("Error associating employee with company:", error);
+  }
+};
+
+// Ensure the employee exists in company_employees table
+const ensureEmployeeInCompany = async (employeeId: string, companyId: string) => {
+  try {
     // Check if employee is already in company_employees
     const { data: existingRelation } = await supabase
       .from('company_employees')
       .select('id')
-      .eq('employee_id', employee.id)
+      .eq('employee_id', employeeId)
+      .eq('company_id', companyId)
       .maybeSingle();
       
-    if (!existingRelation) {
-      // Get IT department
-      const { data: itDept } = await supabase
-        .from('company_departments')
-        .select('id')
-        .eq('company_id', businessAdmin.company_id)
-        .eq('name', 'IT')
-        .maybeSingle();
-        
-      // Add to company_employees
-      await supabase
-        .from('company_employees')
-        .insert({
-          company_id: businessAdmin.company_id,
-          employee_id: employee.id,
-          job_title: 'Développeur Web',
-          department_id: itDept?.id || null,
-          status: 'active'
-        });
+    if (existingRelation) {
+      console.log(`Employee ${employeeId} already in company_employees table`);
+      return;
     }
+    
+    // Get IT department
+    const { data: itDept } = await supabase
+      .from('company_departments')
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('name', 'IT')
+      .maybeSingle();
+      
+    // Add to company_employees
+    await supabase
+      .from('company_employees')
+      .insert({
+        company_id: companyId,
+        employee_id: employeeId,
+        job_title: 'Développeur Web',
+        department_id: itDept?.id || null,
+        status: 'active'
+      });
+      
+    console.log(`Added employee ${employeeId} to company_employees table`);
   } catch (error) {
-    console.error("Error associating employee with company:", error);
+    console.error(`Error ensuring employee in company: ${error}`);
   }
 };

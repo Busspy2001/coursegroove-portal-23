@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const [authStateReady, setAuthStateReady] = useState<boolean>(false);
   const location = useLocation();
 
   // Check for logout parameter in URL
@@ -51,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setCurrentUser(null);
           setIsAuthenticated(false);
           setIsLoading(false);
+          setAuthStateReady(true);
           return;
         }
         
@@ -74,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       } finally {
         setIsLoading(false);
+        setAuthStateReady(true);
       }
     };
 
@@ -93,23 +96,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               supabase.auth.signOut({ scope: 'global' }).then(() => {
                 clearUserCache();
               });
-            }, 0);
+            }, 100);
           }
           
           setCurrentUser(null);
           setIsAuthenticated(false);
           setIsLoading(false);
+          setAuthStateReady(true);
           return;
         }
         
         // Using setTimeout to prevent infinite recursion with RLS policies
         setTimeout(async () => {
           if (session && event !== 'SIGNED_OUT') {
-            const user = await authService.getCurrentUser();
-            if (user) {
-              setCurrentUser(user);
-              setIsAuthenticated(true);
-              console.log("👤 Utilisateur mis à jour:", user.email, "Rôle:", user.role);
+            try {
+              const user = await authService.getCurrentUser();
+              if (user) {
+                setCurrentUser(user);
+                setIsAuthenticated(true);
+                console.log("👤 Utilisateur mis à jour:", user.email, "Rôle:", user.role);
+              }
+            } catch (error) {
+              console.error("Error getting user after auth state change:", error);
             }
           } else {
             setCurrentUser(null);
@@ -118,7 +126,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
           
           setIsLoading(false);
-        }, 0);
+          setAuthStateReady(true);
+        }, 100);
       }
     );
 
@@ -194,6 +203,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     isLoggingOut,
     isLoggingIn,
+    authStateReady,
     login,
     loginWithDemo,
     register,

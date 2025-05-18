@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +17,9 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ profileType }: LoginFormProps) => {
-  const { login, isLoading, isLoggingIn } = useAuth();
+  const { login, isLoading, isLoggingIn, authStateReady } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +27,21 @@ const LoginForm = ({ profileType }: LoginFormProps) => {
   const { toast } = useToast();
   const [isDemo, setIsDemo] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
+
+  // Get redirect path from location state or search params
+  const getRedirectPath = () => {
+    // Check for explicit redirect in search params
+    const redirectParam = searchParams.get("redirect");
+    if (redirectParam) return redirectParam;
+    
+    // Check for returnUrl in location state
+    const locationState = location.state as { from?: Location, returnUrl?: string } | null;
+    if (locationState?.returnUrl) return locationState.returnUrl;
+    if (locationState?.from?.pathname) return locationState.from.pathname;
+    
+    // Default to demo-redirect for intelligent routing
+    return "/demo-redirect";
+  };
 
   useEffect(() => {
     // Check if the email corresponds to a demo account
@@ -46,17 +62,15 @@ const LoginForm = ({ profileType }: LoginFormProps) => {
           title: "Connexion réussie",
           description: "Redirection vers votre tableau de bord...",
         });
-        
-        // Route based on URL or use smart redirect
-        if (searchParams.get("redirect")) {
-          navigate(searchParams.get("redirect") as string);
-        } else {
-          // Use the demo-redirect for intelligent routing based on role
-          navigate("/demo-redirect");
-        }
       });
 
       console.log("Login succeeded!");
+      
+      // Redirect using the determined path with a slight delay to ensure auth state is updated
+      setTimeout(() => {
+        navigate(getRedirectPath(), { replace: true });
+      }, 300);
+      
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Une erreur s'est produite lors de la connexion.");
@@ -107,7 +121,10 @@ const LoginForm = ({ profileType }: LoginFormProps) => {
                 {error}
               </p>
             )}
-            <Button disabled={isLoggingIn || localLoading} className="w-full mt-4 bg-schoolier-teal hover:bg-schoolier-dark-teal text-white font-medium">
+            <Button 
+              disabled={isLoggingIn || localLoading || !authStateReady || isLoading} 
+              className="w-full mt-4 bg-schoolier-teal hover:bg-schoolier-dark-teal text-white font-medium"
+            >
               {isLoggingIn || localLoading ? (
                 <>
                   <Icons.spinner className="mr-2 h-4 w-4" />

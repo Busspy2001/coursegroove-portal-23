@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
@@ -12,19 +13,41 @@ import BusinessBilling from "@/components/entreprise-dashboard/billing/BusinessB
 import { toast } from "@/hooks/use-toast";
 import { UserRole } from "@/contexts/auth/types";
 import { isLogoutActive } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const BusinessDashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [redirecting, setRedirecting] = useState(false);
   
-  // Check logout state
+  // Check logout state and authentication
   useEffect(() => {
-    if (isLogoutActive || location.search.includes('logout=true')) {
-      console.log("🚫 BusinessDashboard: Accès au tableau de bord entreprise avec déconnexion active, redirection vers la page de connexion");
-      navigate("/login?logout=true", { replace: true });
+    if (authStateReady && !isLoading) {
+      // Check for logout state
+      if (isLogoutActive || location.search.includes('logout=true')) {
+        console.log("🚫 BusinessDashboard: Accès au tableau de bord entreprise avec déconnexion active, redirection vers la page de connexion");
+        setRedirecting(true);
+        navigate("/login?logout=true", { replace: true });
+        return;
+      }
+      
+      // Check authentication
+      if (!isAuthenticated || !currentUser) {
+        console.log("🚫 BusinessDashboard: Utilisateur non authentifié, redirection vers la page de connexion");
+        setRedirecting(true);
+        navigate("/login", { state: { returnUrl: location.pathname }, replace: true });
+        return;
+      }
+      
+      // Check role permissions
+      if (!isAllowedRole(currentUser.role, currentUser.is_demo)) {
+        console.log(`🚫 BusinessDashboard: Rôle ${currentUser.role} non autorisé, redirection vers le tableau de bord approprié`);
+        setRedirecting(true);
+        navigate("/demo-redirect", { replace: true }); // Use demo-redirect to handle role-based redirections
+      }
     }
-  }, [location, navigate]);
+  }, [isAuthenticated, currentUser, isLoading, authStateReady, navigate, location]);
   
   // Modified to allow access to demo accounts or business admins
   const isAllowedRole = (role?: UserRole, isDemo?: boolean): boolean => {
@@ -40,6 +63,20 @@ const BusinessDashboard = () => {
     // Otherwise, deny access
     return false;
   };
+  
+  // Show loading state when auth is being verified or redirecting
+  if (isLoading || !authStateReady || redirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-10 w-10 text-schoolier-blue animate-spin" />
+          <p className="text-lg font-medium">
+            {redirecting ? "Redirection en cours..." : "Vérification de l'authentification..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
   
   // Check if the user has permission and is not in logout process
   if (isLogoutActive) {

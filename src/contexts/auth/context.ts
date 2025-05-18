@@ -1,24 +1,42 @@
 
-import { createContext } from 'react';
-import { AuthContextType, User } from './types';
+import { createContext, useContext } from "react";
+import { User } from "./types";
 
-// Default context values
-const defaultAuthContext: AuthContextType = {
+interface AuthContextType {
+  currentUser: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isLoggingOut: boolean;
+  isLoggingIn: boolean;
+  authStateReady: boolean;
+  login: (email: string, password: string, callback?: () => void) => Promise<User>;
+  loginWithDemo: (account: any, callback?: () => void) => Promise<User>;
+  register: (email: string, password: string, name: string, callback?: () => void) => Promise<void>;
+  logout: (callback?: () => void) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+}
+
+// Create auth context with default values
+export const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   isAuthenticated: false,
   isLoading: true,
   isLoggingOut: false,
   isLoggingIn: false,
-  login: async (_email: string, _password: string, _callback?: () => void): Promise<User> => {
-    throw new Error('login function not implemented');
+  authStateReady: false,
+  login: async () => {
+    throw new Error("login function not implemented");
   },
-  loginWithDemo: async (_account: any, _callback?: () => void): Promise<User> => {
-    throw new Error('loginWithDemo function not implemented');
+  loginWithDemo: async () => {
+    throw new Error("loginWithDemo function not implemented");
   },
-  register: async () => {},
-  logout: async () => {},
-  resetPassword: async () => {},
-};
-
-// Create context
-export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+  register: async () => {
+    throw new Error("register function not implemented");
+  },
+  logout: async () => {
+    throw new Error("logout function not implemented");
+  },
+  resetPassword: async () => {
+    throw new Error("resetPassword function not implemented");
+  }
+});

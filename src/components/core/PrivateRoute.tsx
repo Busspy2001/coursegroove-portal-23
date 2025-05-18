@@ -3,6 +3,7 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { isLogoutActive } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -13,15 +14,16 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   children, 
   requiredRoles = [] 
 }) => {
-  const { currentUser, isAuthenticated, isLoading } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
   const location = useLocation();
 
-  // Afficher un indicateur de chargement pendant la vérification de l'authentification
-  if (isLoading) {
+  // Montrer un écran de chargement tant que l'état d'authentification n'est pas prêt
+  if (isLoading || !authStateReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-2xl font-semibold">
-          Vérification de l'authentification...
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-10 w-10 text-schoolier-blue animate-spin" />
+          <div className="text-lg font-medium">Vérification de l'authentification...</div>
         </div>
       </div>
     );

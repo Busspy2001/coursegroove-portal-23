@@ -1,117 +1,30 @@
 
-import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '@/contexts/auth/types';
-import { DemoAccount } from './types';
+import { demoAccounts, DemoAccount } from './initDemoAccounts';
 
-/**
- * Provides pre-configured demo accounts for different user roles
- */
-export const getDemoAccounts = (): DemoAccount[] => {
-  return [
-    {
-      id: uuidv4(),
-      email: 'etudiant@schoolier.com',
-      password: 'demo123',
-      role: 'student',
-      name: 'Jean Dupont',
-      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=JD&backgroundColor=0D9488',
-      description: 'Accédez à différents cours et suivez votre progression.',
-      features: [
-        'Parcourir le catalogue de cours',
-        'Suivre des cours et compléter des leçons',
-        'Recevoir des certificats',
-        'Interagir avec la communauté'
-      ]
-    },
-    {
-      id: uuidv4(),
-      email: 'prof@schoolier.com',
-      password: 'demo123',
-      role: 'instructor',
-      name: 'Marie Laurent',
-      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=ML&backgroundColor=4338CA',
-      description: 'Créez et gérez des cours, interagissez avec vos étudiants.',
-      features: [
-        'Créer et publier des cours',
-        'Analyser les statistiques des cours',
-        'Interagir avec les étudiants',
-        'Gérer les revenus et paiements'
-      ]
-    },
-    {
-      id: uuidv4(),
-      email: 'admin@schoolier.com',
-      password: 'demo123',
-      role: 'admin',
-      name: 'Admin Demo',
-      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=AD&backgroundColor=BE185D',
-      description: 'Supervisez tous les aspects de la plateforme.',
-      features: [
-        'Gérer les utilisateurs et les cours',
-        'Modérer les contenus',
-        'Accéder aux statistiques globales',
-        'Configurer les paramètres système'
-      ]
-    },
-    {
-      id: uuidv4(),
-      email: 'business@schoolier.com',
-      password: 'demo123',
-      role: 'business_admin',
-      name: 'Sophie Martin',
-      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=SM&backgroundColor=D97706',
-      description: 'Gérez la formation pour votre entreprise.',
-      features: [
-        'Gérer les utilisateurs de l\'entreprise',
-        'Suivre les progrès de l\'équipe',
-        'Attribuer des cours et parcours',
-        'Analyser les résultats de formation'
-      ]
-    },
-    {
-      id: uuidv4(),
-      email: 'entreprise@schoolier.com',
-      password: 'demo123',
-      role: 'business_admin',
-      name: 'Thomas Durand',
-      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=TD&backgroundColor=2563EB',
-      description: 'Accédez à l\'espace complet de gestion d\'entreprise.',
-      features: [
-        'Gérer l\'ensemble des employés',
-        'Créer et assigner des formations',
-        'Suivre les statistiques de progression',
-        'Configurer les départements et l\'organisation'
-      ]
-    },
-    {
-      id: uuidv4(),
-      email: 'employee@schoolier.com',
-      password: 'demo123',
-      role: 'employee',
-      name: 'Alex Martin',
-      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=AM&backgroundColor=7C3AED',
-      description: 'Accédez aux formations fournies par votre entreprise.',
-      features: [
-        'Accéder aux cours assignés',
-        'Suivre votre progression',
-        'Obtenir des certifications',
-        'Communiquer avec les formateurs'
-      ]
-    }
-  ];
-};
-
-/**
- * Vérifie si l'email correspond à un compte de démonstration
- */
+// Check if an email belongs to a demo account
 export const isDemoAccount = (email: string): boolean => {
-  const demoEmails = getDemoAccounts().map(account => account.email);
-  return demoEmails.includes(email);
+  if (!email) return false;
+  return demoAccounts.some(account => account.email.toLowerCase() === email.toLowerCase());
 };
 
-/**
- * Récupère un compte de démonstration par email
- */
-export const getDemoAccountByEmail = (email: string): DemoAccount | undefined => {
-  return getDemoAccounts().find(account => account.email === email);
+// Get demo account info by email
+export const getDemoAccountInfo = (email: string): DemoAccount | null => {
+  if (!email) return null;
+  return demoAccounts.find(account => account.email.toLowerCase() === email.toLowerCase()) || null;
+};
+
+// Get all demo accounts for a specific role
+export const getDemoAccountsByRole = (role: string): DemoAccount[] => {
+  return demoAccounts.filter(account => account.role === role);
+};
+
+// Get first demo account for a specific role
+export const getFirstDemoAccountByRole = (role: string): DemoAccount | null => {
+  return demoAccounts.find(account => account.role === role) || null;
+};
+
+// Get a list of available demo roles
+export const getAvailableDemoRoles = (): string[] => {
+  const roles = demoAccounts.map(account => account.role);
+  return [...new Set(roles)]; // Remove duplicates
 };
