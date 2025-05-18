@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -82,6 +81,13 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
     }
   };
 
+  // Initialize default features if they don't exist
+  const features = account.features || [
+    "Accès au tableau de bord",
+    "Consultation des formations",
+    "Gestion du profil"
+  ];
+
   return (
     <div className="group flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-sm hover:shadow">
       <div className="flex items-center">
@@ -119,11 +125,11 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
                     <p className="text-xs text-muted-foreground">{account.email}</p>
                   </div>
                 </div>
-                <p className="text-sm">{account.description}</p>
+                <p className="text-sm">{account.description || "Compte de démonstration"}</p>
                 <div className="pt-2">
                   <p className="text-xs font-medium mb-1">Fonctionnalités disponibles :</p>
                   <ul className="text-xs space-y-1">
-                    {account.features.map((feature, idx) => (
+                    {features.map((feature, idx) => (
                       <li key={idx} className="flex items-start">
                         <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400 mr-1 mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>

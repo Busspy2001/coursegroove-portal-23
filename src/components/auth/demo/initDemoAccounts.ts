@@ -9,6 +9,8 @@ export interface DemoAccount {
   name: string;
   avatar?: string;
   description?: string;
+  id?: string;
+  features?: string[];
 }
 
 // List of demo accounts
@@ -18,42 +20,78 @@ export const demoAccounts: DemoAccount[] = [
     password: "demo123",
     role: "student",
     name: "Marie Martin",
-    description: "Compte étudiant"
+    description: "Compte étudiant",
+    features: [
+      "Accès à tous les cours en ligne",
+      "Suivi de progression personnalisé",
+      "Forums d'entraide entre étudiants",
+      "Certificats de réussite"
+    ]
   },
   {
     email: "prof@schoolier.com",
     password: "demo123",
     role: "instructor",
     name: "Jean Dupont",
-    description: "Compte formateur"
+    description: "Compte formateur",
+    features: [
+      "Création et gestion de cours",
+      "Tableau de bord des statistiques",
+      "Gestion des étudiants inscrits",
+      "Outils de communication et feedback"
+    ]
   },
   {
     email: "admin@schoolier.com",
     password: "demo123",
     role: "admin",
     name: "Admin Système",
-    description: "Compte administrateur"
+    description: "Compte administrateur",
+    features: [
+      "Administration complète de la plateforme",
+      "Gestion des utilisateurs et permissions",
+      "Statistiques et rapports avancés",
+      "Configuration système et maintenance"
+    ]
   },
   {
     email: "entreprise@schoolier.com",
     password: "demo123",
     role: "business_admin",
     name: "Thomas Durand",
-    description: "Compte entreprise"
+    description: "Compte entreprise",
+    features: [
+      "Administration des groupes d'employés",
+      "Assignation de formations",
+      "Suivi de progression des équipes",
+      "Rapports analytiques avancés"
+    ]
   },
   {
     email: "business@schoolier.com",
     password: "demo123",
     role: "business_admin",
     name: "Sophie Leroy",
-    description: "Compte entreprise"
+    description: "Compte entreprise",
+    features: [
+      "Administration des groupes d'employés",
+      "Assignation de formations",
+      "Suivi de progression des équipes",
+      "Rapports analytiques avancés"
+    ]
   },
   {
     email: "employee@schoolier.com",
     password: "demo123",
     role: "employee",
     name: "Pierre Martin",
-    description: "Compte employé"
+    description: "Compte employé",
+    features: [
+      "Accès aux formations assignées",
+      "Suivi de progression personnalisé",
+      "Certificats de compétences",
+      "Communication avec les formateurs"
+    ]
   }
 ];
 
