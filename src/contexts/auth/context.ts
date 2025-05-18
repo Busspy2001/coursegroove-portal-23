@@ -1,6 +1,6 @@
 
 import { createContext } from 'react';
-import { AuthContextType } from './types';
+import { AuthContextType, User } from './types';
 
 // Default context values
 const defaultAuthContext: AuthContextType = {
@@ -9,8 +9,12 @@ const defaultAuthContext: AuthContextType = {
   isLoading: true,
   isLoggingOut: false,
   isLoggingIn: false,
-  login: async () => {},
-  loginWithDemo: async () => {},
+  login: async (_email: string, _password: string, _callback?: () => void): Promise<User> => {
+    throw new Error('login function not implemented');
+  },
+  loginWithDemo: async (_account: any, _callback?: () => void): Promise<User> => {
+    throw new Error('loginWithDemo function not implemented');
+  },
   register: async () => {},
   logout: async () => {},
   resetPassword: async () => {},
