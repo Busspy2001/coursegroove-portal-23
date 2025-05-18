@@ -8,6 +8,7 @@ const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const DemoRedirect = lazy(() => import("@/pages/DemoRedirect"));
 
 export const authRoutes: RouteObject[] = [
   {
@@ -29,5 +30,9 @@ export const authRoutes: RouteObject[] = [
   {
     path: "/reset-password",
     element: <ResetPassword />
+  },
+  {
+    path: "/demo-redirect",
+    element: <DemoRedirect />
   }
 ];

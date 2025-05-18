@@ -7,80 +7,17 @@ import { DemoAccountCard } from './demo/DemoAccountCard';
 import { DemoInfoAlert } from './demo/DemoInfoAlert';
 import { Book, Briefcase, Building, GraduationCap } from 'lucide-react';
 import { DemoAccount } from './demo/types';
-import { v4 as uuidv4 } from 'uuid';
+import { getDemoAccounts } from './demo/demoAccountService';
 
-// Profile-specific demo accounts
-const demoAccounts: Record<string, DemoAccount[]> = {
-  student: [
-    {
-      id: uuidv4(),
-      name: "Étudiant Démo",
-      email: "student@demo.com",
-      password: "demo1234",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      role: "student",
-      description: "Accédez à des milliers de cours et progressez à votre rythme",
-      features: [
-        "Parcourir le catalogue de cours",
-        "Suivre des cours et compléter des leçons",
-        "Recevoir des certificats",
-        "Interagir avec la communauté"
-      ]
-    }
-  ],
-  instructor: [
-    {
-      id: uuidv4(),
-      name: "Enseignant Démo",
-      email: "instructor@demo.com",
-      password: "demo1234",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily",
-      role: "instructor",
-      description: "Partagez votre expertise et créez des cours de qualité",
-      features: [
-        "Créer et publier des cours",
-        "Analyser les statistiques des cours",
-        "Interagir avec les étudiants",
-        "Gérer les revenus et paiements"
-      ]
-    }
-  ],
-  business: [
-    {
-      id: uuidv4(),
-      name: "Entreprise Démo",
-      email: "business@demo.com",
-      password: "demo1234",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
-      role: "business_admin",
-      description: "Gérez la formation de vos équipes et suivez leurs progrès",
-      features: [
-        "Gérer les utilisateurs de l'entreprise",
-        "Suivre les progrès de l'équipe",
-        "Attribuer des cours et parcours",
-        "Analyser les résultats de formation"
-      ]
-    }
-  ],
-  employee: [
-    {
-      id: uuidv4(),
-      name: "Employé Démo",
-      email: "employee@demo.com",
-      password: "demo1234",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
-      role: "employee",
-      description: "Accédez aux formations fournies par votre entreprise",
-      features: [
-        "Accéder aux cours assignés",
-        "Suivre votre progression",
-        "Obtenir des certifications",
-        "Communiquer avec les formateurs"
-      ]
-    }
-  ]
+// Profile-specific demo accounts mapping
+const demoAccountsByType: Record<string, string[]> = {
+  student: ['etudiant@schoolier.com'],
+  instructor: ['prof@schoolier.com'],
+  business: ['business@schoolier.com', 'entreprise@schoolier.com'],
+  employee: ['employee@schoolier.com']
 };
 
+// Map profile types to icons
 const profileIcons = {
   student: GraduationCap,
   instructor: Book,
@@ -96,17 +33,37 @@ interface DemoAccountsProps {
 
 const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
   const { loginWithDemo, isLoggingIn } = useAuth();
+  const [accounts, setAccounts] = React.useState<DemoAccount[]>([]);
+  const [loading, setLoading] = React.useState(true);
   
   // Get the appropriate demo accounts for the selected profile
-  const filteredAccounts = demoAccounts[profileType];
+  React.useEffect(() => {
+    const allAccounts = getDemoAccounts();
+    const emails = demoAccountsByType[profileType] || [];
+    
+    // Filter accounts based on the profile type
+    const filteredAccounts = allAccounts.filter(account => 
+      emails.includes(account.email)
+    );
+    
+    setAccounts(filteredAccounts);
+    setLoading(false);
+    
+    console.log(`Loaded ${filteredAccounts.length} demo accounts for profile type: ${profileType}`);
+  }, [profileType]);
+  
   const ProfileIcon = profileIcons[profileType];
+  
+  if (loading) {
+    return <div className="text-center py-4">Chargement des comptes de démonstration...</div>;
+  }
   
   return (
     <div className="space-y-3">
       <DemoInfoAlert />
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredAccounts.map((account, index) => (
+        {accounts.map((account, index) => (
           <DemoAccountCard
             key={index}
             account={account}
@@ -115,6 +72,11 @@ const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
             isLoading={isLoggingIn}
           />
         ))}
+        {accounts.length === 0 && (
+          <div className="col-span-2 text-center py-6 border rounded-lg bg-gray-50 dark:bg-gray-800">
+            <p className="text-muted-foreground">Aucun compte de démonstration disponible pour ce profil.</p>
+          </div>
+        )}
       </div>
     </div>
   );

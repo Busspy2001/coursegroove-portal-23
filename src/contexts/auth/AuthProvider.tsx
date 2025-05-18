@@ -8,6 +8,7 @@ import { AuthContext } from './context';
 import { executeLogout } from './logout';
 import { handleLogin, handleLoginWithDemo, handleRegister, handleResetPassword } from './auth-functions';
 import { useLocation } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -58,9 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setCurrentUser(user);
           setIsAuthenticated(true);
           console.log("🔓 Utilisateur authentifié:", user.email, "Rôle:", user.role);
+          
+          // Verify if user is demo 
+          if (user.is_demo) {
+            console.log("👨‍💼 Compte de démonstration détecté");
+          }
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
+        toast({
+          title: "Erreur d'authentification",
+          description: "Un problème est survenu lors de la vérification de votre session.",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -123,14 +134,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string, callback?: () => void) => {
     // Reset logout status when logging in
     setLogoutActive(false);
-    return handleLogin(email, password, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
+    try {
+      const user = await handleLogin(email, password, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
+      console.log(`✅ Login successful for ${user.email} (${user.role})`);
+      
+      // Verify role and direct user to appropriate dashboard
+      return user;
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error;
+    }
   };
 
   // Login with demo account
   const loginWithDemo = async (account: any, callback?: () => void) => {
     // Reset logout status when logging in
     setLogoutActive(false);
-    return handleLoginWithDemo(account, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
+    try {
+      const user = await handleLoginWithDemo(account, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
+      console.log(`✅ Demo login successful for ${user.email} (${user.role})`);
+
+      // Return the user for additional processing if needed
+      return user;
+    } catch (error) {
+      console.error("Demo login failed:", error);
+      throw error;
+    }
   };
 
   // Register function

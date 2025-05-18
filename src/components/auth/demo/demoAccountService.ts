@@ -82,6 +82,36 @@ export const getDemoAccounts = (): DemoAccount[] => {
         'Suivre les statistiques de progression',
         'Configurer les départements et l\'organisation'
       ]
+    },
+    {
+      id: uuidv4(),
+      email: 'employee@schoolier.com',
+      password: 'demo123',
+      role: 'employee',
+      name: 'Alex Martin',
+      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=AM&backgroundColor=7C3AED',
+      description: 'Accédez aux formations fournies par votre entreprise.',
+      features: [
+        'Accéder aux cours assignés',
+        'Suivre votre progression',
+        'Obtenir des certifications',
+        'Communiquer avec les formateurs'
+      ]
     }
   ];
+};
+
+/**
+ * Vérifie si l'email correspond à un compte de démonstration
+ */
+export const isDemoAccount = (email: string): boolean => {
+  const demoEmails = getDemoAccounts().map(account => account.email);
+  return demoEmails.includes(email);
+};
+
+/**
+ * Récupère un compte de démonstration par email
+ */
+export const getDemoAccountByEmail = (email: string): DemoAccount | undefined => {
+  return getDemoAccounts().find(account => account.email === email);
 };

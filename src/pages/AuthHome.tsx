@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Book } from "lucide-react";
@@ -9,10 +9,20 @@ import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProfileSelector from "@/components/auth/ProfileSelector";
+import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 
 const AuthHome = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  
+  // Ensure demo accounts are available
+  useEffect(() => {
+    const initAccounts = async () => {
+      await ensureDemoAccountsExist(false);
+    };
+    
+    initAccounts();
+  }, []);
   
   return (
     <div className="flex flex-col min-h-screen">

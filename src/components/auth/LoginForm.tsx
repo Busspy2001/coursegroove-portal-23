@@ -1,162 +1,136 @@
-
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Icons } from "@/components/Icons";
+import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
+import { isDemoAccount } from "./demo/demoAccountService";
 
-// Validation schema
-const loginSchema = z.object({
-  email: z.string().email("Email invalide"),
-  password: z.string().min(6, "Mot de passe de 6 caractères minimum"),
-  rememberMe: z.boolean().optional(),
-});
-
-type ProfileType = "student" | "instructor" | "business" | "employee";
-
-interface LoginFormProps {
-  profileType?: ProfileType;
-}
-
-export function LoginForm({ profileType = "student" }: LoginFormProps) {
-  const { login, isLoggingIn } = useAuth();
+const LoginForm = () => {
+  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  
-  // Form setup with React Hook Form and Zod validation
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      rememberMe: false,
-    },
-  });
+  const [searchParams] = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { toast } = useToast();
+  const [isDemo, setIsDemo] = useState(false);
 
-  // Handle form submission
-  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+  useEffect(() => {
+    // Check if the email corresponds to a demo account
+    setIsDemo(isDemoAccount(email));
+  }, [email]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    setError("");
+    
     try {
-      await login(values.email, values.password, () => {
-        console.log("Connexion réussie");
+      const user = await login(email, password, () => {
+        // Success handling moved to the callback for better async control
+        if (searchParams.get("redirect")) {
+          navigate(searchParams.get("redirect") as string);
+        } else {
+          // Use the demo-redirect for intelligent routing based on role
+          navigate("/demo-redirect");
+        }
       });
-    } catch (error: any) {
-      console.error("Erreur de connexion:", error);
-    }
-  };
 
-  // Get button styles based on profile type
-  const getButtonClass = () => {
-    switch (profileType) {
-      case "instructor":
-        return "bg-schoolier-teal hover:bg-schoolier-dark-teal";
-      case "business":
-        return "bg-amber-500 hover:bg-amber-600";
-      case "employee":
-        return "bg-purple-500 hover:bg-purple-600";
-      default:
-        return "bg-schoolier-blue hover:bg-schoolier-dark-blue";
+      console.log("Login succeeded!");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(err.message || "Une erreur s'est produite lors de la connexion.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <FormControl>
-                  <Input placeholder="votre@email.com" className="pl-10" {...field} />
-                </FormControl>
-                <FormMessage />
-              </div>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <FormControl>
-                  <Input 
-                    type={showPassword ? "text" : "password"} 
-                    className="pl-10" 
-                    {...field} 
-                  />
-                </FormControl>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-                <FormMessage />
-              </div>
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex items-center justify-between">
-          <FormField
-            control={form.control}
-            name="rememberMe"
-            render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel className="text-sm font-normal">
-                  Se souvenir de moi
-                </FormLabel>
-              </FormItem>
+    <div className="container grid h-screen place-items-center">
+      <Card className="w-[350px] md:w-[450px] lg:w-[550px] shadow-xl">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl">Se connecter</CardTitle>
+          <CardDescription>Entrez votre email et mot de passe pour vous connecter</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="exemple@schoolier.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-red-500 text-sm mt-2" role="alert">
+                {error}
+              </p>
             )}
-          />
-          
-          <Link
-            to="/forgot-password"
-            className="text-sm text-schoolier-blue hover:underline"
-          >
-            Mot de passe oublié?
-          </Link>
+            <Button disabled={isLoading} className="w-full mt-4 bg-schoolier-teal hover:bg-schoolier-dark-teal text-white font-medium">
+              {isLoading ? (
+                <>
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  Chargement...
+                </>
+              ) : (
+                "Se connecter"
+              )}
+            </Button>
+          </form>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Ou</span>
+            </div>
+          </div>
+          <Button variant="outline" disabled className="w-full justify-center">
+            <Icons.gitHub className="mr-2 h-4 w-4" />
+            Github
+          </Button>
+        </CardContent>
+        <div className="p-6 pt-0 text-center">
+          <Separator />
+          <div className="mt-4 text-sm">
+            <Link to="/forgot-password" className="hover:underline text-muted-foreground">
+              Mot de passe oublié?
+            </Link>
+          </div>
+          <div className="mt-2 text-sm">
+            Pas de compte?{" "}
+            <Link to="/register" className="text-schoolier-teal hover:underline">
+              S'inscrire
+            </Link>
+          </div>
         </div>
-        
-        <Button
-          type="submit"
-          className={`w-full ${getButtonClass()}`}
-          disabled={isLoggingIn}
-        >
-          {isLoggingIn ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connexion en cours...
-            </>
-          ) : (
-            "Se connecter"
-          )}
-        </Button>
-      </form>
-    </Form>
+      </Card>
+    </div>
   );
-}
+};
 
 export default LoginForm;

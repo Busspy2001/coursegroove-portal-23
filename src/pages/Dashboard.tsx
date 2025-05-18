@@ -15,9 +15,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check authentication
+  // Check authentication and redirect based on role
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      // Still loading, wait for completion
+      return;
+    }
 
     // Si une déconnexion est active, rediriger vers la page de connexion
     if (isLogoutActive) {
@@ -36,21 +39,41 @@ const Dashboard = () => {
       return;
     }
 
+    // Afficher le rôle détecté pour le débogage
+    console.log(`👤 Utilisateur authentifié: ${currentUser.email} (Rôle: ${currentUser.role})`);
+    
     // Redirect based on role
-    if (currentUser.role === "instructor") {
-      navigate("/instructor", { replace: true });
-    } else if (currentUser.role === "super_admin" || currentUser.role === "admin") {
-      navigate("/admin", { replace: true });
-    } else if (currentUser.role === "business_admin") {
-      // Vérifier que nous ne sommes pas dans un cycle de redirection post-déconnexion
-      if (!location.search.includes('logout=true')) {
-        navigate("/entreprise", { replace: true });
-      } else {
-        console.log("🚫 Redirection bloquée vers /entreprise car déconnexion active");
-        navigate("/login?logout=true", { replace: true });
+    if (!location.pathname.includes('logout=true')) {
+      switch (currentUser.role) {
+        case "instructor":
+          console.log("🚀 Redirection vers /instructor pour le rôle instructor");
+          navigate("/instructor", { replace: true });
+          break;
+        case "admin":
+        case "super_admin":
+          console.log("🚀 Redirection vers /admin pour le rôle admin");
+          navigate("/admin", { replace: true });
+          break;
+        case "business_admin":
+          console.log("🚀 Redirection vers /entreprise pour le rôle business_admin");
+          navigate("/entreprise", { replace: true });
+          break;
+        case "employee":
+          console.log("🚀 Redirection vers /employee pour le rôle employee");
+          navigate("/employee", { replace: true });
+          break;
+        case "student":
+          // Déjà sur le bon tableau de bord
+          console.log("✅ Déjà sur le dashboard étudiant");
+          break;
+        default:
+          console.warn(`⚠️ Rôle non reconnu: ${currentUser.role}, utilisation du dashboard étudiant par défaut`);
       }
+    } else {
+      console.log("🛑 Redirection bloquée car déconnexion active");
+      navigate("/login?logout=true", { replace: true });
     }
-  }, [currentUser, isAuthenticated, isLoading, navigate, location]);
+  }, [currentUser, isAuthenticated, isLoading, navigate, location.pathname]);
 
   // Show loading state
   if (isLoading || !isAuthenticated || !currentUser) {
@@ -63,6 +86,8 @@ const Dashboard = () => {
     );
   }
 
+  // Only show StudentDashboard if we're still here and the user is a student
+  // For other roles, redirection should have happened in the useEffect
   return (
     <Layout>
       <motion.div

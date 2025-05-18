@@ -7,7 +7,6 @@ import { DemoAccount } from "./types";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
 
 export interface DemoAccountCardProps {
   account: DemoAccount;
@@ -34,6 +33,8 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 border-purple-200 dark:border-purple-800";
       case "business_admin":
         return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+      case "employee":
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 border-gray-200 dark:border-gray-700";
     }
@@ -64,6 +65,9 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
           title: "Connexion en cours",
           description: `Connexion au compte ${account.name}...`,
         });
+        
+        // Log pour débuggage
+        console.log(`🔑 Tentative de connexion avec compte démo: ${account.email} (${account.role})`);
         
         // Appel de la fonction de connexion
         onLogin(account);

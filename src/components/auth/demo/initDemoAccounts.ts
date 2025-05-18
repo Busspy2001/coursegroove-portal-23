@@ -2,6 +2,34 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getDemoAccounts } from "./demoAccountService";
 import { toast } from "@/hooks/use-toast";
+import { DemoAccount } from "./types";
+
+// Diagnostic log helper
+const logDemoAccountStatus = async () => {
+  try {
+    // Check how many demo accounts exist in profiles_unified
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles_unified')
+      .select('email, role, is_demo')
+      .eq('is_demo', true);
+    
+    if (profileError) {
+      console.error("❌ Erreur lors de la vérification des profils:", profileError);
+      return;
+    }
+    
+    console.log(`📊 Statut des comptes démo: ${profiles?.length || 0} comptes trouvés dans profiles_unified`);
+    
+    if (profiles && profiles.length > 0) {
+      // Log each profile for debugging
+      profiles.forEach(profile => {
+        console.log(`  - ${profile.email} (${profile.role})`);
+      });
+    }
+  } catch (error) {
+    console.error("❌ Erreur lors du diagnostic des comptes démo:", error);
+  }
+};
 
 /**
  * Crée ou met à jour les comptes de démonstration dans la base de données Supabase
@@ -11,7 +39,8 @@ export const initDemoAccounts = async (): Promise<boolean> => {
   try {
     console.log("🚀 Initialisation des comptes démo...");
     const demoAccounts = getDemoAccounts();
-    let success = true;
+    let successCount = 0;
+    let errorCount = 0;
 
     // Vérifier d'abord la connexion à Supabase
     const { data: { session } } = await supabase.auth.getSession();
@@ -20,42 +49,54 @@ export const initDemoAccounts = async (): Promise<boolean> => {
       return true;
     }
 
+    // Log initial diagnostic
+    await logDemoAccountStatus();
+    
     // Créer ou mettre à jour chaque compte démo
     for (const account of demoAccounts) {
       try {
-        // Vérifier si le compte existe déjà via l'API auth
-        const { data: existingUser, error: authError } = await supabase.auth.admin.listUsers();
+        // Vérifier si le compte existe déjà via la table profiles_unified (méthode plus fiable)
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles_unified')
+          .select('id, email, is_demo, role')
+          .eq('email', account.email)
+          .limit(1);
+          
+        const profileExists = profiles && profiles.length > 0;
         
-        // Si on ne peut pas accéder à l'API admin (c'est normal), on vérifie dans la table profiles_unified
-        if (authError) {
-          console.log("ℹ️ Impossible d'utiliser listUsers, vérification via profiles_unified");
-          const { data: profiles, error: profileError } = await supabase
-            .from('profiles_unified')
-            .select('email, is_demo')
-            .eq('email', account.email)
-            .eq('is_demo', true)
-            .limit(1);
+        if (profileError) {
+          console.warn(`⚠️ Impossible de vérifier le profil pour ${account.email}: ${profileError.message}`);
+        }
+        
+        // Si le profil existe, vérifier et mettre à jour si nécessaire
+        if (profileExists) {
+          const existingProfile = profiles[0];
+          console.log(`ℹ️ Le compte démo ${account.email} existe déjà (${existingProfile.role})`);
+          
+          // Vérifier si le profil a les bonnes propriétés
+          if (existingProfile.role !== account.role || existingProfile.is_demo !== true) {
+            console.log(`🔄 Mise à jour des propriétés pour ${account.email}`);
             
-          const userExists = profiles && profiles.length > 0;
-          
-          if (userExists) {
-            console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
-            continue;
+            // Mettre à jour les propriétés
+            const { error: updateError } = await supabase
+              .from('profiles_unified')
+              .update({
+                role: account.role,
+                is_demo: true,
+                avatar_url: account.avatar
+              })
+              .eq('id', existingProfile.id);
+              
+            if (updateError) {
+              console.error(`❌ Erreur lors de la mise à jour du profil ${account.email}:`, updateError);
+              errorCount++;
+            } else {
+              console.log(`✅ Profil mis à jour pour ${account.email}`);
+              successCount++;
+            }
           }
-        } else {
-          // Si on a pu accéder à listUsers, on vérifie là-dedans
-          // Utilisation de type casting pour résoudre le problème de typage
-          interface UserObject {
-            email?: string;
-          }
           
-          const users = existingUser?.users as UserObject[] | undefined;
-          const userExists = users?.some(user => user.email === account.email);
-          
-          if (userExists) {
-            console.log(`ℹ️ Le compte démo ${account.email} existe déjà`);
-            continue;
-          }
+          continue;
         }
 
         // Si le compte n'existe pas, on le crée
@@ -78,18 +119,23 @@ export const initDemoAccounts = async (): Promise<boolean> => {
 
         if (error) {
           console.error(`❌ Erreur lors de la création du compte démo ${account.email}:`, error);
-          success = false;
+          errorCount++;
           continue;
         }
 
         console.log(`✅ Compte démo créé pour ${account.email}`);
+        successCount++;
       } catch (error) {
         console.error(`❌ Erreur lors du traitement du compte ${account.email}:`, error);
-        success = false;
+        errorCount++;
       }
     }
 
-    console.log(`✅ Initialisation des comptes démo ${success ? 'réussie' : 'partiellement réussie'}`);
+    // Final diagnostic log
+    await logDemoAccountStatus();
+    
+    const success = errorCount === 0;
+    console.log(`✅ Initialisation des comptes démo: ${successCount} réussis, ${errorCount} échoués`);
     return success;
   } catch (error) {
     console.error("❌ Erreur lors de l'initialisation des comptes démo:", error);
@@ -109,7 +155,8 @@ export const ensureDemoAccountsExist = async (silent: boolean = true): Promise<v
     // Only initialize demo accounts if we're on the login or register page
     // This prevents auto-initialization on page refresh after logout
     const isAuthPage = window.location.pathname.includes('/login') || 
-                       window.location.pathname.includes('/register');
+                       window.location.pathname.includes('/register') ||
+                       window.location.pathname.includes('/auth');
     
     if (!session && isAuthPage) {
       const success = await initDemoAccounts();
