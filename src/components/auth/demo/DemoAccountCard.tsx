@@ -9,16 +9,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
-interface DemoAccountCardProps {
+export interface DemoAccountCardProps {
   account: DemoAccount;
   isLoading: boolean;
-  onClick: (account: DemoAccount) => void;
+  icon?: React.ReactNode;
+  onLogin: (account: DemoAccount) => void;
 }
 
 export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({ 
   account, 
   isLoading, 
-  onClick 
+  icon,
+  onLogin 
 }) => {
   // Gestion des couleurs et badges selon le rôle
   const getRoleBadgeStyles = () => {
@@ -45,6 +47,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
       case "admin": return "Admin";
       case "super_admin": return "Super Admin";
       case "business_admin": return "Entreprise";
+      case "employee": return "Employé";
       default: return account.role;
     }
   };
@@ -63,7 +66,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         });
         
         // Appel de la fonction de connexion
-        onClick(account);
+        onLogin(account);
       } catch (error) {
         console.error("Erreur lors de la connexion:", error);
         toast({
@@ -149,7 +152,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
           </span>
         ) : (
           <span className="flex items-center">
-            <User className="mr-1 h-4 w-4" />
+            {icon || <User className="mr-1 h-4 w-4" />}
             Se connecter
           </span>
         )}
