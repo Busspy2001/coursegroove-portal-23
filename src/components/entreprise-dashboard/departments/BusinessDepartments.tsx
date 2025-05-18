@@ -159,9 +159,12 @@ const BusinessDepartments = () => {
         return;
       }
       
-      const result = isEditMode
-        ? await updateDepartment(currentDepartment.id!, currentDepartment)
-        : await createDepartment(companyData.id, currentDepartment);
+      let result;
+      if (isEditMode && currentDepartment.id) {
+        result = await updateDepartment(currentDepartment.id, currentDepartment);
+      } else {
+        result = await createDepartment(companyData.id, currentDepartment);
+      }
       
       if (result) {
         // Rafraîchir la liste des départements
@@ -186,7 +189,7 @@ const BusinessDepartments = () => {
   };
   
   const handleDeleteDepartment = async () => {
-    if (!departmentToDelete) return;
+    if (!departmentToDelete || !departmentToDelete.id) return;
     
     try {
       const result = await deleteDepartment(
@@ -223,7 +226,7 @@ const BusinessDepartments = () => {
   const filteredDepartments = departments.filter(department =>
     searchQuery.trim() === "" ||
     department.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    department.manager_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    (department.manager_name && department.manager_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
   
   // Calculer le nombre total d'employés par département
@@ -397,7 +400,7 @@ const BusinessDepartments = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {department.manager_name !== "Non assigné" ? (
+                        {department.manager_name && department.manager_name !== "Non assigné" ? (
                           <Badge variant="outline" className="font-normal">
                             {department.manager_name}
                           </Badge>

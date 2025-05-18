@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -141,9 +140,9 @@ const BusinessOverview = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <OverviewMetricCard
           title="Employés"
-          value={stats?.total_employees || 0}
+          value={String(stats?.total_employees || 0)}
           description="employés actifs"
-          icon={<Users className="h-4 w-4 text-muted-foreground" />}
+          icon={Users}
           trend={{
             value: "+5%",
             positive: true
@@ -152,9 +151,9 @@ const BusinessOverview = () => {
         />
         <OverviewMetricCard
           title="Départements"
-          value={stats?.departments_count || 0}
+          value={String(stats?.departments_count || 0)}
           description="départements"
-          icon={<Layers className="h-4 w-4 text-muted-foreground" />}
+          icon={Layers}
           trend={{
             value: "",
             positive: true
@@ -163,9 +162,9 @@ const BusinessOverview = () => {
         />
         <OverviewMetricCard
           title="Formations"
-          value={stats?.active_courses || 0}
+          value={String(stats?.active_courses || 0)}
           description="formations disponibles"
-          icon={<GraduationCap className="h-4 w-4 text-muted-foreground" />}
+          icon={GraduationCap}
           trend={{
             value: "+2",
             positive: true
@@ -176,7 +175,7 @@ const BusinessOverview = () => {
           title="Taux complétion"
           value={`${stats?.completion_rate || 0}%`}
           description="formations complétées"
-          icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+          icon={BarChart3}
           trend={{
             value: "+10%",
             positive: true

@@ -68,7 +68,6 @@ import {
   Trash2,
   GraduationCap,
   MailIcon,
-  UserRoundCog,
   ShieldCheck,
   ShieldX,
   Briefcase,
@@ -169,9 +168,12 @@ const BusinessEmployees = () => {
         return;
       }
       
-      const result = isEditMode
-        ? await updateEmployee(companyData.id, currentEmployee.id!, currentEmployee)
-        : await addEmployee(companyData.id, currentEmployee);
+      let result;
+      if (isEditMode && currentEmployee.id) {
+        result = await updateEmployee(companyData.id, currentEmployee.id, currentEmployee);
+      } else {
+        result = await addEmployee(companyData.id, currentEmployee);
+      }
       
       if (result) {
         // Rafraîchir la liste des employés
@@ -196,7 +198,7 @@ const BusinessEmployees = () => {
   };
   
   const handleDeleteEmployee = async () => {
-    if (!companyData || !employeeToDelete) return;
+    if (!companyData || !employeeToDelete || !employeeToDelete.id) return;
     
     try {
       const result = await removeEmployee(
