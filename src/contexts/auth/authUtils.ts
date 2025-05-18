@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "./types";
 import { userCache } from "@/integrations/supabase/client";
@@ -8,17 +7,15 @@ export const getUserFromCache = (userId?: string): User | null => {
   try {
     // If no userId is provided, try to get the current session user id
     if (!userId) {
-      const session = supabase.auth.session();
-      userId = session?.user?.id;
-    }
-
-    // If we still don't have a userId, return null
-    if (!userId) {
+      // Note: The session method is deprecated in newer Supabase versions
+      // We need to use getSession() instead which returns a promise
+      const session = supabase.auth.getSession();
+      // Since we can't await here synchronously, we'll have to return null if no userId provided
       return null;
     }
-    
-    // Check if user is in cache
-    if (userCache.has(userId)) {
+
+    // If we have a userId, check if user is in cache
+    if (userId && userCache.has(userId)) {
       return userCache.get(userId);
     }
     

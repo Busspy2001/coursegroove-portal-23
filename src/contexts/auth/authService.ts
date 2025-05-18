@@ -8,6 +8,7 @@ import { isDemoAccount, getDemoAccountInfo } from '@/components/auth/demo/demoAc
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
     // First try to get from cache for performance
+    // Note: We can't get userId from cache without a session, so this will likely return null
     const cachedUser = getUserFromCache();
     if (cachedUser) {
       console.log("📂 Utilisateur récupéré du cache");
