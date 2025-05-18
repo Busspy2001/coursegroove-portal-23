@@ -12,6 +12,7 @@ export interface User {
   bio?: string;
   phone?: string;
   is_demo?: boolean;
+  company_id?: string; // Add this property to fix the error
 }
 
 export interface AuthContextType {
