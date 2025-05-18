@@ -27,9 +27,9 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import OverviewMetricCard from "./OverviewMetricCard";
-import OverviewChart from "./OverviewChart";
-import OverviewActivityCard from "./OverviewActivityCard";
+import { OverviewMetricCard } from "./OverviewMetricCard";
+import { OverviewChart } from "./OverviewChart";
+import { OverviewActivityCard } from "./OverviewActivityCard";
 import { fetchCompanyData, fetchBusinessStatistics, BusinessStatistics } from "@/services/supabase-business-data";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";

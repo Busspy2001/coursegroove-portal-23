@@ -1,677 +1,353 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { PostgrestError } from '@supabase/supabase-js';
+import { UserRole } from '@/contexts/auth/types';
 
-// Types
-type Department = {
+// Define types
+export interface Company {
   id: string;
   name: string;
-  description: string | null;
-  manager_id: string | null;
-  manager_name?: string;
-  employee_count?: number;
-};
+  admin_id: string;
+  created_at?: string;
+}
 
-type Employee = {
+export interface Department {
   id: string;
-  full_name: string | null;
-  email: string | null;
-  avatar_url: string | null;
-  job_title: string | null;
-  department_id: string | null;
+  name: string;
+  description?: string;
+  company_id: string;
+  manager_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Employee {
+  id: string;
+  full_name: string;
+  email: string;
+  avatar_url?: string;
+  role: UserRole;
+  department_id?: string;
   department_name?: string;
-  joined_at: string | null;
-  status: string | null;
-};
+  job_title?: string;
+  status?: string;
+}
 
-type CompanyCourse = {
-  id: string;
-  title: string;
-  description: string | null;
-  is_required: boolean;
-  category: string | null;
-  duration: string | null;
-  created_at: string;
-};
+export interface RecentActivity {
+  type: string;
+  message: string;
+  date: string;
+}
 
-type CourseAssignment = {
-  id: string;
-  course_id: string;
-  employee_id: string;
-  department_id: string | null;
-  assigned_by: string | null;
-  due_date: string | null;
-  completed: boolean;
-  completed_at: string | null;
-  course_title?: string;
-  employee_name?: string;
-};
-
-type BusinessStatistics = {
+export interface BusinessStatistics {
   total_employees: number;
+  departments_count: number;
   active_courses: number;
   completion_rate: number;
-  departments_count: number;
-  recent_activities: Array<{
-    type: string;
-    message: string;
-    date: string;
-  }>;
-};
+  recent_activities?: RecentActivity[];
+}
 
-// Récupérer les données de l'entreprise associée à l'utilisateur actuel
-export const fetchCompanyData = async () => {
+// Fetch company data for the current user
+export const fetchCompanyData = async (): Promise<Company | null> => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!userData?.user) throw new Error('Utilisateur non authentifié');
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
     
-    // Récupérer l'entreprise où l'utilisateur est administrateur
+    // First, check if user is company admin
     const { data: company, error } = await supabase
       .from('companies')
       .select('*')
-      .eq('admin_id', userData.user.id)
+      .eq('admin_id', user.id)
       .single();
-    
-    if (error) throw error;
-    
-    return company;
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données de l\'entreprise:', error);
-    return null;
-  }
-};
-
-// Départements
-export const fetchDepartments = async (companyId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_departments')
-      .select(`
-        *,
-        manager:manager_id(id, full_name),
-        employees:company_employees(id)
-      `)
-      .eq('company_id', companyId);
-    
-    if (error) throw error;
-    
-    // Transformer les données pour inclure le nom du responsable et le nombre d'employés
-    return data.map(dep => ({
-      ...dep,
-      manager_name: dep.manager?.full_name || 'Non assigné',
-      employee_count: dep.employees ? dep.employees.length : 0
-    }));
-  } catch (error) {
-    console.error('Erreur lors de la récupération des départements:', error);
-    return [];
-  }
-};
-
-export const createDepartment = async (companyId: string, departmentData: Partial<Department>) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_departments')
-      .insert([
-        { 
-          company_id: companyId,
-          name: departmentData.name,
-          description: departmentData.description,
-          manager_id: departmentData.manager_id
-        }
-      ])
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Département créé",
-      description: `Le département "${departmentData.name}" a été créé avec succès.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de la création du département:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de créer le département. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const updateDepartment = async (departmentId: string, departmentData: Partial<Department>) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_departments')
-      .update({
-        name: departmentData.name,
-        description: departmentData.description,
-        manager_id: departmentData.manager_id,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', departmentId)
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Département mis à jour",
-      description: `Le département "${departmentData.name}" a été mis à jour avec succès.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour du département:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de mettre à jour le département. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const deleteDepartment = async (departmentId: string, departmentName: string) => {
-  try {
-    const { error } = await supabase
-      .from('company_departments')
-      .delete()
-      .eq('id', departmentId);
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Département supprimé",
-      description: `Le département "${departmentName}" a été supprimé avec succès.`
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Erreur lors de la suppression du département:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de supprimer le département. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return false;
-  }
-};
-
-// Employés
-export const fetchEmployees = async (companyId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_employees')
-      .select(`
-        *,
-        employee:employee_id(id, full_name, email, avatar_url),
-        department:department_id(id, name)
-      `)
-      .eq('company_id', companyId);
-    
-    if (error) throw error;
-    
-    // Transformer les données pour un format plus facile à utiliser
-    return data.map(item => ({
-      id: item.employee.id,
-      full_name: item.employee.full_name,
-      email: item.employee.email,
-      avatar_url: item.employee.avatar_url,
-      job_title: item.job_title,
-      department_id: item.department_id,
-      department_name: item.department?.name || 'Non assigné',
-      joined_at: item.joined_at,
-      status: item.status
-    }));
-  } catch (error) {
-    console.error('Erreur lors de la récupération des employés:', error);
-    return [];
-  }
-};
-
-export const addEmployee = async (companyId: string, employeeData: Partial<Employee>) => {
-  try {
-    // Vérifier si l'employé existe déjà dans les profils
-    let employeeId = employeeData.id;
-    
-    if (!employeeId) {
-      // Dans un système réel, nous inviterions l'employé par email
-      // Pour notre démo, nous allons simplement créer un nouveau profil
-      const { data: newProfile, error: profileError } = await supabase
-        .from('profiles_unified')
-        .insert([
-          {
-            full_name: employeeData.full_name,
-            email: employeeData.email,
-            role: 'employee',
-            company_id: companyId
-          }
-        ])
-        .select();
       
-      if (profileError) throw profileError;
-      
-      employeeId = newProfile[0].id;
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 is "no rows returned" which just means user is not a company admin
+      console.error('Error fetching company data:', error);
+      throw error;
     }
     
-    // Ajouter l'employé à l'entreprise
-    const { data, error } = await supabase
+    if (company) {
+      return company;
+    }
+    
+    // If not a company admin, check if user is an employee
+    const { data: employeeRelation, error: employeeError } = await supabase
       .from('company_employees')
-      .insert([
-        {
-          company_id: companyId,
-          employee_id: employeeId,
-          department_id: employeeData.department_id,
-          job_title: employeeData.job_title,
-          status: employeeData.status || 'active'
-        }
-      ])
-      .select();
+      .select('company_id')
+      .eq('employee_id', user.id)
+      .single();
+      
+    if (employeeError && employeeError.code !== 'PGRST116') {
+      console.error('Error checking if user is an employee:', employeeError);
+      throw employeeError;
+    }
     
-    if (error) throw error;
+    if (employeeRelation) {
+      const { data: employeeCompany, error: companyError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', employeeRelation.company_id)
+        .single();
+        
+      if (companyError) {
+        console.error('Error fetching company as employee:', companyError);
+        throw companyError;
+      }
+      
+      return employeeCompany;
+    }
     
-    toast({
-      title: "Employé ajouté",
-      description: `${employeeData.full_name} a été ajouté à votre entreprise.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de l\'ajout de l\'employé:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible d'ajouter l'employé. Veuillez réessayer.",
-      variant: "destructive"
-    });
     return null;
+  } catch (error) {
+    console.error('Failed to fetch company data:', error);
+    throw error;
   }
 };
 
-export const updateEmployee = async (companyId: string, employeeId: string, employeeData: Partial<Employee>) => {
+// Fetch business statistics
+export const fetchBusinessStatistics = async (companyId: string): Promise<BusinessStatistics> => {
   try {
-    const { data, error } = await supabase
+    // Get total employees count
+    const { count: totalEmployees, error: employeesError } = await supabase
       .from('company_employees')
-      .update({
-        department_id: employeeData.department_id,
-        job_title: employeeData.job_title,
-        status: employeeData.status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('company_id', companyId)
-      .eq('employee_id', employeeId)
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Employé mis à jour",
-      description: `Les informations de l'employé ont été mises à jour avec succès.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour de l\'employé:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de mettre à jour l'employé. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const removeEmployee = async (companyId: string, employeeId: string, employeeName: string) => {
-  try {
-    const { error } = await supabase
-      .from('company_employees')
-      .delete()
-      .eq('company_id', companyId)
-      .eq('employee_id', employeeId);
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Employé retiré",
-      description: `${employeeName} a été retiré de votre entreprise.`
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Erreur lors du retrait de l\'employé:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de retirer l'employé. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return false;
-  }
-};
-
-// Formations
-export const fetchCompanyCourses = async (companyId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_courses')
-      .select('*')
+      .select('*', { count: 'exact', head: true })
       .eq('company_id', companyId);
+      
+    if (employeesError) {
+      throw employeesError;
+    }
     
-    if (error) throw error;
-    
-    return data;
-  } catch (error) {
-    console.error('Erreur lors de la récupération des formations:', error);
-    return [];
-  }
-};
-
-export const createCompanyCourse = async (companyId: string, courseData: Partial<CompanyCourse>) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_courses')
-      .insert([
-        {
-          company_id: companyId,
-          title: courseData.title,
-          description: courseData.description,
-          is_required: courseData.is_required || false,
-          category: courseData.category,
-          duration: courseData.duration
-        }
-      ])
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Formation créée",
-      description: `La formation "${courseData.title}" a été créée avec succès.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de la création de la formation:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de créer la formation. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const updateCompanyCourse = async (courseId: string, courseData: Partial<CompanyCourse>) => {
-  try {
-    const { data, error } = await supabase
-      .from('company_courses')
-      .update({
-        title: courseData.title,
-        description: courseData.description,
-        is_required: courseData.is_required,
-        category: courseData.category,
-        duration: courseData.duration,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', courseId)
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Formation mise à jour",
-      description: `La formation "${courseData.title}" a été mise à jour avec succès.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour de la formation:', error);
-    toast({
-      title: "Erreur", 
-      description: "Impossible de mettre à jour la formation. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const deleteCompanyCourse = async (courseId: string, courseTitle: string) => {
-  try {
-    const { error } = await supabase
-      .from('company_courses')
-      .delete()
-      .eq('id', courseId);
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Formation supprimée",
-      description: `La formation "${courseTitle}" a été supprimée avec succès.`
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Erreur lors de la suppression de la formation:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de supprimer la formation. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return false;
-  }
-};
-
-// Assignations de formations
-export const fetchCourseAssignments = async (companyId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('course_assignments')
-      .select(`
-        *,
-        employee:employee_id(id, full_name),
-        course:course_id(id, title)
-      `)
+    // Get departments count
+    const { count: departmentsCount, error: departmentsError } = await supabase
+      .from('company_departments')
+      .select('*', { count: 'exact', head: true })
       .eq('company_id', companyId);
+      
+    if (departmentsError) {
+      throw departmentsError;
+    }
     
-    if (error) throw error;
-    
-    // Transformer les données pour un format plus facile à utiliser
-    return data.map(item => ({
-      ...item,
-      employee_name: item.employee?.full_name || 'Inconnu',
-      course_title: item.course?.title || 'Formation inconnue'
-    }));
-  } catch (error) {
-    console.error('Erreur lors de la récupération des assignations:', error);
-    return [];
-  }
-};
-
-export const assignCourse = async (
-  companyId: string, 
-  courseId: string, 
-  employeeId: string,
-  departmentId: string | null,
-  assignerId: string,
-  dueDate: string | null
-) => {
-  try {
-    const { data, error } = await supabase
-      .from('course_assignments')
-      .insert([
-        {
-          company_id: companyId,
-          course_id: courseId,
-          employee_id: employeeId,
-          department_id: departmentId,
-          assigned_by: assignerId,
-          due_date: dueDate,
-          completed: false
-        }
-      ])
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Formation assignée",
-      description: `La formation a été assignée avec succès.`
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de l\'assignation de la formation:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible d'assigner la formation. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const updateAssignmentStatus = async (assignmentId: string, completed: boolean) => {
-  try {
-    const { data, error } = await supabase
-      .from('course_assignments')
-      .update({
-        completed: completed,
-        completed_at: completed ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', assignmentId)
-      .select();
-    
-    if (error) throw error;
-    
-    toast({
-      title: completed ? "Formation complétée" : "Statut mis à jour",
-      description: completed 
-        ? "La formation a été marquée comme complétée." 
-        : "Le statut de la formation a été mis à jour."
-    });
-    
-    return data[0];
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour du statut:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de mettre à jour le statut. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return null;
-  }
-};
-
-export const deleteAssignment = async (assignmentId: string) => {
-  try {
-    const { error } = await supabase
-      .from('course_assignments')
-      .delete()
-      .eq('id', assignmentId);
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Assignation supprimée",
-      description: `L'assignation de formation a été supprimée avec succès.`
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Erreur lors de la suppression de l\'assignation:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de supprimer l'assignation. Veuillez réessayer.",
-      variant: "destructive"
-    });
-    return false;
-  }
-};
-
-// Statistiques
-export const fetchBusinessStatistics = async (companyId: string) => {
-  try {
-    // Récupérer le nombre total d'employés
-    const { data: employeesData, error: employeesError } = await supabase
-      .from('company_employees')
-      .select('id')
-      .eq('company_id', companyId);
-    
-    if (employeesError) throw employeesError;
-    
-    // Récupérer le nombre de cours actifs
-    const { data: coursesData, error: coursesError } = await supabase
+    // Get active courses count
+    const { count: activeCourses, error: coursesError } = await supabase
       .from('company_courses')
-      .select('id')
+      .select('*', { count: 'exact', head: true })
       .eq('company_id', companyId);
+      
+    if (coursesError) {
+      throw coursesError;
+    }
     
-    if (coursesError) throw coursesError;
-    
-    // Récupérer les statistiques de complétion
-    const { data: assignmentsData, error: assignmentsError } = await supabase
+    // Calculate completion rate
+    const { data: assignments, error: assignmentsError } = await supabase
       .from('course_assignments')
       .select('completed')
       .eq('company_id', companyId);
+      
+    if (assignmentsError) {
+      throw assignmentsError;
+    }
     
-    if (assignmentsError) throw assignmentsError;
+    let completionRate = 0;
     
-    const completedAssignments = assignmentsData.filter(a => a.completed).length;
-    const completionRate = assignmentsData.length > 0 
-      ? (completedAssignments / assignmentsData.length) * 100 
-      : 0;
+    if (assignments && assignments.length > 0) {
+      const completed = assignments.filter(a => a.completed).length;
+      completionRate = Math.round((completed / assignments.length) * 100);
+    }
     
-    // Récupérer le nombre de départements
-    const { data: departmentsData, error: departmentsError } = await supabase
-      .from('company_departments')
-      .select('id')
-      .eq('company_id', companyId);
-    
-    if (departmentsError) throw departmentsError;
-    
-    // Créer des activités récentes fictives pour la démo
-    // Dans une application réelle, cela viendrait d'une table d'événements
-    const recentActivities = [
+    // Get recent activities (mock data for now)
+    // In a real implementation, you'd query a dedicated activities table
+    const recentActivities: RecentActivity[] = [
       {
-        type: 'employee',
-        message: 'Nouvel employé ajouté: Sarah Martin',
-        date: new Date(Date.now() - 3600000).toISOString()
+        type: "Assignation",
+        message: "Formation 'Sécurité informatique' assignée à 5 employés",
+        date: "Il y a 2 heures"
       },
       {
-        type: 'course',
-        message: 'Formation "Introduction à la cybersécurité" créée',
-        date: new Date(Date.now() - 86400000).toISOString()
+        type: "Complétion",
+        message: "Thomas Dubois a complété 'Leadership et gestion d'équipe'",
+        date: "Il y a 3 heures"
       },
       {
-        type: 'assignment',
-        message: 'Jean Dupont a complété la formation "Excel avancé"',
-        date: new Date(Date.now() - 172800000).toISOString()
+        type: "Nouveau",
+        message: "Nouvelle formation 'Excel avancé' ajoutée au catalogue",
+        date: "Il y a 5 heures"
       }
     ];
     
     return {
-      total_employees: employeesData.length,
-      active_courses: coursesData.length,
-      completion_rate: Math.round(completionRate),
-      departments_count: departmentsData.length,
+      total_employees: totalEmployees || 0,
+      departments_count: departmentsCount || 0,
+      active_courses: activeCourses || 0,
+      completion_rate: completionRate,
       recent_activities: recentActivities
     };
   } catch (error) {
-    console.error('Erreur lors de la récupération des statistiques:', error);
-    return {
-      total_employees: 0,
-      active_courses: 0,
-      completion_rate: 0,
-      departments_count: 0,
-      recent_activities: []
-    };
+    console.error('Failed to fetch business statistics:', error);
+    throw error;
   }
 };
 
-export type {
-  Department,
-  Employee,
-  CompanyCourse,
-  CourseAssignment,
-  BusinessStatistics
+// Fetch departments
+export const fetchDepartments = async (companyId: string): Promise<Department[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('company_departments')
+      .select('*')
+      .eq('company_id', companyId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch departments:', error);
+    throw error;
+  }
+};
+
+// Fetch employees
+export const fetchEmployees = async (companyId: string): Promise<Employee[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('company_employees')
+      .select(`
+        employee_id,
+        job_title,
+        status,
+        profiles_unified!employee_id (
+          id,
+          full_name,
+          email,
+          avatar_url,
+          role
+        ),
+        company_departments!department_id (
+          id,
+          name
+        )
+      `)
+      .eq('company_id', companyId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    // Map the joined data to our Employee interface
+    const employees: Employee[] = data?.map(item => ({
+      id: item.profiles_unified.id,
+      full_name: item.profiles_unified.full_name,
+      email: item.profiles_unified.email,
+      avatar_url: item.profiles_unified.avatar_url,
+      role: item.profiles_unified.role,
+      job_title: item.job_title,
+      status: item.status,
+      department_id: item.company_departments?.id,
+      department_name: item.company_departments?.name
+    })) || [];
+    
+    return employees;
+  } catch (error) {
+    console.error('Failed to fetch employees:', error);
+    throw error;
+  }
+};
+
+// Create a department
+export const createDepartment = async (department: Omit<Department, 'id' | 'created_at' | 'updated_at'>): Promise<Department> => {
+  try {
+    const { data, error } = await supabase
+      .from('company_departments')
+      .insert(department)
+      .select()
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Failed to create department:', error);
+    throw error;
+  }
+};
+
+// Bulk add employees
+export const addEmployees = async (employees: Array<{
+  full_name: string; 
+  email: string; 
+  role: UserRole;
+  company_id: string;
+  id: string; // Ensure id is included
+}>): Promise<void> => {
+  try {
+    // Insert into profiles_unified first
+    const { error: profilesError } = await supabase
+      .from('profiles_unified')
+      .insert(employees);
+      
+    if (profilesError) {
+      throw profilesError;
+    }
+    
+    // Then add the company-employee relationships
+    const companyEmployees = employees.map(emp => ({
+      company_id: emp.company_id,
+      employee_id: emp.id
+    }));
+    
+    const { error: relationError } = await supabase
+      .from('company_employees')
+      .insert(companyEmployees);
+      
+    if (relationError) {
+      throw relationError;
+    }
+  } catch (error) {
+    console.error('Failed to add employees:', error);
+    throw error;
+  }
+};
+
+// Get recent assignments with employee and course info
+export const getRecentAssignments = async (companyId: string, limit = 5): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('course_assignments')
+      .select(`
+        id,
+        created_at,
+        completed,
+        due_date,
+        profiles_unified!employee_id (
+          full_name
+        ),
+        company_courses!course_id (
+          title
+        )
+      `)
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data.map(item => ({
+      id: item.id,
+      employee_name: item.profiles_unified?.full_name,
+      course_title: item.company_courses?.title,
+      created_at: item.created_at,
+      due_date: item.due_date,
+      completed: item.completed
+    })) || [];
+  } catch (error) {
+    console.error('Failed to fetch recent assignments:', error);
+    return [];
+  }
 };

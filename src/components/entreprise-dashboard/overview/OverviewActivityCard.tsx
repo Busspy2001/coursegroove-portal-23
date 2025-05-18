@@ -3,22 +3,20 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface OverviewActivityCardProps {
-  user: string;
-  action: string;
-  target: string;
-  department: string;
-  time: string;
+  type?: string;
+  message: string;
+  timestamp: string;
+  department?: string;
 }
 
 export const OverviewActivityCard: React.FC<OverviewActivityCardProps> = ({
-  user,
-  action,
-  target,
-  department,
-  time
+  type = "info",
+  message,
+  timestamp,
+  department
 }) => {
   // Génération d'une couleur basée sur le département
-  const getDepartmentColor = (dept: string) => {
+  const getDepartmentColor = (dept: string = "") => {
     const colors: Record<string, string> = {
       "IT": "bg-blue-100 text-blue-800",
       "RH": "bg-green-100 text-green-800",
@@ -34,21 +32,22 @@ export const OverviewActivityCard: React.FC<OverviewActivityCardProps> = ({
   return (
     <div className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
       <div className="flex justify-between items-start mb-1">
-        <span className="font-medium text-sm">{user}</span>
-        <span className="text-xs text-muted-foreground">{time}</span>
+        <span className="font-medium text-sm">{type}</span>
+        <span className="text-xs text-muted-foreground">{timestamp}</span>
       </div>
       <p className="text-sm text-muted-foreground mb-2">
-        <span>{action}</span>{" "}
-        <span className="font-medium text-foreground">{target}</span>
+        {message}
       </p>
-      <div className="flex items-center justify-between">
-        <span className={cn(
-          "inline-block text-xs px-2 py-1 rounded-full",
-          getDepartmentColor(department)
-        )}>
-          {department}
-        </span>
-      </div>
+      {department && (
+        <div className="flex items-center justify-between">
+          <span className={cn(
+            "inline-block text-xs px-2 py-1 rounded-full",
+            getDepartmentColor(department)
+          )}>
+            {department}
+          </span>
+        </div>
+      )}
     </div>
   );
 };
