@@ -2,10 +2,19 @@
 import * as authService from './authService';
 import { clearUserCache } from './authUtils';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Timeout constants for logout process
 export const LOGOUT_TIMEOUT = 5000; // 5 seconds timeout for logout
 export const CACHE_CLEAR_DELAY = 100; // Small delay before cache clearing
+
+// Flag to prevent navigation loops
+let isLogoutInProgress = false;
+
+// Function to reset the logout flag (useful for tests and error recovery)
+export const resetLogoutStatus = () => {
+  isLogoutInProgress = false;
+};
 
 // Improved logout function with timeout and better error handling
 export const executeLogout = async (
@@ -15,6 +24,14 @@ export const executeLogout = async (
   callback?: () => void
 ) => {
   console.log("🔄 Début du processus de déconnexion");
+  
+  // Prevent multiple logout attempts
+  if (isLogoutInProgress) {
+    console.log("⚠️ Déconnexion déjà en cours, ignorée");
+    return;
+  }
+  
+  isLogoutInProgress = true;
   
   try {
     // First, clear any local user state before calling Supabase logout
@@ -46,6 +63,17 @@ export const executeLogout = async (
         console.error("⚠️ Erreur lors de la déconnexion, forçage de la fin de session:", error);
       } finally {
         clearTimeout(timeoutId);
+        
+        // Force delete local storage Supabase tokens
+        try {
+          const authToken = localStorage.getItem('sb-iigenwvxvvfoywrhbwms-auth-token');
+          if (authToken) {
+            console.log("🗑️ Suppression manuelle du token d'authentification");
+            localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
+          }
+        } catch (e) {
+          console.error("❌ Erreur lors de la suppression du token:", e);
+        }
         
         // Clear cache after a small delay to ensure it doesn't interfere with logout
         setTimeout(() => {
@@ -82,5 +110,10 @@ export const executeLogout = async (
   } finally {
     setIsLoggingOut(false);
     console.log("🔄 Processus de déconnexion terminé");
+    
+    // Reset the logout flag after a short delay
+    setTimeout(() => {
+      isLogoutInProgress = false;
+    }, 500);
   }
 };

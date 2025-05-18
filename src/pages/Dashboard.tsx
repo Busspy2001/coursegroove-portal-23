@@ -1,9 +1,10 @@
 
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { motion } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import { isLogoutActive } from "@/integrations/supabase/client";
 
 // Components
 import StudentDashboard from "./StudentDashboard";
@@ -12,10 +13,18 @@ import { Layout } from "@/components/layout/Layout";
 const Dashboard = () => {
   const { currentUser, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check authentication
   useEffect(() => {
     if (isLoading) return;
+
+    // Si une déconnexion est active, rediriger vers la page de connexion
+    if (isLogoutActive) {
+      console.log("🚫 Dashboard: Accès au tableau de bord avec déconnexion active, redirection vers la page de connexion");
+      navigate("/login?logout=true", { replace: true });
+      return;
+    }
 
     if (!isAuthenticated || !currentUser) {
       toast({
@@ -33,9 +42,15 @@ const Dashboard = () => {
     } else if (currentUser.role === "super_admin" || currentUser.role === "admin") {
       navigate("/admin", { replace: true });
     } else if (currentUser.role === "business_admin") {
-      navigate("/entreprise", { replace: true });
+      // Vérifier que nous ne sommes pas dans un cycle de redirection post-déconnexion
+      if (!location.search.includes('logout=true')) {
+        navigate("/entreprise", { replace: true });
+      } else {
+        console.log("🚫 Redirection bloquée vers /entreprise car déconnexion active");
+        navigate("/login?logout=true", { replace: true });
+      }
     }
-  }, [currentUser, isAuthenticated, isLoading, navigate]);
+  }, [currentUser, isAuthenticated, isLoading, navigate, location]);
 
   // Show loading state
   if (isLoading || !isAuthenticated || !currentUser) {

@@ -6,9 +6,6 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://iigenwvxvvfoywrhbwms.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ2Vud3Z4dnZmb3l3cmhid21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MDU0MTksImV4cCI6MjA2MjI4MTQxOX0.oRO2co015e5tiMIB3TtVlOliEv8eSBibUvhl8nrZyf8";
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
@@ -20,6 +17,31 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
+// Flag to track logout status to prevent automatic reconnection
+export let isLogoutActive = false;
+
+export const setLogoutActive = (status: boolean) => {
+  isLogoutActive = status;
+  
+  // Store the logout status in sessionStorage to persist across page navigation
+  try {
+    if (typeof window !== 'undefined') {
+      if (status) {
+        sessionStorage.setItem('logoutActive', 'true');
+      } else {
+        sessionStorage.removeItem('logoutActive');
+      }
+    }
+  } catch (e) {
+    console.error("Error managing logout status in sessionStorage:", e);
+  }
+};
+
+// Check if there's a stored logout status on initialization
+if (typeof window !== 'undefined') {
+  isLogoutActive = sessionStorage.getItem('logoutActive') === 'true';
+}
+
 // Cache for user data - prevents repeated database calls
 export const userCache = new Map();
 
@@ -27,6 +49,22 @@ export const userCache = new Map();
 export const clearUserCache = () => {
   console.log("🗑️ Nettoyage du cache utilisateur");
   userCache.clear();
+  
+  // Also clear any auth-related items from localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      // Liste des clés potentiellement liées à l'authentification
+      const authKeys = ['supabase.auth.token', 'sb-iigenwvxvvfoywrhbwms-auth-token'];
+      authKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.log(`Suppression de ${key} du localStorage`);
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      console.error("Erreur lors du nettoyage du localStorage:", e);
+    }
+  }
 };
 
 // Expose admin methods for demo purposes - this is for demo accounts only
@@ -65,7 +103,7 @@ if (typeof window !== 'undefined') {
     // Utilisation de la méthode standard de déconnexion pour assurer la cohérence
     signOut: async () => {
       console.log("Admin signOut called - utilisation de la méthode standard de déconnexion");
-      return await supabase.auth.signOut();
+      return await supabase.auth.signOut({ scope: 'global' });
     }
   };
 }

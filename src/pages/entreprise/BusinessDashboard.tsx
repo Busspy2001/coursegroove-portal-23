@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
 import BusinessOverview from "@/components/entreprise-dashboard/overview/BusinessOverview";
@@ -12,9 +12,20 @@ import BusinessSettings from "@/components/entreprise-dashboard/settings/Busines
 import BusinessBilling from "@/components/entreprise-dashboard/billing/BusinessBilling";
 import { toast } from "@/hooks/use-toast";
 import { UserRole } from "@/contexts/auth/types";
+import { isLogoutActive } from "@/integrations/supabase/client";
 
 const BusinessDashboard = () => {
   const { currentUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Vérifier l'état de déconnexion
+  useEffect(() => {
+    if (isLogoutActive || location.search.includes('logout=true')) {
+      console.log("🚫 BusinessDashboard: Accès au tableau de bord entreprise avec déconnexion active, redirection vers la page de connexion");
+      navigate("/login?logout=true", { replace: true });
+    }
+  }, [location, navigate]);
   
   // Modification pour autoriser l'accès aux comptes de démo ou aux administrateurs d'entreprise
   const isAllowedRole = currentUser?.role === "business_admin" || 
@@ -22,7 +33,11 @@ const BusinessDashboard = () => {
                        currentUser?.role === "super_admin" || 
                        currentUser?.is_demo === true;
   
-  // Vérifier si l'utilisateur a un rôle autorisé
+  // Vérifier si l'utilisateur a un rôle autorisé et qu'il n'y a pas de déconnexion active
+  if (isLogoutActive) {
+    return <Navigate to="/login?logout=true" replace />;
+  }
+  
   if (!currentUser || !isAllowedRole) {
     toast({
       title: "Accès refusé",

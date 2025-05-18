@@ -3,10 +3,11 @@ import React, { useState, useEffect, ReactNode } from 'react';
 import { User } from './types';
 import * as authService from './authService';
 import { clearUserCache } from './authUtils';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, setLogoutActive, isLogoutActive } from '@/integrations/supabase/client';
 import { AuthContext } from './context';
 import { executeLogout } from './logout';
 import { handleLogin, handleLoginWithDemo, handleRegister, handleResetPassword } from './auth-functions';
+import { useLocation } from 'react-router-dom';
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -15,12 +16,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const location = useLocation();
+
+  // Check for logout parameter in URL
+  useEffect(() => {
+    // Si l'URL contient ?logout=true, marquer l'état de déconnexion
+    if (location.search.includes('logout=true')) {
+      console.log("📍 Paramètre de déconnexion détecté dans l'URL, blocage de la reconnexion automatique");
+      setLogoutActive(true);
+      // Vérifier si l'utilisateur est encore authentifié et forcer la déconnexion si nécessaire
+      if (isAuthenticated && currentUser) {
+        console.log("🔐 Utilisateur toujours authentifié après redirection, forçage de la déconnexion");
+        logout();
+      }
+    } else if (isLogoutActive) {
+      // Réinitialiser le statut de déconnexion si on navigue sur une autre page (sauf login)
+      if (!location.pathname.includes('/login')) {
+        console.log("📍 Navigation vers une page non-login, réinitialisation du statut de déconnexion");
+        setLogoutActive(false);
+      }
+    }
+  }, [location, isAuthenticated, currentUser]);
 
   // Check if the user is authenticated on component mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
+        
+        // Skip auth check if logout is active
+        if (isLogoutActive) {
+          console.log("🛑 État de déconnexion actif, vérification d'authentification ignorée");
+          setCurrentUser(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+        
         const user = await authService.getCurrentUser();
         if (user) {
           setCurrentUser(user);
@@ -39,9 +71,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         console.log("🔄 Changement d'état d'authentification:", event);
         
+        // Si un logout est actif, ignorer les événements de session
+        if (isLogoutActive && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          console.log("🛑 Blocage de la reconnexion automatique car déconnexion active");
+          
+          // Force logout if a session is detected while logout is active
+          if (session) {
+            console.log("⚠️ Session détectée pendant la déconnexion active, forçage de la déconnexion");
+            setTimeout(() => {
+              supabase.auth.signOut({ scope: 'global' }).then(() => {
+                clearUserCache();
+              });
+            }, 0);
+          }
+          
+          setCurrentUser(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+        
         // Using setTimeout to prevent infinite recursion with RLS policies
         setTimeout(async () => {
-          if (session) {
+          if (session && event !== 'SIGNED_OUT') {
             const user = await authService.getCurrentUser();
             if (user) {
               setCurrentUser(user);
@@ -69,16 +121,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Login function
   const login = async (email: string, password: string, callback?: () => void) => {
+    // Reset logout status when logging in
+    setLogoutActive(false);
     return handleLogin(email, password, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
   };
 
   // Login with demo account
   const loginWithDemo = async (account: any, callback?: () => void) => {
+    // Reset logout status when logging in
+    setLogoutActive(false);
     return handleLoginWithDemo(account, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
   };
 
   // Register function
   const register = async (email: string, password: string, name: string, callback?: () => void) => {
+    // Reset logout status when registering
+    setLogoutActive(false);
     return handleRegister(email, password, name, setCurrentUser, setIsAuthenticated, callback);
   };
 
@@ -89,6 +147,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    // Activer le drapeau de déconnexion
+    setLogoutActive(true);
     setIsLoggingOut(true);
     return executeLogout(setCurrentUser, setIsAuthenticated, setIsLoggingOut, callback);
   };
