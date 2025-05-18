@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -108,7 +107,96 @@ const BusinessEmployees = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const company = await fetchCompanyData();
+        // First check if the user is a demo account
+        const isDemo = currentUser?.is_demo === true;
+        
+        // Get company data - handle both regular and demo accounts
+        let company;
+        
+        if (isDemo) {
+          // For demo accounts, we need to make sure the company exists
+          // and is correctly associated with the user
+          const { data: companyDataForDemo } = await supabase
+            .from('companies')
+            .select('*')
+            .eq('admin_id', currentUser?.id)
+            .maybeSingle();
+          
+          if (companyDataForDemo) {
+            company = companyDataForDemo;
+          } else {
+            // If no company found, try to create one for the demo user
+            const { data: newCompany, error: companyError } = await supabase
+              .from('companies')
+              .insert({
+                name: `Entreprise de ${currentUser?.full_name || currentUser?.name || 'Demo'}`,
+                admin_id: currentUser?.id
+              })
+              .select()
+              .single();
+              
+            if (!companyError && newCompany) {
+              company = newCompany;
+              
+              // Update the user with the company ID
+              await supabase
+                .from('profiles_unified')
+                .update({ company_id: newCompany.id })
+                .eq('id', currentUser?.id);
+                
+              // Create default departments
+              const deptNames = ['Marketing', 'IT', 'RH', 'Ventes'];
+              for (const name of deptNames) {
+                await supabase
+                  .from('company_departments')
+                  .insert({
+                    name,
+                    description: `Département ${name}`,
+                    company_id: newCompany.id
+                  });
+              }
+              
+              // Add some demo employees
+              const demoEmployees = [
+                { name: 'Sophie Martin', email: 'sophie.martin@demo.com', dept: 'Marketing', role: 'Responsable' },
+                { name: 'Thomas Dubois', email: 'thomas.dubois@demo.com', dept: 'IT', role: 'Développeur' },
+                { name: 'Julie Leclerc', email: 'julie.leclerc@demo.com', dept: 'Finance', role: 'Comptable' }
+              ];
+              
+              for (const emp of demoEmployees) {
+                const { data: newProfile } = await supabase
+                  .from('profiles_unified')
+                  .insert({
+                    id: crypto.randomUUID(),
+                    full_name: emp.name,
+                    email: emp.email,
+                    role: 'employee',
+                    is_demo: true,
+                    company_id: newCompany.id
+                  })
+                  .select()
+                  .single();
+                  
+                if (newProfile) {
+                  // Add to company_employees
+                  await supabase
+                    .from('company_employees')
+                    .insert({
+                      company_id: newCompany.id,
+                      employee_id: newProfile.id,
+                      job_title: emp.role,
+                      status: 'active'
+                    });
+                }
+              }
+            }
+          }
+        } else {
+          // For real users, just fetch their company data
+          const fetchedCompany = await fetchCompanyData();
+          company = fetchedCompany;
+        }
+        
         setCompanyData(company);
         
         if (company) {
@@ -131,7 +219,7 @@ const BusinessEmployees = () => {
     };
     
     loadData();
-  }, []);
+  }, [currentUser]);
   
   const openAddDialog = () => {
     setCurrentEmployee({});

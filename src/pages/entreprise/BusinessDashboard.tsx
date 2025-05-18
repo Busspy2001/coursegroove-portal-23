@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -19,7 +18,7 @@ const BusinessDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Vérifier l'état de déconnexion
+  // Check logout state
   useEffect(() => {
     if (isLogoutActive || location.search.includes('logout=true')) {
       console.log("🚫 BusinessDashboard: Accès au tableau de bord entreprise avec déconnexion active, redirection vers la page de connexion");
@@ -27,18 +26,28 @@ const BusinessDashboard = () => {
     }
   }, [location, navigate]);
   
-  // Modification pour autoriser l'accès aux comptes de démo ou aux administrateurs d'entreprise
-  const isAllowedRole = currentUser?.role === "business_admin" || 
-                       currentUser?.role === "admin" || 
-                       currentUser?.role === "super_admin" || 
-                       currentUser?.is_demo === true;
+  // Modified to allow access to demo accounts or business admins
+  const isAllowedRole = (role?: UserRole, isDemo?: boolean): boolean => {
+    // Always allow business_admin role
+    if (role === "business_admin") return true;
+    
+    // Allow demo accounts regardless of role
+    if (isDemo === true) return true;
+    
+    // Allow super admins and regular admins
+    if (role === "admin" || role === "super_admin") return true;
+    
+    // Otherwise, deny access
+    return false;
+  };
   
-  // Vérifier si l'utilisateur a un rôle autorisé et qu'il n'y a pas de déconnexion active
+  // Check if the user has permission and is not in logout process
   if (isLogoutActive) {
     return <Navigate to="/login?logout=true" replace />;
   }
   
-  if (!currentUser || !isAllowedRole) {
+  // Using the improved permission check
+  if (!currentUser || !isAllowedRole(currentUser.role, currentUser.is_demo)) {
     toast({
       title: "Accès refusé",
       description: "Vous devez être connecté en tant qu'administrateur d'entreprise pour accéder à ce tableau de bord.",

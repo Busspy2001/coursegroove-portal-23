@@ -1,191 +1,215 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { getDemoAccounts } from "./demoAccountService";
-import { toast } from "@/hooks/use-toast";
-import { DemoAccount } from "./types";
 
-// Diagnostic log helper
-const logDemoAccountStatus = async () => {
-  try {
-    // Check how many demo accounts exist in profiles_unified
-    const { data: profiles, error: profileError } = await supabase
-      .from('profiles_unified')
-      .select('email, role, is_demo')
-      .eq('is_demo', true);
-    
-    if (profileError) {
-      console.error("❌ Erreur lors de la vérification des profils:", profileError);
-      return;
-    }
-    
-    console.log(`📊 Statut des comptes démo: ${profiles?.length || 0} comptes trouvés dans profiles_unified`);
-    
-    if (profiles && profiles.length > 0) {
-      // Log each profile for debugging
-      profiles.forEach(profile => {
-        console.log(`  - ${profile.email} (${profile.role})`);
-      });
-    }
-  } catch (error) {
-    console.error("❌ Erreur lors du diagnostic des comptes démo:", error);
+export interface DemoAccount {
+  email: string;
+  password: string;
+  role: string;
+  name: string;
+  avatar?: string;
+  description?: string;
+}
+
+// List of demo accounts
+export const demoAccounts: DemoAccount[] = [
+  {
+    email: "etudiant@schoolier.com",
+    password: "demo123",
+    role: "student",
+    name: "Marie Martin",
+    description: "Compte étudiant"
+  },
+  {
+    email: "prof@schoolier.com",
+    password: "demo123",
+    role: "instructor",
+    name: "Jean Dupont",
+    description: "Compte formateur"
+  },
+  {
+    email: "admin@schoolier.com",
+    password: "demo123",
+    role: "admin",
+    name: "Admin Système",
+    description: "Compte administrateur"
+  },
+  {
+    email: "entreprise@schoolier.com",
+    password: "demo123",
+    role: "business_admin",
+    name: "Thomas Durand",
+    description: "Compte entreprise"
+  },
+  {
+    email: "business@schoolier.com",
+    password: "demo123",
+    role: "business_admin",
+    name: "Sophie Leroy",
+    description: "Compte entreprise"
+  },
+  {
+    email: "employee@schoolier.com",
+    password: "demo123",
+    role: "employee",
+    name: "Pierre Martin",
+    description: "Compte employé"
   }
+];
+
+export const isDemoAccount = (email: string): boolean => {
+  return demoAccounts.some(account => account.email.toLowerCase() === email.toLowerCase());
 };
 
-/**
- * Crée ou met à jour les comptes de démonstration dans la base de données Supabase
- * Cette fonction s'assure que les comptes démo sont toujours disponibles
- */
-export const initDemoAccounts = async (): Promise<boolean> => {
+// Make sure the demo accounts exist in the database
+export const ensureDemoAccountsExist = async (): Promise<void> => {
   try {
-    console.log("🚀 Initialisation des comptes démo...");
-    const demoAccounts = getDemoAccounts();
-    let successCount = 0;
-    let errorCount = 0;
-
-    // Vérifier d'abord la connexion à Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      console.log("⏭️ L'utilisateur est déjà connecté, pas besoin d'initialiser les comptes démo");
-      return true;
-    }
-
-    // Log initial diagnostic
-    await logDemoAccountStatus();
-    
-    // Créer ou mettre à jour chaque compte démo
     for (const account of demoAccounts) {
-      try {
-        // Vérifier si le compte existe déjà via la table profiles_unified (méthode plus fiable)
-        const { data: profiles, error: profileError } = await supabase
+      // Check if account exists
+      const { data: existingUser } = await supabase
+        .from('profiles_unified')
+        .select('id, email, role, is_demo')
+        .eq('email', account.email)
+        .single();
+
+      // If account doesn't exist or needs updating
+      if (!existingUser) {
+        console.log(`Creating demo account for ${account.email}`);
+        
+        // For simplicity in a demo, we're directly creating entries in profiles_unified
+        // In a real app, we would create auth users properly
+        const { data, error } = await supabase
           .from('profiles_unified')
-          .select('id, email, is_demo, role')
-          .eq('email', account.email)
-          .limit(1);
+          .insert({
+            id: crypto.randomUUID(), // Generate a random UUID
+            email: account.email,
+            full_name: account.name,
+            role: account.role,
+            is_demo: true,
+            avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
+          })
+          .select();
           
-        const profileExists = profiles && profiles.length > 0;
-        
-        if (profileError) {
-          console.warn(`⚠️ Impossible de vérifier le profil pour ${account.email}: ${profileError.message}`);
-        }
-        
-        // Si le profil existe, vérifier et mettre à jour si nécessaire
-        if (profileExists) {
-          const existingProfile = profiles[0];
-          console.log(`ℹ️ Le compte démo ${account.email} existe déjà (${existingProfile.role})`);
-          
-          // Vérifier si le profil a les bonnes propriétés
-          if (existingProfile.role !== account.role || existingProfile.is_demo !== true) {
-            console.log(`🔄 Mise à jour des propriétés pour ${account.email}`);
-            
-            // Mettre à jour les propriétés
-            const { error: updateError } = await supabase
-              .from('profiles_unified')
-              .update({
-                role: account.role,
-                is_demo: true,
-                avatar_url: account.avatar
-              })
-              .eq('id', existingProfile.id);
-              
-            if (updateError) {
-              console.error(`❌ Erreur lors de la mise à jour du profil ${account.email}:`, updateError);
-              errorCount++;
-            } else {
-              console.log(`✅ Profil mis à jour pour ${account.email}`);
-              successCount++;
-            }
-          }
-          
-          continue;
-        }
-
-        // Si le compte n'existe pas, on le crée
-        console.log(`➕ Création du compte démo: ${account.email} (${account.role})`);
-        
-        // Créer le compte via signUp
-        const { data, error } = await supabase.auth.signUp({
-          email: account.email,
-          password: account.password,
-          options: {
-            data: {
-              name: account.name,
-              full_name: account.name,
-              role: account.role,
-              avatar_url: account.avatar,
-              is_demo: true
-            }
-          }
-        });
-
         if (error) {
-          console.error(`❌ Erreur lors de la création du compte démo ${account.email}:`, error);
-          errorCount++;
-          continue;
+          console.error(`Error creating demo account for ${account.email}:`, error);
+        } else if (data && data[0]) {
+          console.log(`Demo account created for ${account.email}`);
+          
+          // If it's a business admin, create a company for them
+          if (account.role === 'business_admin') {
+            const { data: companyData, error: companyError } = await supabase
+              .from('companies')
+              .insert({
+                name: `Entreprise de ${account.name}`,
+                admin_id: data[0].id
+              })
+              .select();
+              
+            if (companyError) {
+              console.error(`Error creating company for ${account.email}:`, companyError);
+            } else if (companyData && companyData[0]) {
+              // Update the user with the company ID
+              await supabase
+                .from('profiles_unified')
+                .update({ company_id: companyData[0].id })
+                .eq('id', data[0].id);
+                
+              // Create some departments
+              const departments = [
+                { name: 'Marketing', description: 'Département marketing' },
+                { name: 'IT', description: 'Département informatique' },
+                { name: 'RH', description: 'Ressources Humaines' }
+              ];
+              
+              for (const dept of departments) {
+                await supabase
+                  .from('company_departments')
+                  .insert({
+                    name: dept.name,
+                    description: dept.description,
+                    company_id: companyData[0].id,
+                    position: departments.indexOf(dept) + 1
+                  });
+              }
+            }
+          }
         }
-
-        console.log(`✅ Compte démo créé pour ${account.email}`);
-        successCount++;
-      } catch (error) {
-        console.error(`❌ Erreur lors du traitement du compte ${account.email}:`, error);
-        errorCount++;
+      } else if (existingUser && (!existingUser.is_demo || existingUser.role !== account.role)) {
+        // Update the existing account with correct demo status and role
+        await supabase
+          .from('profiles_unified')
+          .update({
+            is_demo: true,
+            role: account.role
+          })
+          .eq('id', existingUser.id);
+          
+        console.log(`Updated demo status for ${account.email}`);
       }
     }
-
-    // Final diagnostic log
-    await logDemoAccountStatus();
     
-    const success = errorCount === 0;
-    console.log(`✅ Initialisation des comptes démo: ${successCount} réussis, ${errorCount} échoués`);
-    return success;
+    // Ensure employee@schoolier.com is associated with a company
+    await associateEmployeeWithCompany();
+    
   } catch (error) {
-    console.error("❌ Erreur lors de l'initialisation des comptes démo:", error);
-    return false;
+    console.error("Error ensuring demo accounts exist:", error);
   }
 };
 
-/**
- * Appelle initDemoAccounts avec gestion des erreurs et notification
- * Cette version est modifiée pour ne pas essayer d'auto-connecter les comptes démo
- */
-export const ensureDemoAccountsExist = async (silent: boolean = true): Promise<void> => {
+// Helper function to associate the employee demo account with a company
+const associateEmployeeWithCompany = async () => {
   try {
-    // First check if user is already logged in - don't create accounts if so
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    // Only initialize demo accounts if we're on the login or register page
-    // This prevents auto-initialization on page refresh after logout
-    const isAuthPage = window.location.pathname.includes('/login') || 
-                       window.location.pathname.includes('/register') ||
-                       window.location.pathname.includes('/auth');
-    
-    if (!session && isAuthPage) {
-      const success = await initDemoAccounts();
+    // Get the employee account
+    const { data: employee } = await supabase
+      .from('profiles_unified')
+      .select('id')
+      .eq('email', 'employee@schoolier.com')
+      .single();
       
-      if (!silent) {
-        if (success) {
-          toast({
-            title: "Comptes démo initialisés",
-            description: "Les comptes de démonstration sont prêts à être utilisés.",
-          });
-        } else {
-          toast({
-            title: "Initialisation partielle",
-            description: "Certains comptes démo n'ont pas pu être initialisés.",
-            variant: "destructive",
-          });
-        }
-      }
-    } else {
-      console.log("⏭️ Initialisation des comptes démo ignorée - utilisateur déjà connecté ou page non pertinente");
+    if (!employee) return;
+    
+    // Get a business admin account
+    const { data: businessAdmin } = await supabase
+      .from('profiles_unified')
+      .select('id, company_id')
+      .eq('email', 'business@schoolier.com')
+      .single();
+      
+    if (!businessAdmin || !businessAdmin.company_id) return;
+    
+    // Update employee with company_id
+    await supabase
+      .from('profiles_unified')
+      .update({ company_id: businessAdmin.company_id })
+      .eq('id', employee.id);
+      
+    // Check if employee is already in company_employees
+    const { data: existingRelation } = await supabase
+      .from('company_employees')
+      .select('id')
+      .eq('employee_id', employee.id)
+      .maybeSingle();
+      
+    if (!existingRelation) {
+      // Get IT department
+      const { data: itDept } = await supabase
+        .from('company_departments')
+        .select('id')
+        .eq('company_id', businessAdmin.company_id)
+        .eq('name', 'IT')
+        .maybeSingle();
+        
+      // Add to company_employees
+      await supabase
+        .from('company_employees')
+        .insert({
+          company_id: businessAdmin.company_id,
+          employee_id: employee.id,
+          job_title: 'Développeur Web',
+          department_id: itDept?.id || null,
+          status: 'active'
+        });
     }
   } catch (error) {
-    console.error("Erreur lors de l'initialisation des comptes démo:", error);
-    if (!silent) {
-      toast({
-        title: "Erreur d'initialisation",
-        description: "Impossible d'initialiser les comptes démo.",
-        variant: "destructive",
-      });
-    }
+    console.error("Error associating employee with company:", error);
   }
 };

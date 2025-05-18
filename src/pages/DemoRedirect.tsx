@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 
 // This component handles intelligent redirection for demo accounts
 const DemoRedirect = () => {
@@ -12,6 +13,9 @@ const DemoRedirect = () => {
   const location = useLocation();
   
   useEffect(() => {
+    // First, ensure demo accounts are properly set up
+    ensureDemoAccountsExist();
+    
     // Allow a small delay for authentication state to stabilize
     const redirectTimer = setTimeout(() => {
       if (isLoading) {
@@ -57,8 +61,23 @@ const DemoRedirect = () => {
           navigate("/employee", { replace: true });
           break;
         default:
-          console.warn(`⚠️ Rôle non reconnu: ${currentUser.role}, redirection vers le tableau de bord par défaut`);
-          navigate("/dashboard", { replace: true });
+          // If the user has is_demo flag, try to route them based on email
+          if (currentUser.is_demo) {
+            const email = currentUser.email?.toLowerCase();
+            if (email?.includes('business') || email?.includes('entreprise')) {
+              console.log("🏢 Redirection d'un utilisateur demo vers le tableau de bord entreprise");
+              navigate("/entreprise", { replace: true });
+            } else if (email?.includes('employee')) {
+              console.log("👔 Redirection d'un utilisateur demo vers le tableau de bord employé");
+              navigate("/employee", { replace: true });
+            } else {
+              console.log("🏫 Redirection par défaut vers le tableau de bord étudiant");
+              navigate("/dashboard", { replace: true });
+            }
+          } else {
+            console.warn(`⚠️ Rôle non reconnu: ${currentUser.role}, redirection vers le tableau de bord par défaut`);
+            navigate("/dashboard", { replace: true });
+          }
       }
     }, 500); // Small delay to ensure authentication state is ready
     

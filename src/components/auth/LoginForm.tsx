@@ -42,7 +42,12 @@ const LoginForm = ({ profileType }: LoginFormProps) => {
     
     try {
       const user = await login(email, password, () => {
-        // Success handling moved to the callback for better async control
+        toast({
+          title: "Connexion réussie",
+          description: "Redirection vers votre tableau de bord...",
+        });
+        
+        // Route based on URL or use smart redirect
         if (searchParams.get("redirect")) {
           navigate(searchParams.get("redirect") as string);
         } else {
@@ -55,6 +60,12 @@ const LoginForm = ({ profileType }: LoginFormProps) => {
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Une erreur s'est produite lors de la connexion.");
+      
+      toast({
+        title: "Erreur de connexion",
+        description: err.message || "Vérifiez vos identifiants et réessayez.",
+        variant: "destructive",
+      });
     } finally {
       setLocalLoading(false);
     }
