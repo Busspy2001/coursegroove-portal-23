@@ -1,152 +1,339 @@
 
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, BookOpen, Award, Building2 } from "lucide-react";
-import { OverviewMetricCard } from "./OverviewMetricCard";
-import { OverviewActivityCard } from "./OverviewActivityCard";
-import { OverviewChart } from "./OverviewChart";
-
-interface MetricCardProps {
-  title: string;
-  value: string;
-  change: string;
-  changeType: "positive" | "negative" | "neutral";
-  icon: React.ElementType;
-}
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
+import { 
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowRight,
+  BarChart3,
+  Briefcase,
+  Calendar,
+  GraduationCap,
+  Layers,
+  MoreHorizontal,
+  Plus,
+  Settings,
+  Upload,
+  User,
+  Users
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/hooks/use-toast";
+import OverviewMetricCard from "./OverviewMetricCard";
+import OverviewChart from "./OverviewChart";
+import OverviewActivityCard from "./OverviewActivityCard";
+import { fetchCompanyData, fetchBusinessStatistics, BusinessStatistics } from "@/services/supabase-business-data";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const BusinessOverview = () => {
-  // Données fictives pour l'affichage
-  const metrics: MetricCardProps[] = [
-    {
-      title: "Employés formés",
-      value: "124",
-      change: "+12%",
-      changeType: "positive",
-      icon: Users
-    },
-    {
-      title: "Heures de formation",
-      value: "1,420",
-      change: "+5%",
-      changeType: "positive",
-      icon: Clock
-    },
-    {
-      title: "Formations actives",
-      value: "32",
-      change: "-3",
-      changeType: "negative",
-      icon: BookOpen
-    },
-    {
-      title: "Certifications obtenues",
-      value: "87",
-      change: "+15",
-      changeType: "positive",
-      icon: Award
-    }
-  ];
-
-  // Activités récentes (fictives)
-  const recentActivities = [
-    {
-      id: "1",
-      user: "Sophie Martin",
-      action: "a terminé",
-      target: "Introduction à la cybersécurité",
-      department: "IT",
-      time: "Il y a 2 heures"
-    },
-    {
-      id: "2",
-      user: "Thomas Dubois",
-      action: "s'est inscrit à",
-      target: "Leadership et management d'équipe",
-      department: "RH",
-      time: "Il y a 3 heures"
-    },
-    {
-      id: "3",
-      user: "Julie Leclerc",
-      action: "a obtenu la certification",
-      target: "Excel avancé",
-      department: "Finance",
-      time: "Il y a 5 heures"
-    },
-    {
-      id: "4",
-      user: "Philippe Moreau",
-      action: "a commencé",
-      target: "Communication efficace en entreprise",
-      department: "Marketing",
-      time: "Il y a 8 heures"
-    }
-  ];
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [companyData, setCompanyData] = useState<any>(null);
+  const [stats, setStats] = useState<BusinessStatistics | null>(null);
+  
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const company = await fetchCompanyData();
+        setCompanyData(company);
+        
+        if (company) {
+          const statistics = await fetchBusinessStatistics(company.id);
+          setStats(statistics);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les données du tableau de bord.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+  
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
+  
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+        
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+  
+  if (!companyData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 space-y-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-lg w-full text-center space-y-4">
+          <div className="mx-auto bg-amber-100 rounded-full p-3 w-fit">
+            <Briefcase className="h-8 w-8 text-amber-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-amber-800">Aucune entreprise associée</h2>
+          <p className="text-amber-700">
+            Vous n'avez pas encore d'entreprise configurée dans votre compte.
+            Veuillez contacter un administrateur pour configurer votre espace entreprise.
+          </p>
+          <div className="pt-4">
+            <Button variant="outline" onClick={() => navigate("/contact")}>
+              Contacter le support
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
-        <p className="text-muted-foreground">Bienvenue sur votre espace entreprise.</p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Tableau de bord</h1>
+          <p className="text-muted-foreground">
+            Bienvenue dans votre espace entreprise, {currentUser?.full_name || "Administrator"}
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            className="hidden md:flex"
+            onClick={() => navigate("/entreprise/parametres")}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Paramètres
+          </Button>
+          <Button onClick={() => navigate("/entreprise/formations/ajouter")}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle formation
+          </Button>
+        </div>
       </div>
-
+      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((metric, index) => (
-          <OverviewMetricCard key={index} {...metric} />
-        ))}
+        <OverviewMetricCard
+          title="Employés"
+          value={stats?.total_employees || 0}
+          description="employés actifs"
+          icon={<Users className="h-4 w-4 text-muted-foreground" />}
+          trend={{
+            value: "+5%",
+            positive: true
+          }}
+          onClick={() => navigate('/entreprise/employes')}
+        />
+        <OverviewMetricCard
+          title="Départements"
+          value={stats?.departments_count || 0}
+          description="départements"
+          icon={<Layers className="h-4 w-4 text-muted-foreground" />}
+          trend={{
+            value: "",
+            positive: true
+          }}
+          onClick={() => navigate('/entreprise/departements')}
+        />
+        <OverviewMetricCard
+          title="Formations"
+          value={stats?.active_courses || 0}
+          description="formations disponibles"
+          icon={<GraduationCap className="h-4 w-4 text-muted-foreground" />}
+          trend={{
+            value: "+2",
+            positive: true
+          }}
+          onClick={() => navigate('/entreprise/formations')}
+        />
+        <OverviewMetricCard
+          title="Taux complétion"
+          value={`${stats?.completion_rate || 0}%`}
+          description="formations complétées"
+          icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+          trend={{
+            value: "+10%",
+            positive: true
+          }}
+          onClick={() => navigate('/entreprise/statistiques')}
+        />
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-2">
-          <CardHeader>
-            <CardTitle>Progression mensuelle</CardTitle>
-            <CardDescription>Taux de complétion des formations par département</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <OverviewChart />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Activités récentes</CardTitle>
-            <CardDescription>Les dernières actions de vos employés</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <OverviewActivityCard key={activity.id} {...activity} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Départements les plus actifs</CardTitle>
-          <CardDescription>Performance des départements ce mois-ci</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {["Marketing", "IT", "RH", "Finance", "Ventes", "Support"].map((dept, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-lg border p-4">
-                <div className={`rounded-full p-2 ${
-                  ["bg-blue-100", "bg-green-100", "bg-yellow-100", "bg-purple-100", "bg-pink-100", "bg-orange-100"][i % 6]
-                }`}>
-                  <Building2 className={`h-4 w-4 ${
-                    ["text-blue-600", "text-green-600", "text-yellow-600", "text-purple-600", "text-pink-600", "text-orange-600"][i % 6]
-                  }`} />
+      
+      <Tabs defaultValue="activity" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="activity">Activité récente</TabsTrigger>
+          <TabsTrigger value="stats">Statistiques</TabsTrigger>
+          <TabsTrigger value="upcoming">À venir</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="activity" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">
+                    Activité récente
+                  </CardTitle>
+                  <Badge variant="outline" className="font-normal">
+                    Dernières 24h
+                  </Badge>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">{dept}</p>
-                  <p className="text-xs text-muted-foreground">{Math.floor(Math.random() * 50) + 50}% de complétion</p>
+              </CardHeader>
+              <CardContent className="px-2">
+                <div className="space-y-4">
+                  {stats?.recent_activities ? (
+                    stats.recent_activities.map((activity, i) => (
+                      <OverviewActivityCard 
+                        key={i}
+                        type={activity.type}
+                        message={activity.message}
+                        timestamp={activity.date}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-center py-4 text-muted-foreground">
+                      Aucune activité récente
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full" onClick={() => navigate("/entreprise/employes")}>
+                  <span>Voir toutes les activités</span>
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Actions rapides
+                </CardTitle>
+                <CardDescription>
+                  Gérez votre entreprise avec ces actions rapides
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => navigate("/entreprise/employes")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Ajouter un employé</span>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => navigate("/entreprise/formations/ajouter")}
+                >
+                  <GraduationCap className="mr-2 h-4 w-4" />
+                  <span>Créer une formation</span>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => navigate("/entreprise/formations/assigner")}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  <span>Assigner une formation</span>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => navigate("/entreprise/statistiques")}
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  <span>Voir les statistiques</span>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => navigate("/entreprise/facturation")}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Gérer l'abonnement</span>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="stats">
+          <Card>
+            <CardHeader>
+              <CardTitle>Progression des formations</CardTitle>
+              <CardDescription>
+                Suivi des formations assignées et complétées au cours des derniers mois.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-2">
+              <div className="h-[300px]">
+                <OverviewChart />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="upcoming">
+          <Card>
+            <CardHeader>
+              <CardTitle>Formations à venir</CardTitle>
+              <CardDescription>
+                Échéances à venir pour les formations assignées dans votre entreprise.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <div className="p-4">
+                  <div className="flex items-center justify-center h-20">
+                    <p className="text-muted-foreground">
+                      Aucune échéance prochaine pour le moment
+                    </p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full" onClick={() => navigate("/entreprise/formations/assigner")}>
+                Assigner une nouvelle formation
+                <Plus className="ml-2 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
