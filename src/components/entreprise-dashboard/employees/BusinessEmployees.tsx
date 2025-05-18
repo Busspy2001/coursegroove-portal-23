@@ -34,7 +34,8 @@ const BusinessEmployees: React.FC = () => {
     handleAddEmployee,
     handleUpdateEmployee,
     handleDeleteEmployee,
-    handleUpdateEmployeeStatus
+    handleUpdateEmployeeStatus,
+    isDemo
   } = useEmployees();
   
   // Local state for dialogs
@@ -107,7 +108,7 @@ const BusinessEmployees: React.FC = () => {
   
   // No company state
   if (!companyData) {
-    return <NoCompanyMessage onNavigate={navigate} />;
+    return <NoCompanyMessage onNavigate={navigate} isDemoUser={isDemo} />;
   }
 
   return (

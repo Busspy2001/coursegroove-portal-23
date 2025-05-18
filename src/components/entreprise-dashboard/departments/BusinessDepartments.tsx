@@ -76,6 +76,8 @@ import {
   type Department,
   type Employee
 } from "@/services/supabase-business-data";
+import { NoCompanyMessage } from "../employees/components/NoCompanyMessage";
+import { supabase } from "@/integrations/supabase/client";
 
 const BusinessDepartments = () => {
   const { currentUser } = useAuth();
@@ -86,6 +88,7 @@ const BusinessDepartments = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [companyData, setCompanyData] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDemo, setIsDemo] = useState(false);
 
   // État pour la boîte de dialogue d'ajout/modification de département
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -99,15 +102,142 @@ const BusinessDepartments = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const company = await fetchCompanyData();
+        setLoading(true);
+        console.log("Loading department data for user:", currentUser?.email);
+        
+        // Check if user is a demo user
+        const isUserDemo = currentUser?.is_demo === true;
+        setIsDemo(isUserDemo);
+        
+        // Get or create company data
+        let company;
+        
+        if (isUserDemo) {
+          console.log("Demo user detected, checking for existing company");
+          // For demo accounts, check if company exists
+          const { data: companyDataForDemo } = await supabase
+            .from('companies')
+            .select('*')
+            .eq('admin_id', currentUser?.id)
+            .maybeSingle();
+          
+          if (companyDataForDemo) {
+            console.log("Found existing demo company:", companyDataForDemo.name);
+            company = companyDataForDemo;
+          } else {
+            // If no company found, create a demo company for this user
+            console.log("Creating demo company for user:", currentUser?.id);
+            const { data: newCompany, error: companyError } = await supabase
+              .from('companies')
+              .insert({
+                name: `Entreprise de ${currentUser?.full_name || currentUser?.name || 'Demo'}`,
+                admin_id: currentUser?.id
+              })
+              .select()
+              .single();
+              
+            if (companyError) {
+              console.error("Error creating company:", companyError);
+              throw companyError;
+            }
+              
+            if (newCompany) {
+              console.log("Demo company created successfully:", newCompany.name);
+              company = newCompany;
+              
+              // Update the user with the company ID
+              await supabase
+                .from('profiles_unified')
+                .update({ company_id: newCompany.id })
+                .eq('id', currentUser?.id);
+                
+              console.log("User updated with company ID");
+                
+              // Create default departments
+              const deptNames = ['Marketing', 'IT', 'RH', 'Ventes'];
+              console.log("Creating default departments:", deptNames.join(", "));
+              
+              for (const name of deptNames) {
+                await supabase
+                  .from('company_departments')
+                  .insert({
+                    name,
+                    description: `Département ${name}`,
+                    company_id: newCompany.id
+                  });
+              }
+              
+              // Add some demo employees
+              const demoEmployees = [
+                { name: 'Sophie Martin', email: 'sophie.martin@demo.com', dept: 'Marketing', role: 'Responsable' },
+                { name: 'Thomas Dubois', email: 'thomas.dubois@demo.com', dept: 'IT', role: 'Développeur' },
+                { name: 'Julie Leclerc', email: 'julie.leclerc@demo.com', dept: 'Finance', role: 'Comptable' }
+              ];
+              
+              console.log("Creating demo employees:", demoEmployees.map(e => e.name).join(", "));
+              
+              for (const emp of demoEmployees) {
+                const { data: newProfile, error: profileError } = await supabase
+                  .from('profiles_unified')
+                  .insert({
+                    id: crypto.randomUUID(),
+                    full_name: emp.name,
+                    email: emp.email,
+                    role: 'employee' as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo",
+                    is_demo: true,
+                    company_id: newCompany.id
+                  })
+                  .select()
+                  .single();
+                  
+                if (profileError) {
+                  console.error("Error creating employee profile:", profileError);
+                  continue;
+                }
+                  
+                if (newProfile) {
+                  // Get department ID
+                  const { data: dept } = await supabase
+                    .from('company_departments')
+                    .select('id')
+                    .eq('company_id', newCompany.id)
+                    .eq('name', emp.dept)
+                    .maybeSingle();
+                    
+                  // Add to company_employees
+                  await supabase
+                    .from('company_employees')
+                    .insert({
+                      company_id: newCompany.id,
+                      employee_id: newProfile.id,
+                      job_title: emp.role,
+                      department_id: dept?.id,
+                      status: 'active'
+                    });
+                }
+              }
+              
+              console.log("Demo data setup completed");
+            }
+          }
+        } else {
+          // For real users, just fetch their company data
+          company = await fetchCompanyData();
+        }
+        
         setCompanyData(company);
         
         if (company) {
+          console.log("Loading departments and employees for company:", company.id);
           const departmentsData = await fetchDepartments(company.id);
           setDepartments(departmentsData);
           
           const employeesData = await fetchEmployees(company.id);
           setEmployees(employeesData);
+          
+          console.log(`Loaded ${departmentsData.length} departments and ${employeesData.length} employees`);
+        } else {
+          console.log("No company found for this user");
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
@@ -122,7 +252,7 @@ const BusinessDepartments = () => {
     };
     
     loadData();
-  }, []);
+  }, [currentUser]);
   
   const openAddDialog = () => {
     setCurrentDepartment({});
@@ -204,6 +334,11 @@ const BusinessDepartments = () => {
         
         setIsDeleteDialogOpen(false);
         setDepartmentToDelete(null);
+        
+        toast({
+          title: "Département supprimé",
+          description: `Le département ${departmentToDelete.name} a été supprimé avec succès.`,
+        });
       }
     } catch (error) {
       console.error("Erreur:", error);
@@ -262,25 +397,7 @@ const BusinessDepartments = () => {
   }
   
   if (!companyData) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 space-y-4">
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-lg w-full text-center space-y-4">
-          <div className="mx-auto bg-amber-100 rounded-full p-3 w-fit">
-            <Briefcase className="h-8 w-8 text-amber-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-amber-800">Aucune entreprise associée</h2>
-          <p className="text-amber-700">
-            Vous n'avez pas encore d'entreprise configurée dans votre compte.
-            Veuillez contacter un administrateur pour configurer votre espace entreprise.
-          </p>
-          <div className="pt-4">
-            <Button variant="outline" onClick={() => navigate("/contact")}>
-              Contacter le support
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <NoCompanyMessage onNavigate={navigate} isDemoUser={isDemo} />;
   }
   
   return (

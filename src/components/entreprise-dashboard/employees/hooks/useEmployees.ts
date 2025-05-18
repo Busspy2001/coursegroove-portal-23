@@ -28,6 +28,7 @@ interface UseEmployeesResult {
   handleUpdateEmployee: (id: string, employeeData: Partial<Employee>) => Promise<boolean>;
   handleDeleteEmployee: (id: string, name: string) => Promise<boolean>;
   handleUpdateEmployeeStatus: (employee: Employee) => Promise<void>;
+  isDemo: boolean;
 }
 
 export const useEmployees = (): UseEmployeesResult => {
@@ -39,18 +40,23 @@ export const useEmployees = (): UseEmployeesResult => {
   const [companyData, setCompanyData] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [isDemo, setIsDemo] = useState(false);
 
   // Function to load data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Loading employee data for user:", currentUser?.email);
+      
       // First check if the user is a demo account
-      const isDemo = currentUser?.is_demo === true;
+      const isUserDemo = currentUser?.is_demo === true;
+      setIsDemo(isUserDemo);
       
       // Get company data - handle both regular and demo accounts
       let company;
       
-      if (isDemo) {
+      if (isUserDemo) {
+        console.log("Demo user detected, checking for existing company");
         // For demo accounts, we need to make sure the company exists
         // and is correctly associated with the user
         const { data: companyDataForDemo } = await supabase
@@ -60,6 +66,7 @@ export const useEmployees = (): UseEmployeesResult => {
           .maybeSingle();
         
         if (companyDataForDemo) {
+          console.log("Found existing demo company:", companyDataForDemo.name);
           company = companyDataForDemo;
         } else {
           // If no company found, create a demo company for this user
@@ -73,7 +80,13 @@ export const useEmployees = (): UseEmployeesResult => {
             .select()
             .single();
             
-          if (!companyError && newCompany) {
+          if (companyError) {
+            console.error("Error creating company:", companyError);
+            throw companyError;
+          }
+            
+          if (newCompany) {
+            console.log("Demo company created successfully:", newCompany.name);
             company = newCompany;
             
             // Update the user with the company ID
@@ -82,8 +95,12 @@ export const useEmployees = (): UseEmployeesResult => {
               .update({ company_id: newCompany.id })
               .eq('id', currentUser?.id);
               
+            console.log("User updated with company ID");
+              
             // Create default departments
             const deptNames = ['Marketing', 'IT', 'RH', 'Ventes'];
+            console.log("Creating default departments:", deptNames.join(", "));
+            
             for (const name of deptNames) {
               await supabase
                 .from('company_departments')
@@ -101,8 +118,10 @@ export const useEmployees = (): UseEmployeesResult => {
               { name: 'Julie Leclerc', email: 'julie.leclerc@demo.com', dept: 'Finance', role: 'Comptable' }
             ];
             
+            console.log("Creating demo employees:", demoEmployees.map(e => e.name).join(", "));
+            
             for (const emp of demoEmployees) {
-              const { data: newProfile } = await supabase
+              const { data: newProfile, error: profileError } = await supabase
                 .from('profiles_unified')
                 .insert({
                   id: crypto.randomUUID(),
@@ -115,7 +134,20 @@ export const useEmployees = (): UseEmployeesResult => {
                 .select()
                 .single();
                 
+              if (profileError) {
+                console.error("Error creating employee profile:", profileError);
+                continue;
+              }
+                
               if (newProfile) {
+                // Get department ID
+                const { data: dept } = await supabase
+                  .from('company_departments')
+                  .select('id')
+                  .eq('company_id', newCompany.id)
+                  .eq('name', emp.dept)
+                  .maybeSingle();
+                  
                 // Add to company_employees
                 await supabase
                   .from('company_employees')
@@ -123,14 +155,18 @@ export const useEmployees = (): UseEmployeesResult => {
                     company_id: newCompany.id,
                     employee_id: newProfile.id,
                     job_title: emp.role,
+                    department_id: dept?.id,
                     status: 'active'
                   });
               }
             }
+            
+            console.log("Demo data setup completed");
           }
         }
       } else {
         // For real users, just fetch their company data
+        console.log("Regular user, fetching company data");
         const { data: companyData } = await supabase
           .from('companies')
           .select('*')
@@ -143,11 +179,16 @@ export const useEmployees = (): UseEmployeesResult => {
       setCompanyData(company);
       
       if (company) {
+        console.log("Loading employees and departments for company:", company.id);
         const employeesData = await fetchEmployees(company.id);
         setEmployees(employeesData);
         
         const departmentsData = await fetchDepartments(company.id);
         setDepartments(departmentsData);
+        
+        console.log(`Loaded ${employeesData.length} employees and ${departmentsData.length} departments`);
+      } else {
+        console.log("No company found for this user");
       }
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
@@ -324,6 +365,7 @@ export const useEmployees = (): UseEmployeesResult => {
     handleAddEmployee,
     handleUpdateEmployee,
     handleDeleteEmployee,
-    handleUpdateEmployeeStatus
+    handleUpdateEmployeeStatus,
+    isDemo
   };
 };
