@@ -11,14 +11,20 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Book, CheckCircle } from "lucide-react";
+import { Book, CheckCircle, Building } from "lucide-react";
 import { motion } from "framer-motion";
+import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 
 const Login = () => {
   const { currentUser, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+
+  // Initialiser les comptes de démonstration
+  useEffect(() => {
+    ensureDemoAccountsExist();
+  }, []);
 
   // Redirection après connexion
   useEffect(() => {
@@ -119,9 +125,9 @@ const Login = () => {
                   transition={{ delay: 0.6 }}
                 >
                   <div className="rounded-full bg-white/20 p-2 mr-4">
-                    <CheckCircle className="h-5 w-5 text-white" />
+                    <Building className="h-5 w-5 text-white" />
                   </div>
-                  <p className="text-lg">Interagissez avec les formateurs</p>
+                  <p className="text-lg">Gérez la formation de votre entreprise</p>
                 </motion.div>
                 <motion.div 
                   className="flex items-center"

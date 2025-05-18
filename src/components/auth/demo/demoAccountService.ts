@@ -67,6 +67,21 @@ export const getDemoAccounts = (): DemoAccount[] => {
         'Attribuer des cours et parcours',
         'Analyser les résultats de formation'
       ]
+    },
+    {
+      id: uuidv4(),
+      email: 'entreprise@schoolier.com',
+      password: 'demo123',
+      role: 'business_admin',
+      name: 'Thomas Durand',
+      avatar: 'https://api.dicebear.com/6.x/initials/svg?seed=TD&backgroundColor=2563EB',
+      description: 'Accédez à l\'espace complet de gestion d\'entreprise.',
+      features: [
+        'Gérer l\'ensemble des employés',
+        'Créer et assigner des formations',
+        'Suivre les statistiques de progression',
+        'Configurer les départements et l\'organisation'
+      ]
     }
   ];
 };
