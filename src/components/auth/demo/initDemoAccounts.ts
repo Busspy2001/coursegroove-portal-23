@@ -83,7 +83,7 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
             id: crypto.randomUUID(), // Generate a random UUID
             email: account.email,
             full_name: account.name,
-            role: account.role,
+            role: account.role as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo",
             is_demo: true,
             avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
           })
@@ -139,7 +139,7 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
           .from('profiles_unified')
           .update({
             is_demo: true,
-            role: account.role
+            role: account.role as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo"
           })
           .eq('id', existingUser.id);
           

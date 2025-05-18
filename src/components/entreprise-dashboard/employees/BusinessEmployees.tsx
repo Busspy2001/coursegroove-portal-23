@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
+import { supabase } from "@/integrations/supabase/client"; // Added missing import
 import {
   Card,
   CardContent,
@@ -170,7 +171,7 @@ const BusinessEmployees = () => {
                     id: crypto.randomUUID(),
                     full_name: emp.name,
                     email: emp.email,
-                    role: 'employee',
+                    role: 'employee' as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo",
                     is_demo: true,
                     company_id: newCompany.id
                   })

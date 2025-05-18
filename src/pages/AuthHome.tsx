@@ -15,10 +15,10 @@ const AuthHome = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Ensure demo accounts are available
+  // Ensure demo accounts are available - fixed parameter issue
   useEffect(() => {
     const initAccounts = async () => {
-      await ensureDemoAccountsExist(false);
+      await ensureDemoAccountsExist();
     };
     
     initAccounts();
