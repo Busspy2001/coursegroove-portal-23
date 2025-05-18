@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -43,6 +42,51 @@ const BusinessOverview = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        if (!currentUser) return;
+        
+        // Pour les comptes de démonstration, nous utilisons des données fictives
+        if (currentUser.is_demo) {
+          console.log("Chargement des données de démonstration pour:", currentUser.email);
+          
+          // Données fictives de l'entreprise pour les comptes de démonstration
+          const demoCompany = {
+            id: currentUser.company_id || "demo-company-id",
+            name: `Entreprise de ${currentUser.full_name || "Démonstration"}`,
+            admin_id: currentUser.id
+          };
+          
+          // Statistiques fictives pour la démonstration
+          const demoStats = {
+            total_employees: 24,
+            departments_count: 3,
+            active_courses: 8,
+            completion_rate: 68,
+            recent_activities: [
+              {
+                type: "Assignation",
+                message: "Formation 'Sécurité informatique' assignée à 5 employés",
+                date: "Il y a 2 heures"
+              },
+              {
+                type: "Complétion",
+                message: "Thomas Dubois a complété 'Leadership et gestion d'équipe'",
+                date: "Il y a 3 heures"
+              },
+              {
+                type: "Nouveau",
+                message: "Nouvelle formation 'Excel avancé' ajoutée au catalogue",
+                date: "Il y a 5 heures"
+              }
+            ]
+          };
+          
+          setCompanyData(demoCompany);
+          setStats(demoStats);
+          setLoading(false);
+          return;
+        }
+        
+        // Pour les utilisateurs normaux, nous chargeons les données réelles
         const company = await fetchCompanyData();
         setCompanyData(company);
         
@@ -63,7 +107,7 @@ const BusinessOverview = () => {
     };
     
     loadData();
-  }, []);
+  }, [currentUser]);
   
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -87,6 +131,41 @@ const BusinessOverview = () => {
         <Skeleton className="h-[400px] w-full" />
       </div>
     );
+  }
+  
+  // Assurons-nous que le compte de démonstration a toujours des données d'entreprise
+  if (!companyData && currentUser?.is_demo && currentUser?.role === "business_admin") {
+    // Créer une entreprise fictive pour l'affichage
+    setCompanyData({
+      id: "demo-company-id",
+      name: `Entreprise de ${currentUser.full_name || "Démonstration"}`,
+      admin_id: currentUser.id
+    });
+    
+    // Créer des statistiques fictives
+    setStats({
+      total_employees: 24,
+      departments_count: 3,
+      active_courses: 8,
+      completion_rate: 68,
+      recent_activities: [
+        {
+          type: "Assignation",
+          message: "Formation 'Sécurité informatique' assignée à 5 employés",
+          date: "Il y a 2 heures"
+        },
+        {
+          type: "Complétion",
+          message: "Thomas Dubois a complété 'Leadership et gestion d'équipe'",
+          date: "Il y a 3 heures"
+        },
+        {
+          type: "Nouveau",
+          message: "Nouvelle formation 'Excel avancé' ajoutée au catalogue",
+          date: "Il y a 5 heures"
+        }
+      ]
+    });
   }
   
   if (!companyData) {
