@@ -3,8 +3,8 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import DemoAccountCard from './demo/DemoAccountCard';
-import DemoInfoAlert from './demo/DemoInfoAlert';
+import { DemoAccountCard } from './demo/DemoAccountCard';
+import { DemoInfoAlert } from './demo/DemoInfoAlert';
 import { Book, Briefcase, Building, GraduationCap } from 'lucide-react';
 
 // Profile-specific demo accounts
