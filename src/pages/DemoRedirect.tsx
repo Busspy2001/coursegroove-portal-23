@@ -1,71 +1,43 @@
 
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 
 // This component handles intelligent redirection for demo accounts
 const DemoRedirect = () => {
   const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [redirectAttempts, setRedirectAttempts] = useState(0);
+  const [redirectAttempt, setRedirectAttempt] = useState(0);
   
   useEffect(() => {
-    // First, ensure demo accounts are properly set up
-    const setupDemoAccounts = async () => {
-      try {
-        await ensureDemoAccountsExist();
-      } catch (error) {
-        console.error("Error setting up demo accounts:", error);
-      }
-    };
-    
-    setupDemoAccounts();
-    
     // Only proceed with redirection when auth state is ready
-    if (!authStateReady) {
-      console.log("🕒 Attente de la stabilisation de l'état d'authentification...");
-      return;
-    }
-    
-    if (isLoading) {
+    if (!authStateReady || isLoading) {
       console.log("🕒 Attente de la vérification d'authentification...");
       return;
     }
     
-    if (redirectAttempts > 5) {
-      console.log("⚠️ Nombre maximum de tentatives de redirection atteint, redirection vers la page d'accueil");
-      toast({
-        title: "Problème de redirection",
-        description: "Un problème est survenu lors de la redirection. Veuillez réessayer.",
-        variant: "destructive",
-      });
+    // Safety check to prevent infinite loops
+    if (redirectAttempt > 3) {
+      console.log("⚠️ Trop de tentatives de redirection, retour à la page d'accueil");
       navigate("/", { replace: true });
       return;
     }
     
-    if (!isAuthenticated || !currentUser) {
-      console.log("🚫 Utilisateur non authentifié, redirection vers la page de login");
-      toast({
-        title: "Connexion requise",
-        description: "Veuillez vous connecter pour continuer.",
-        variant: "destructive",
-      });
-      navigate("/login", { replace: true });
-      return;
-    }
-    
-    // Limiter le risque de boucles infinies
-    setRedirectAttempts(prev => prev + 1);
-    
-    // Log information for debugging
-    console.log(`🧭 Redirection intelligente pour: ${currentUser.email} (${currentUser.role})`);
-    
-    // Use a small timeout to ensure stable state before redirection
+    // Set a small delay before redirecting to ensure state is stable
     const redirectTimer = setTimeout(() => {
+      if (!isAuthenticated || !currentUser) {
+        console.log("🚫 Utilisateur non authentifié, redirection vers la page de login");
+        navigate("/login", { replace: true });
+        return;
+      }
+      
+      // Increment attempt counter
+      setRedirectAttempt(prev => prev + 1);
+      
+      // Log information for debugging
+      console.log(`🧭 Redirection intelligente pour: ${currentUser.email} (${currentUser.role})`);
+      
       // Redirect based on role with replace: true to prevent back button issues
       switch(currentUser.role) {
         case "student":
@@ -104,14 +76,14 @@ const DemoRedirect = () => {
               navigate("/dashboard", { replace: true });
             }
           } else {
-            console.warn(`⚠️ Rôle non reconnu: ${currentUser.role}, redirection vers le tableau de bord par défaut`);
+            console.log("🏫 Redirection vers le tableau de bord par défaut");
             navigate("/dashboard", { replace: true });
           }
       }
     }, 300); // Small delay to ensure authentication state is ready
     
     return () => clearTimeout(redirectTimer);
-  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempts]);
+  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt]);
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">

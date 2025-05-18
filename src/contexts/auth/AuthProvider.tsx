@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [authStateReady, setAuthStateReady] = useState<boolean>(false);
   const location = useLocation();
+  const [initialCheckDone, setInitialCheckDone] = useState<boolean>(false);
 
   // Check for logout parameter in URL
   useEffect(() => {
@@ -42,22 +43,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Check if the user is authenticated on component mount
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
+      // Avoid checking auth multiple times
+      if (initialCheckDone) return;
+      
       try {
         setIsLoading(true);
         
         // Skip auth check if logout is active
         if (isLogoutActive) {
           console.log("🛑 État de déconnexion actif, vérification d'authentification ignorée");
-          setCurrentUser(null);
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          setAuthStateReady(true);
+          if (isMounted) {
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            setIsLoading(false);
+            setAuthStateReady(true);
+            setInitialCheckDone(true);
+          }
           return;
         }
         
         const user = await authService.getCurrentUser();
-        if (user) {
+        if (user && isMounted) {
           setCurrentUser(user);
           setIsAuthenticated(true);
           console.log("🔓 Utilisateur authentifié:", user.email, "Rôle:", user.role);
@@ -69,20 +78,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
-        toast({
-          title: "Erreur d'authentification",
-          description: "Un problème est survenu lors de la vérification de votre session.",
-          variant: "destructive",
-        });
+        if (isMounted) {
+          toast({
+            title: "Erreur d'authentification",
+            description: "Un problème est survenu lors de la vérification de votre session.",
+            variant: "destructive",
+          });
+        }
       } finally {
-        setIsLoading(false);
-        setAuthStateReady(true);
+        if (isMounted) {
+          setIsLoading(false);
+          setAuthStateReady(true);
+          setInitialCheckDone(true);
+        }
       }
     };
 
     // Setup auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!isMounted) return;
+        
         console.log("🔄 Changement d'état d'authentification:", event);
         
         // Si un logout est actif, ignorer les événements de session
@@ -93,9 +109,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (session) {
             console.log("⚠️ Session détectée pendant la déconnexion active, forçage de la déconnexion");
             setTimeout(() => {
-              supabase.auth.signOut({ scope: 'global' }).then(() => {
-                clearUserCache();
-              });
+              if (isMounted) {
+                supabase.auth.signOut({ scope: 'global' }).then(() => {
+                  clearUserCache();
+                });
+              }
             }, 100);
           }
           
@@ -108,10 +126,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         // Using setTimeout to prevent infinite recursion with RLS policies
         setTimeout(async () => {
+          if (!isMounted) return;
+          
           if (session && event !== 'SIGNED_OUT') {
             try {
               const user = await authService.getCurrentUser();
-              if (user) {
+              if (user && isMounted) {
                 setCurrentUser(user);
                 setIsAuthenticated(true);
                 console.log("👤 Utilisateur mis à jour:", user.email, "Rôle:", user.role);
@@ -133,8 +153,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     checkAuth();
 
-    // Cleanup subscription
+    // Cleanup subscription and prevent state updates after unmount
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -144,13 +165,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Reset logout status when logging in
     setLogoutActive(false);
     try {
+      setIsLoggingIn(true);
       const user = await handleLogin(email, password, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
       console.log(`✅ Login successful for ${user.email} (${user.role})`);
       
-      // Verify role and direct user to appropriate dashboard
+      // Return user for additional processing if needed
       return user;
     } catch (error) {
-      console.error("Login failed:", error);
+      setIsLoggingIn(false);
+      console.error("❌ Login failed:", error);
       throw error;
     }
   };
@@ -160,13 +183,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Reset logout status when logging in
     setLogoutActive(false);
     try {
+      setIsLoggingIn(true);
       const user = await handleLoginWithDemo(account, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
       console.log(`✅ Demo login successful for ${user.email} (${user.role})`);
 
       // Return the user for additional processing if needed
       return user;
     } catch (error) {
-      console.error("Demo login failed:", error);
+      setIsLoggingIn(false);
+      console.error("❌ Demo login failed:", error);
       throw error;
     }
   };

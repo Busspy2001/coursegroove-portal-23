@@ -1,151 +1,225 @@
 
 import { User } from './types';
-import * as authService from './authService';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { clearUserCache } from './authUtils';
+import { DemoAccount } from '@/components/auth/demo/types';
+import { isDemoAccount } from '@/components/auth/demo/demoAccountService';
 
-// Login function
+// Fonction de connexion avec email/password
 export const handleLogin = async (
-  email: string, 
-  password: string, 
-  setCurrentUser: (user: User) => void,
-  setIsAuthenticated: (value: boolean) => void,
-  setIsLoggingIn: (value: boolean) => void,
+  email: string,
+  password: string,
+  setCurrentUser: (user: User | null) => void,
+  setIsAuthenticated: (isAuth: boolean) => void,
+  setIsLoggingIn: (isLogging: boolean) => void,
   callback?: () => void
-) => {
+): Promise<User> => {
   try {
-    setIsLoggingIn(true);
-    const user = await authService.loginUser(email, password);
+    console.log(`🔑 Tentative de connexion pour: ${email}`);
+    
+    // Vérifier si c'est un compte de démonstration
+    if (isDemoAccount(email)) {
+      console.log("🎭 Compte de démonstration détecté, utilisation d'un flux de connexion spécial");
+      const demoAccount = { email, password };
+      return handleLoginWithDemo(demoAccount, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
+    }
+    
+    // Connexion avec Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("❌ Erreur de connexion:", error.message);
+      throw new Error(error.message);
+    }
+
+    if (!data || !data.user) {
+      console.error("❌ Erreur: Données utilisateur manquantes");
+      throw new Error("Une erreur s'est produite lors de la connexion.");
+    }
+
+    // Récupérer le profil utilisateur avec le rôle
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles_unified')
+      .select('*')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error("❌ Erreur lors de la récupération du profil:", profileError);
+      // Continue anyway with limited user info
+    }
+
+    // Créer l'objet utilisateur
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email || "",
+      name: profile?.full_name || "",
+      role: profile?.role || "student",
+      is_demo: profile?.is_demo || false,
+      avatar: profile?.avatar_url,
+      company_id: profile?.company_id
+    };
+
+    // Mettre à jour l'état de l'authentification
     setCurrentUser(user);
     setIsAuthenticated(true);
     
-    // Success toast
-    toast({
-      title: "Connexion réussie",
-      description: `Bienvenue, ${user.name || user.email}!`,
-    });
-    
-    if (callback) callback();
-    return user; // Return the user for additional processing
-  } catch (error: any) {
-    console.error("Login error:", error);
-    // Error toast
-    toast({
-      title: "Erreur de connexion",
-      description: error.message || "Vérifiez vos identifiants et réessayez.",
-      variant: "destructive",
-    });
+    // Exécuter le callback de réussite
+    if (callback) {
+      callback();
+    }
+
+    console.log(`✅ Connexion réussie pour: ${email} (${user.role})`);
+    return user;
+
+  } catch (error) {
+    console.error("❌ Erreur de connexion:", error);
     throw error;
   } finally {
     setIsLoggingIn(false);
   }
 };
 
-// Login with demo account
+// Fonction de connexion avec un compte démo
 export const handleLoginWithDemo = async (
-  account: any, 
-  setCurrentUser: (user: User) => void,
-  setIsAuthenticated: (value: boolean) => void,
-  setIsLoggingIn: (value: boolean) => void,
+  account: DemoAccount,
+  setCurrentUser: (user: User | null) => void,
+  setIsAuthenticated: (isAuth: boolean) => void,
+  setIsLoggingIn: (isLogging: boolean) => void,
   callback?: () => void
-) => {
+): Promise<User> => {
   try {
-    setIsLoggingIn(true);
-    
-    console.log(`Tentative de connexion au compte démo: ${account.email} (${account.role})`);
-    const { email, password } = account;
-    
-    // Validate demo account data before attempting login
-    if (!email || !password) {
-      throw new Error("Données de compte démo incomplètes");
+    console.log(`🎭 Connexion avec compte démo: ${account.email}`);
+
+    // Connexion avec Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: account.email,
+      password: account.password,
+    });
+
+    if (error) {
+      console.error(`❌ Erreur de connexion démo (${account.email}):`, error.message);
+      throw new Error(error.message);
     }
-    
-    // Login with the demo account
-    const user = await authService.loginUser(email, password);
-    
-    // Verify the user has the expected role
-    if (user.role !== account.role) {
-      console.warn(`Attention: le rôle attendu (${account.role}) ne correspond pas au rôle réel (${user.role})`);
+
+    if (!data || !data.user) {
+      console.error("❌ Données utilisateur manquantes");
+      throw new Error("Une erreur s'est produite lors de la connexion.");
     }
-    
+
+    // Créer l'objet utilisateur pour le compte de démo
+    const user: User = {
+      id: data.user.id,
+      email: account.email,
+      name: account.name,
+      role: account.role,
+      is_demo: true,
+      avatar: account.avatar
+    };
+
+    // Mettre à jour l'état
     setCurrentUser(user);
     setIsAuthenticated(true);
+    
+    // Exécuter le callback
+    if (callback) {
+      callback();
+    }
+
+    console.log(`✅ Connexion démo réussie pour: ${account.email} (${account.role})`);
     
     toast({
       title: "Connexion démo réussie",
-      description: `Vous êtes connecté en tant que ${user.name || user.email} (${user.role}).`,
+      description: `Connecté en tant que ${account.name} (${account.role})`,
     });
-    
-    // Log success for debugging
-    console.log(`✅ Connexion démo réussie: ${user.email} (${user.role})`);
-    
-    if (callback) {
-      // Decouple callback execution with setTimeout to prevent state update conflicts
-      setTimeout(() => {
-        callback();
-      }, 0);
-    }
-    
+
     return user;
-  } catch (error: any) {
-    console.error("Demo login error:", error);
-    toast({
-      title: "Erreur de connexion démo",
-      description: error.message || "Un problème est survenu avec ce compte de démonstration.",
-      variant: "destructive",
-    });
+  } catch (error) {
+    console.error("❌ Erreur de connexion démo:", error);
     throw error;
   } finally {
     setIsLoggingIn(false);
   }
 };
 
-// Register function
+// Fonction d'inscription
 export const handleRegister = async (
-  email: string, 
-  password: string, 
-  name: string, 
-  setCurrentUser: (user: User) => void,
-  setIsAuthenticated: (value: boolean) => void,
+  email: string,
+  password: string,
+  name: string,
+  setCurrentUser: (user: User | null) => void,
+  setIsAuthenticated: (isAuth: boolean) => void,
   callback?: () => void
-) => {
+): Promise<User> => {
   try {
-    const user = await authService.registerUser(name, email, password);
+    // Inscription avec Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+        }
+      }
+    });
+
+    if (error) {
+      console.error("❌ Erreur d'inscription:", error.message);
+      throw new Error(error.message);
+    }
+
+    if (!data || !data.user) {
+      console.error("❌ Données utilisateur manquantes");
+      throw new Error("Une erreur s'est produite lors de l'inscription.");
+    }
+
+    // Créer l'objet utilisateur
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email || "",
+      name: name,
+      role: "student", // Par défaut, un nouvel utilisateur est un étudiant
+      is_demo: false
+    };
+
+    // Mettre à jour l'état
     setCurrentUser(user);
     setIsAuthenticated(true);
     
-    toast({
-      title: "Compte créé avec succès",
-      description: "Bienvenue sur Schoolier!",
-    });
-    
-    if (callback) callback();
-    return;
-  } catch (error: any) {
-    console.error("Registration error:", error);
-    toast({
-      title: "Erreur d'inscription",
-      description: error.message || "Impossible de créer votre compte. Veuillez réessayer.",
-      variant: "destructive",
-    });
+    // Exécuter le callback
+    if (callback) {
+      callback();
+    }
+
+    console.log(`✅ Inscription réussie pour: ${email}`);
+    return user;
+
+  } catch (error) {
+    console.error("❌ Erreur d'inscription:", error);
     throw error;
   }
 };
 
-// Reset password
-export const handleResetPassword = async (email: string) => {
+// Fonction de réinitialisation de mot de passe
+export const handleResetPassword = async (email: string): Promise<void> => {
   try {
-    await authService.resetUserPassword(email);
-    toast({
-      title: "Email envoyé",
-      description: "Si un compte existe avec cette adresse, vous recevrez un email de réinitialisation.",
+    // Envoyer un email de réinitialisation
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
     });
-  } catch (error: any) {
-    console.error("Password reset error:", error);
-    toast({
-      title: "Erreur de réinitialisation",
-      description: error.message || "Impossible d'envoyer l'email de réinitialisation.",
-      variant: "destructive",
-    });
+
+    if (error) {
+      console.error("❌ Erreur de réinitialisation:", error.message);
+      throw new Error(error.message);
+    }
+
+    console.log(`📧 Email de réinitialisation envoyé à: ${email}`);
+  } catch (error) {
+    console.error("❌ Erreur de réinitialisation:", error);
     throw error;
   }
 };
