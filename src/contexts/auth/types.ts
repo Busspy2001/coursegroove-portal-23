@@ -20,8 +20,8 @@ export interface AuthContextType {
   isLoading: boolean;
   isLoggingOut: boolean;
   isLoggingIn: boolean;
-  login: (email: string, password: string, callback?: () => void) => Promise<void>;
-  loginWithDemo: (account: any, callback?: () => void) => Promise<void>;
+  login: (email: string, password: string, callback?: () => void) => Promise<User>;
+  loginWithDemo: (account: any, callback?: () => void) => Promise<User>;
   register: (email: string, password: string, name: string, callback?: () => void) => Promise<void>;
   logout: (callback?: () => void) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;

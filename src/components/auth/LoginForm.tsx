@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -11,8 +12,12 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { isDemoAccount } from "./demo/demoAccountService";
 
-const LoginForm = () => {
-  const { login, isLoading } = useAuth();
+interface LoginFormProps {
+  profileType?: string;
+}
+
+const LoginForm = ({ profileType }: LoginFormProps) => {
+  const { login, isLoading, isLoggingIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
@@ -20,6 +25,7 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const { toast } = useToast();
   const [isDemo, setIsDemo] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
   useEffect(() => {
     // Check if the email corresponds to a demo account
@@ -29,9 +35,9 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (isLoading) return;
+    if (isLoggingIn || localLoading) return;
     
-    setIsLoading(true);
+    setLocalLoading(true);
     setError("");
     
     try {
@@ -50,7 +56,7 @@ const LoginForm = () => {
       console.error("Login error:", err);
       setError(err.message || "Une erreur s'est produite lors de la connexion.");
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -90,10 +96,10 @@ const LoginForm = () => {
                 {error}
               </p>
             )}
-            <Button disabled={isLoading} className="w-full mt-4 bg-schoolier-teal hover:bg-schoolier-dark-teal text-white font-medium">
-              {isLoading ? (
+            <Button disabled={isLoggingIn || localLoading} className="w-full mt-4 bg-schoolier-teal hover:bg-schoolier-dark-teal text-white font-medium">
+              {isLoggingIn || localLoading ? (
                 <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  <Icons.spinner className="mr-2 h-4 w-4" />
                   Chargement...
                 </>
               ) : (
