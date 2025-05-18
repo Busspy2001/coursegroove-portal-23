@@ -39,7 +39,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         role = 'super_admin';
       } else if (supabaseUser.email === 'prof@schoolier.com') {
         role = 'instructor';
-      } else if (supabaseUser.email === 'business@schoolier.com') {
+      } else if (supabaseUser.email === 'business@schoolier.com' || supabaseUser.email === 'entreprise@schoolier.com') {
         role = 'business_admin';
       } else if (supabaseUser.email?.includes('employee')) {
         role = 'employee';
@@ -120,8 +120,16 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
   }
 };
 
-// Clear user cache (used during logout)
+// Improved cache clearing (used during logout)
 export const clearUserCache = () => {
-  console.log("🗑️ Nettoyage du cache utilisateur");
-  userCache.clear();
+  try {
+    const cacheSize = userCache.size;
+    console.log(`🗑️ Nettoyage du cache utilisateur (${cacheSize} entrées)`);
+    userCache.clear();
+    console.log("✅ Cache utilisateur nettoyé avec succès");
+    return true;
+  } catch (error) {
+    console.error("❌ Erreur lors du nettoyage du cache:", error);
+    return false;
+  }
 };

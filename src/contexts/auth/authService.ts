@@ -91,16 +91,38 @@ export const registerUser = async (name: string, email: string, password: string
 };
 
 /**
- * Logout the current user
+ * Logout the current user with retry mechanism
  */
 export const logoutUser = async (): Promise<void> => {
-  try {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  } catch (error: any) {
-    console.error("Logout error:", error);
-    throw error;
-  }
+  const MAX_RETRIES = 2;
+  let attempt = 0;
+  
+  const executeLogout = async (): Promise<void> => {
+    try {
+      console.log(`📤 Tentative de déconnexion Supabase (${attempt + 1}/${MAX_RETRIES + 1})`);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error(`❌ Erreur lors de la déconnexion (tentative ${attempt + 1}):`, error);
+        throw error;
+      }
+      
+      console.log("✅ Déconnexion Supabase réussie");
+    } catch (error: any) {
+      console.error(`❌ Échec de déconnexion (tentative ${attempt + 1}):`, error);
+      
+      if (attempt < MAX_RETRIES) {
+        attempt++;
+        console.log(`🔄 Nouvelle tentative de déconnexion dans 500ms...`);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+        return executeLogout();
+      }
+      
+      throw error;
+    }
+  };
+  
+  return executeLogout();
 };
 
 /**

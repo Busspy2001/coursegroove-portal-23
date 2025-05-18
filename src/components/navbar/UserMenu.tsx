@@ -1,7 +1,7 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Home, Book, Settings, User, LogOut } from "lucide-react";
+import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -28,18 +28,25 @@ interface UserMenuProps {
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
     try {
-      console.log("Déconnexion depuis le menu utilisateur...");
+      if (isLoggingOut) return;
       
-      // Appeler onLogout sans lui passer de callback
+      console.log("🔄 Déconnexion depuis le menu utilisateur...");
+      setIsLoggingOut(true);
+      
+      // Appeler onLogout et attendre sa complétion
       await onLogout();
       
-      // Navigate with logout parameter to prevent auto-login
+      // Navigation après déconnexion réussie
+      console.log("✅ Redirection après déconnexion");
       navigate("/login?logout=true", { replace: true });
     } catch (error) {
-      console.error("Erreur lors de la déconnexion depuis le menu utilisateur:", error);
+      console.error("❌ Erreur lors de la déconnexion depuis le menu utilisateur:", error);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -157,9 +164,19 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             onClick={handleLogout} 
             className="text-red-500 cursor-pointer"
             data-navbar-logout="true"
+            disabled={isLoggingOut}
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Déconnexion
+            {isLoggingOut ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Déconnexion...
+              </>
+            ) : (
+              <>
+                <LogOut className="mr-2 h-4 w-4" />
+                Déconnexion
+              </>
+            )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

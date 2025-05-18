@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -13,19 +13,25 @@ interface ProfileSidebarProps {
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
     try {
-      console.log("Déconnexion du profil en cours...");
+      if (isLoggingOut) return;
       
-      // Appeler onLogout sans lui passer de callback
-      // Ce sera la responsabilité du composant parent de gérer la redirection
+      setIsLoggingOut(true);
+      console.log("🔄 Déconnexion du profil en cours...");
+      
+      // Appeler onLogout et attendre sa complétion
       await onLogout();
       
-      // Utiliser navigate directement après la déconnexion
-      navigate("/login", { replace: true });
+      // Redirection après déconnexion réussie
+      console.log("✅ Redirection du profil après déconnexion");
+      navigate("/login?logout=true", { replace: true });
     } catch (error) {
-      console.error("Erreur lors de la déconnexion du profil:", error);
+      console.error("❌ Erreur lors de la déconnexion du profil:", error);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -72,9 +78,19 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
             className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
             onClick={handleLogout}
             data-profile-logout="true"
+            disabled={isLoggingOut}
           >
-            <LogOut className="mr-3 h-5 w-5" />
-            Déconnexion
+            {isLoggingOut ? (
+              <>
+                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                Déconnexion en cours...
+              </>
+            ) : (
+              <>
+                <LogOut className="mr-3 h-5 w-5" />
+                Déconnexion
+              </>
+            )}
           </Button>
         </nav>
       </div>

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { 
@@ -39,29 +39,33 @@ import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/use-theme";
 
 const BusinessSidebar = () => {
-  const { currentUser, logout, isLoggingOut } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   
   const handleLogout = async () => {
-    if (isLoggingOut) return;
-    
     try {
-      await logout(() => {
-        toast({
-          title: "Déconnexion réussie",
-          description: "Vous avez été déconnecté avec succès.",
-        });
-        navigate("/login?logout=true", { replace: true });
-      });
+      if (isLoggingOut) return;
+      
+      setIsLoggingOut(true);
+      console.log("🔄 Déconnexion depuis BusinessSidebar en cours...");
+      
+      await logout();
+      
+      // Navigation après déconnexion réussie
+      console.log("✅ Redirection après déconnexion depuis BusinessSidebar");
+      navigate("/login?logout=true", { replace: true });
     } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
+      console.error("❌ Erreur lors de la déconnexion depuis BusinessSidebar:", error);
       toast({
         title: "Erreur de déconnexion",
         description: "Un problème est survenu lors de la déconnexion.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
