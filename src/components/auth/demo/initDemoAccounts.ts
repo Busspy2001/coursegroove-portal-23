@@ -1,10 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { UserRole } from "@/contexts/auth/types";
 
 export interface DemoAccount {
   email: string;
   password: string;
-  role: string;
+  role: UserRole;
   name: string;
   avatar?: string;
   description?: string;
@@ -114,7 +115,7 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
                 id: tempId,
                 email: account.email,
                 full_name: account.name,
-                role: account.role,
+                role: account.role as UserRole, // Explicitly cast to UserRole
                 is_demo: true,
                 avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
               })
@@ -139,7 +140,7 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
                 .from('profiles_unified')
                 .update({
                   is_demo: true,
-                  role: account.role
+                  role: account.role as UserRole // Explicitly cast to UserRole
                 })
                 .eq('id', existingUser.id);
                 

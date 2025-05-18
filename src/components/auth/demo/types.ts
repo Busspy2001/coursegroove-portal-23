@@ -1,20 +1,13 @@
 
-export type UserRole = 
-  | "super_admin" 
-  | "business_admin" 
-  | "instructor" 
-  | "student"
-  | "employee"
-  | "admin"
-  | "demo";
+import { UserRole } from "@/contexts/auth/types";
 
 export interface DemoAccount {
-  id: string;
   email: string;
   password: string;
   role: UserRole;
   name: string;
-  avatar: string;
-  description: string;
-  features: string[];
+  avatar?: string;
+  description?: string;
+  id?: string; // Make ID optional since we might not have it at first
+  features?: string[];
 }

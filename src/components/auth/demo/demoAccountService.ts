@@ -1,6 +1,11 @@
 
 import { demoAccounts, DemoAccount } from './initDemoAccounts';
 
+// Get all demo accounts
+export const getDemoAccounts = (): DemoAccount[] => {
+  return demoAccounts;
+};
+
 // Check if an email belongs to a demo account
 export const isDemoAccount = (email: string): boolean => {
   if (!email) return false;
