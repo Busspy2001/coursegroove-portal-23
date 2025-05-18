@@ -1,153 +1,88 @@
 
-import React from "react";
-import { useAuth } from "@/contexts/auth";
-import { DemoAccountCard } from "./demo/DemoAccountCard";
-import { getDemoAccounts } from "./demo/demoAccountService";
-import { DemoAccount } from "./demo/types";
-import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { DemoInfoAlert } from "./demo/DemoInfoAlert";
-import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/auth';
+import DemoAccountCard from './demo/DemoAccountCard';
+import DemoInfoAlert from './demo/DemoInfoAlert';
+import { Book, Briefcase, Building, GraduationCap } from 'lucide-react';
 
-// Get demo accounts data directly from the service
-const demoAccounts = getDemoAccounts();
+// Profile-specific demo accounts
+const demoAccounts = {
+  student: [
+    {
+      name: "Étudiant Démo",
+      email: "student@demo.com",
+      password: "demo1234",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+      role: "student"
+    }
+  ],
+  instructor: [
+    {
+      name: "Enseignant Démo",
+      email: "instructor@demo.com",
+      password: "demo1234",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily",
+      role: "instructor"
+    }
+  ],
+  business: [
+    {
+      name: "Entreprise Démo",
+      email: "business@demo.com",
+      password: "demo1234",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
+      role: "business_admin"
+    }
+  ],
+  employee: [
+    {
+      name: "Employé Démo",
+      email: "employee@demo.com",
+      password: "demo1234",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+      role: "employee"
+    }
+  ]
+};
 
-const DemoAccounts = () => {
+const profileIcons = {
+  student: GraduationCap,
+  instructor: Book,
+  business: Building,
+  employee: Briefcase
+};
+
+type ProfileType = "student" | "instructor" | "business" | "employee";
+
+interface DemoAccountsProps {
+  profileType?: ProfileType;
+}
+
+const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
   const { loginWithDemo, isLoggingIn } = useAuth();
-
-  const handleDemoLogin = async (account: DemoAccount) => {
-    try {
-      await loginWithDemo(account, () => {
-        console.log(`Connexion avec le compte demo ${account.role} réussie`);
-      });
-    } catch (error) {
-      console.error("Erreur lors de la connexion avec le compte demo:", error);
-    }
-  };
-
-  const studentAccounts = demoAccounts.filter(account => account.role === "student");
-  const instructorAccounts = demoAccounts.filter(account => account.role === "instructor");
-  const adminAccounts = demoAccounts.filter(account => account.role === "super_admin" || account.role === "admin");
-  const businessAccounts = demoAccounts.filter(account => account.role === "business_admin");
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
+  
+  // Get the appropriate demo accounts for the selected profile
+  const filteredAccounts = demoAccounts[profileType];
+  const ProfileIcon = profileIcons[profileType];
+  
   return (
-    <motion.div 
-      className="space-y-4"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
+    <div className="space-y-3">
       <DemoInfoAlert />
       
-      <motion.div className="space-y-4" variants={containerVariants}>
-        <motion.div className="space-y-2" variants={sectionVariants}>
-          <div className="flex items-center">
-            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Étudiant</h4>
-            <Separator className="flex-grow ml-2" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {studentAccounts.map((account) => (
-              <motion.div 
-                key={account.email} 
-                variants={sectionVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <DemoAccountCard
-                  account={account}
-                  onClick={() => handleDemoLogin(account)}
-                  isLoading={isLoggingIn}
-                />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div className="space-y-2" variants={sectionVariants}>
-          <div className="flex items-center">
-            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Instructeur</h4>
-            <Separator className="flex-grow ml-2" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {instructorAccounts.map((account) => (
-              <motion.div 
-                key={account.email} 
-                variants={sectionVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <DemoAccountCard
-                  account={account}
-                  onClick={() => handleDemoLogin(account)}
-                  isLoading={isLoggingIn}
-                />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div className="space-y-2" variants={sectionVariants}>
-          <div className="flex items-center">
-            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin</h4>
-            <Separator className="flex-grow ml-2" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {adminAccounts.map((account) => (
-              <motion.div 
-                key={account.email} 
-                variants={sectionVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <DemoAccountCard
-                  account={account}
-                  onClick={() => handleDemoLogin(account)}
-                  isLoading={isLoggingIn}
-                />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div className="space-y-2" variants={sectionVariants}>
-          <div className="flex items-center">
-            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Entreprise</h4>
-            <Separator className="flex-grow ml-2" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {businessAccounts.map((account) => (
-              <motion.div 
-                key={account.email} 
-                variants={sectionVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <DemoAccountCard
-                  account={account}
-                  onClick={() => handleDemoLogin(account)}
-                  isLoading={isLoggingIn}
-                />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {filteredAccounts.map((account, index) => (
+          <DemoAccountCard
+            key={index}
+            account={account}
+            onLogin={() => loginWithDemo(account)}
+            icon={<ProfileIcon className="h-5 w-5" />}
+            isLoading={isLoggingIn}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 

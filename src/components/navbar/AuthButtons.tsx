@@ -92,13 +92,13 @@ const AuthButtons = () => {
       {/* Auth Buttons with improved visibility */}
       <Button 
         variant="outline" 
-        onClick={() => navigate("/login")}
+        onClick={() => navigate("/auth")}
         className="hidden sm:flex border-2 border-schoolier-blue text-schoolier-blue hover:bg-schoolier-blue/10 font-spartan text-sm transition-all"
       >
         Se connecter
       </Button>
       <Button 
-        onClick={() => navigate("/register")}
+        onClick={() => navigate("/auth")}
         className="bg-schoolier-blue hover:bg-schoolier-dark-blue transition-colors font-spartan font-medium text-sm shadow-sm"
       >
         S'inscrire

@@ -19,7 +19,13 @@ const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-export function LoginForm() {
+type ProfileType = "student" | "instructor" | "business" | "employee";
+
+interface LoginFormProps {
+  profileType?: ProfileType;
+}
+
+export function LoginForm({ profileType = "student" }: LoginFormProps) {
   const { login, isLoggingIn } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +48,20 @@ export function LoginForm() {
       });
     } catch (error: any) {
       console.error("Erreur de connexion:", error);
+    }
+  };
+
+  // Get button styles based on profile type
+  const getButtonClass = () => {
+    switch (profileType) {
+      case "instructor":
+        return "bg-schoolier-teal hover:bg-schoolier-dark-teal";
+      case "business":
+        return "bg-amber-500 hover:bg-amber-600";
+      case "employee":
+        return "bg-purple-500 hover:bg-purple-600";
+      default:
+        return "bg-schoolier-blue hover:bg-schoolier-dark-blue";
     }
   };
 
@@ -122,7 +142,7 @@ export function LoginForm() {
         
         <Button
           type="submit"
-          className="w-full"
+          className={`w-full ${getButtonClass()}`}
           disabled={isLoggingIn}
         >
           {isLoggingIn ? (
