@@ -6,7 +6,7 @@ import { clearUserCache } from './authUtils';
 import { DemoAccount } from '@/components/auth/demo/types';
 import { isDemoAccount } from '@/components/auth/demo/demoAccountService';
 
-// Fonction de connexion avec email/password
+// Login function with email/password
 export const handleLogin = async (
   email: string,
   password: string,
@@ -18,14 +18,27 @@ export const handleLogin = async (
   try {
     console.log(`🔑 Tentative de connexion pour: ${email}`);
     
-    // Vérifier si c'est un compte de démonstration
+    // Check if it's a demo account
     if (isDemoAccount(email)) {
       console.log("🎭 Compte de démonstration détecté, utilisation d'un flux de connexion spécial");
-      const demoAccount = { email, password };
+      // Create a valid DemoAccount object with required fields
+      const demoInfo = await getDemoAccountInfo(email);
+      if (!demoInfo) {
+        throw new Error("Demo account information not found");
+      }
+      
+      const demoAccount: DemoAccount = {
+        email,
+        password,
+        role: demoInfo.role,
+        name: demoInfo.name,
+        avatar: demoInfo.avatar
+      };
+      
       return handleLoginWithDemo(demoAccount, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
     }
     
-    // Connexion avec Supabase
+    // Login with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -41,7 +54,7 @@ export const handleLogin = async (
       throw new Error("Une erreur s'est produite lors de la connexion.");
     }
 
-    // Récupérer le profil utilisateur avec le rôle
+    // Get user profile with role
     const { data: profile, error: profileError } = await supabase
       .from('profiles_unified')
       .select('*')
@@ -53,7 +66,7 @@ export const handleLogin = async (
       // Continue anyway with limited user info
     }
 
-    // Créer l'objet utilisateur
+    // Create user object
     const user: User = {
       id: data.user.id,
       email: data.user.email || "",
@@ -64,11 +77,11 @@ export const handleLogin = async (
       company_id: profile?.company_id
     };
 
-    // Mettre à jour l'état de l'authentification
+    // Update authentication state
     setCurrentUser(user);
     setIsAuthenticated(true);
     
-    // Exécuter le callback de réussite
+    // Execute success callback
     if (callback) {
       callback();
     }
@@ -84,7 +97,35 @@ export const handleLogin = async (
   }
 };
 
-// Fonction de connexion avec un compte démo
+// Helper function to get demo account info
+async function getDemoAccountInfo(email: string): Promise<{role: any, name: string, avatar?: string} | null> {
+  try {
+    // First try import from the demoAccountService
+    const { getDemoAccountInfo } = await import('@/components/auth/demo/demoAccountService');
+    const demoInfo = getDemoAccountInfo(email);
+    if (demoInfo) {
+      return demoInfo;
+    }
+    
+    // Fallback logic if the import doesn't work or returns no data
+    if (email.includes('admin')) {
+      return { role: 'super_admin', name: 'Admin Demo', avatar: '/avatars/admin.png' };
+    } else if (email.includes('prof') || email.includes('instructor')) {
+      return { role: 'instructor', name: 'Instructor Demo', avatar: '/avatars/instructor.png' };
+    } else if (email.includes('business') || email.includes('entreprise')) {
+      return { role: 'business_admin', name: 'Business Admin Demo', avatar: '/avatars/business.png' };
+    } else if (email.includes('employee')) {
+      return { role: 'employee', name: 'Employee Demo', avatar: '/avatars/employee.png' };
+    } else {
+      return { role: 'student', name: 'Student Demo', avatar: '/avatars/student.png' };
+    }
+  } catch (error) {
+    console.error("Error getting demo account info:", error);
+    return null;
+  }
+}
+
+// Demo account login function
 export const handleLoginWithDemo = async (
   account: DemoAccount,
   setCurrentUser: (user: User | null) => void,
@@ -95,7 +136,7 @@ export const handleLoginWithDemo = async (
   try {
     console.log(`🎭 Connexion avec compte démo: ${account.email}`);
 
-    // Connexion avec Supabase
+    // Login with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
       email: account.email,
       password: account.password,
@@ -111,7 +152,7 @@ export const handleLoginWithDemo = async (
       throw new Error("Une erreur s'est produite lors de la connexion.");
     }
 
-    // Créer l'objet utilisateur pour le compte de démo
+    // Create user object for demo account
     const user: User = {
       id: data.user.id,
       email: account.email,
@@ -121,11 +162,11 @@ export const handleLoginWithDemo = async (
       avatar: account.avatar
     };
 
-    // Mettre à jour l'état
+    // Update state
     setCurrentUser(user);
     setIsAuthenticated(true);
     
-    // Exécuter le callback
+    // Execute callback
     if (callback) {
       callback();
     }
@@ -146,7 +187,7 @@ export const handleLoginWithDemo = async (
   }
 };
 
-// Fonction d'inscription
+// Registration function
 export const handleRegister = async (
   email: string,
   password: string,
@@ -156,7 +197,7 @@ export const handleRegister = async (
   callback?: () => void
 ): Promise<User> => {
   try {
-    // Inscription avec Supabase
+    // Register with Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -177,20 +218,20 @@ export const handleRegister = async (
       throw new Error("Une erreur s'est produite lors de l'inscription.");
     }
 
-    // Créer l'objet utilisateur
+    // Create user object
     const user: User = {
       id: data.user.id,
       email: data.user.email || "",
       name: name,
-      role: "student", // Par défaut, un nouvel utilisateur est un étudiant
+      role: "student", // By default, new users are students
       is_demo: false
     };
 
-    // Mettre à jour l'état
+    // Update state
     setCurrentUser(user);
     setIsAuthenticated(true);
     
-    // Exécuter le callback
+    // Execute callback
     if (callback) {
       callback();
     }
@@ -204,10 +245,10 @@ export const handleRegister = async (
   }
 };
 
-// Fonction de réinitialisation de mot de passe
+// Password reset function
 export const handleResetPassword = async (email: string): Promise<void> => {
   try {
-    // Envoyer un email de réinitialisation
+    // Send reset email
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/reset-password',
     });

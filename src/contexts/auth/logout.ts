@@ -1,8 +1,7 @@
 
-import * as authService from './authService';
+import { logoutUser } from './authService';
 import { clearUserCache } from './authUtils';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 // Timeout constants for logout process
 export const LOGOUT_TIMEOUT = 5000; // 5 seconds timeout for logout
@@ -45,7 +44,7 @@ export const executeLogout = async (
       
       // Create a promise that will resolve with the logout result or reject on timeout
       const logoutPromise = Promise.race([
-        authService.logoutUser().then(() => {
+        logoutUser().then(() => {
           console.log("✅ Déconnexion Supabase réussie");
           return true;
         }),

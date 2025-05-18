@@ -3,6 +3,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "./types";
 import { userCache } from "@/integrations/supabase/client";
 
+// User cache management functions
+export const getUserFromCache = (userId?: string): User | null => {
+  try {
+    // If no userId is provided, try to get the current session user id
+    if (!userId) {
+      const session = supabase.auth.session();
+      userId = session?.user?.id;
+    }
+
+    // If we still don't have a userId, return null
+    if (!userId) {
+      return null;
+    }
+    
+    // Check if user is in cache
+    if (userCache.has(userId)) {
+      return userCache.get(userId);
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error getting user from cache:", error);
+    return null;
+  }
+};
+
+// Store user in cache
+export const cacheUser = (user: User): void => {
+  try {
+    if (!user || !user.id) {
+      console.error("Invalid user object for caching");
+      return;
+    }
+    
+    userCache.set(user.id, user);
+    console.log(`✅ User cached: ${user.email}`);
+  } catch (error) {
+    console.error("Error caching user:", error);
+  }
+};
+
 // Mapping Supabase user to our app's user model
 export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> => {
   try {
@@ -60,7 +101,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       };
       
       // Cache the user
-      userCache.set(supabaseUser.id, user);
+      cacheUser(user);
       console.log("✅ Profil utilisateur créé à partir des métadonnées");
       return user;
     }
@@ -108,7 +149,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       };
       
       // Cache the user
-      userCache.set(supabaseUser.id, user);
+      cacheUser(user);
       console.log("✅ Profil utilisateur récupéré de la base de données");
       return user;
     }

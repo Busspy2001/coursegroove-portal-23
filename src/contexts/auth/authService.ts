@@ -4,7 +4,7 @@ import { User } from './types';
 import { getUserFromCache, cacheUser } from './authUtils';
 import { isDemoAccount, getDemoAccountInfo } from '@/components/auth/demo/demoAccountService';
 
-// Fonction pour récupérer l'utilisateur actuel
+// Function to retrieve the current user
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
     // First try to get from cache for performance
@@ -80,5 +80,20 @@ export const getCurrentUser = async (): Promise<User | null> => {
   } catch (error) {
     console.error("❌ Erreur lors de la récupération de l'utilisateur:", error);
     return null;
+  }
+};
+
+// Logout function
+export const logoutUser = async (): Promise<void> => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
+    console.log("✅ User logged out successfully");
+  } catch (error) {
+    console.error("❌ Error during logout:", error);
+    throw error;
   }
 };
