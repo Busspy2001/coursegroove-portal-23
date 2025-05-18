@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { supabase } from "@/integrations/supabase/client"; // Added missing import
+import { supabase } from "@/integrations/supabase/client";
 import {
   Card,
   CardContent,
@@ -126,7 +126,8 @@ const BusinessEmployees = () => {
           if (companyDataForDemo) {
             company = companyDataForDemo;
           } else {
-            // If no company found, try to create one for the demo user
+            // If no company found, create a demo company for this user
+            console.log("Creating demo company for user:", currentUser?.id);
             const { data: newCompany, error: companyError } = await supabase
               .from('companies')
               .insert({
