@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -17,7 +18,6 @@ import {
   Calendar,
   GraduationCap,
   Layers,
-  MoreHorizontal,
   Plus,
   Settings,
   Upload,
