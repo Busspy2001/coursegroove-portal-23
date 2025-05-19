@@ -1,17 +1,18 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Download, Upload } from "lucide-react";
 
 // Import custom components
 import { EmployeeList } from "./components/EmployeeList";
+import { EmployeeGrid } from "./components/EmployeeGrid";
 import { EmployeeFilters } from "./components/EmployeeFilters";
 import { EmployeeDialog } from "./components/EmployeeDialog";
 import { EmployeeDeleteDialog } from "./components/EmployeeDeleteDialog";
 import { EmployeeStats } from "./components/EmployeeStats";
+import { ViewToggle } from "./components/ViewToggle";
 import { NoCompanyMessage } from "./components/NoCompanyMessage";
 import { EmployeeSkeleton } from "./components/EmployeeSkeleton";
 import { useEmployees } from "./hooks/useEmployees";
@@ -38,12 +39,13 @@ const BusinessEmployees: React.FC = () => {
     isDemo
   } = useEmployees();
   
-  // Local state for dialogs
+  // Local state for dialogs and view
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState<Partial<Employee>>({});
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   
   // Dialog handlers
   const openAddDialog = () => {
@@ -121,10 +123,20 @@ const BusinessEmployees: React.FC = () => {
           </p>
         </div>
         
-        <Button onClick={openAddDialog}>
-          <Plus className="mr-2 h-4 w-4" />
-          Ajouter un employé
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" className="flex-1 md:flex-none">
+            <Upload className="mr-2 h-4 w-4" />
+            Importer
+          </Button>
+          <Button variant="outline" className="flex-1 md:flex-none">
+            <Download className="mr-2 h-4 w-4" />
+            Exporter
+          </Button>
+          <Button onClick={openAddDialog} className="flex-1 md:flex-none">
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter
+          </Button>
+        </div>
       </div>
 
       <EmployeeStats 
@@ -134,11 +146,14 @@ const BusinessEmployees: React.FC = () => {
       />
       
       <Card>
-        <CardHeader>
-          <CardTitle>Liste des employés</CardTitle>
-          <CardDescription>
-            {filteredEmployees.length} employé{filteredEmployees.length !== 1 ? 's' : ''} au total
-          </CardDescription>
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+          <div>
+            <CardTitle>Liste des employés</CardTitle>
+            <CardDescription>
+              {filteredEmployees.length} employé{filteredEmployees.length !== 1 ? 's' : ''} au total
+            </CardDescription>
+          </div>
+          <ViewToggle view={viewMode} onToggleView={setViewMode} />
         </CardHeader>
         <CardContent>
           <EmployeeFilters
@@ -149,28 +164,37 @@ const BusinessEmployees: React.FC = () => {
             departments={departments}
           />
           
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Département</TableHead>
-                  <TableHead>Titre</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <EmployeeList
-                  employees={filteredEmployees} 
-                  onEditEmployee={openEditDialog}
-                  onDeleteEmployee={openDeleteDialog}
-                  onUpdateEmployeeStatus={handleUpdateEmployeeStatus}
-                  companyId={companyData.id}
-                />
-              </TableBody>
-            </Table>
-          </div>
+          {viewMode === "list" ? (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Département</TableHead>
+                    <TableHead>Titre</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <EmployeeList
+                    employees={filteredEmployees} 
+                    onEditEmployee={openEditDialog}
+                    onDeleteEmployee={openDeleteDialog}
+                    onUpdateEmployeeStatus={handleUpdateEmployeeStatus}
+                    companyId={companyData.id}
+                  />
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <EmployeeGrid 
+              employees={filteredEmployees}
+              onEditEmployee={openEditDialog}
+              onDeleteEmployee={openDeleteDialog}
+              onUpdateEmployeeStatus={handleUpdateEmployeeStatus}
+            />
+          )}
         </CardContent>
       </Card>
       
