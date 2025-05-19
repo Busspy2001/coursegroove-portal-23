@@ -14,23 +14,35 @@ export const BusinessAuthGuard: React.FC<BusinessAuthGuardProps> = ({ children }
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAccess = () => {
-      // Wait for auth state to be ready
-      if (isLoading || !authStateReady) {
-        return;
-      }
+    // Skip checks when still loading
+    if (isLoading || !authStateReady) {
+      console.log("🔄 BusinessAuthGuard: Chargement en cours...");
+      return;
+    }
 
+    const checkAccess = () => {
       // Check if user is authenticated
       if (!isAuthenticated || !currentUser) {
         console.log("🚫 BusinessAuthGuard: User not authenticated, redirecting to login");
+        toast({
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à cette page.",
+          variant: "destructive",
+        });
         navigate("/login", { state: { returnUrl: "/entreprise" } });
-        return;
+        return false;
       }
 
-      // Check if user is a business admin or employee (with demo accounts being allowed)
-      const isAllowed = currentUser.is_demo || 
-                       hasRole('business_admin') || 
-                       hasRole('employee');
+      // Check user's email for demo accounts (more reliable for demo accounts)
+      const email = currentUser.email?.toLowerCase() || '';
+      const isDemoBusinessAccount = 
+        currentUser.is_demo && (email.includes('business') || email.includes('entreprise'));
+
+      // Check if user is a business admin, employee or has demo access
+      const isAllowed = 
+        isDemoBusinessAccount || 
+        hasRole('business_admin') || 
+        hasRole('employee');
 
       if (!isAllowed) {
         console.log(`⚠️ BusinessAuthGuard: User roles not allowed`);
@@ -40,13 +52,19 @@ export const BusinessAuthGuard: React.FC<BusinessAuthGuardProps> = ({ children }
           variant: "destructive",
         });
         navigate("/dashboard");
-        return;
+        return false;
       }
 
       console.log("✅ BusinessAuthGuard: Access granted for", currentUser.email);
+      return true;
     };
 
-    checkAccess();
+    // Use a small delay to ensure auth state has stabilized
+    const timer = setTimeout(() => {
+      checkAccess();
+    }, 200);
+
+    return () => clearTimeout(timer);
   }, [isAuthenticated, currentUser, navigate, authStateReady, isLoading, hasRole]);
 
   if (isLoading || !authStateReady) {

@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 // This component handles intelligent redirection for demo accounts
 const DemoRedirect = () => {
   const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
   const navigate = useNavigate();
   const [redirectAttempt, setRedirectAttempt] = useState(0);
+  const [redirectStarted, setRedirectStarted] = useState(false);
   
   useEffect(() => {
     // Only proceed with redirection when auth state is ready
@@ -20,7 +22,17 @@ const DemoRedirect = () => {
     // Safety check to prevent infinite loops
     if (redirectAttempt > 3) {
       console.log("⚠️ Trop de tentatives de redirection, retour à la page d'accueil");
+      toast({
+        title: "Problème de redirection",
+        description: "Nous avons rencontré un problème lors de la redirection. Veuillez réessayer.",
+        variant: "destructive",
+      });
       navigate("/", { replace: true });
+      return;
+    }
+    
+    // Prevent multiple redirections
+    if (redirectStarted) {
       return;
     }
     
@@ -32,63 +44,72 @@ const DemoRedirect = () => {
         return;
       }
       
+      setRedirectStarted(true);
+      
       // Increment attempt counter
       setRedirectAttempt(prev => prev + 1);
       
       // Log information for debugging
       console.log(`🧭 Redirection intelligente pour: ${currentUser.email} (${currentUser.roles?.join(', ')})`);
       
-      // Get primary role for redirection
-      const primaryRole = currentUser.roles && currentUser.roles.length > 0 
-        ? currentUser.roles[0] 
-        : 'student';
+      // Email-based redirection for demo accounts
+      const email = currentUser.email?.toLowerCase() || '';
+      const roles = currentUser.roles || [];
       
-      // Redirect based on role with replace: true to prevent back button issues
-      switch(primaryRole) {
-        case "student":
-          console.log("🏫 Redirection vers le tableau de bord étudiant");
-          navigate("/dashboard", { replace: true });
-          break;
-        case "instructor":
-          console.log("👨‍🏫 Redirection vers le tableau de bord instructeur");
-          navigate("/instructor", { replace: true });
-          break;
-        case "admin":
-        case "super_admin":
-          console.log("👑 Redirection vers le tableau de bord administrateur");
-          navigate("/admin", { replace: true });
-          break;
-        case "business_admin":
-          console.log("🏢 Redirection vers le tableau de bord entreprise");
-          navigate("/entreprise", { replace: true });
-          break;
-        case "employee":
-          console.log("👔 Redirection vers le tableau de bord employé");
-          navigate("/employee", { replace: true });
-          break;
-        default:
-          // If the user has is_demo flag, try to route them based on email
-          if (currentUser.is_demo) {
-            const email = currentUser.email?.toLowerCase();
-            if (email?.includes('business') || email?.includes('entreprise')) {
-              console.log("🏢 Redirection d'un utilisateur demo vers le tableau de bord entreprise");
-              navigate("/entreprise", { replace: true });
-            } else if (email?.includes('employee')) {
-              console.log("👔 Redirection d'un utilisateur demo vers le tableau de bord employé");
-              navigate("/employee", { replace: true });
-            } else {
-              console.log("🏫 Redirection par défaut vers le tableau de bord étudiant");
-              navigate("/dashboard", { replace: true });
-            }
-          } else {
-            console.log("🏫 Redirection vers le tableau de bord par défaut");
-            navigate("/dashboard", { replace: true });
-          }
+      // First try to redirect by role (most reliable way)
+      if (roles.includes('instructor')) {
+        console.log("👨‍🏫 Redirection par rôle vers le tableau de bord instructeur");
+        navigate("/instructor", { replace: true });
+      } 
+      else if (roles.includes('admin') || roles.includes('super_admin')) {
+        console.log("👑 Redirection par rôle vers le tableau de bord administrateur");
+        navigate("/admin", { replace: true });
+      } 
+      else if (roles.includes('business_admin')) {
+        console.log("🏢 Redirection par rôle vers le tableau de bord entreprise");
+        navigate("/entreprise", { replace: true });
+      } 
+      else if (roles.includes('employee')) {
+        console.log("👔 Redirection par rôle vers le tableau de bord employé");
+        navigate("/employee", { replace: true });
       }
-    }, 300); // Small delay to ensure authentication state is ready
+      else if (roles.includes('student')) {
+        console.log("🎓 Redirection par rôle vers le tableau de bord étudiant");
+        navigate("/dashboard", { replace: true });
+      }
+      // No role or special case - try to detect from email
+      else if (currentUser.is_demo) {
+        // Explicit redirection based on email patterns
+        if (email.includes('prof') || email.includes('instructor')) {
+          console.log("👨‍🏫 Redirection par email vers le tableau de bord instructeur");
+          navigate("/instructor", { replace: true });
+        } 
+        else if (email.includes('admin')) {
+          console.log("👑 Redirection par email vers le tableau de bord administrateur");
+          navigate("/admin", { replace: true });
+        } 
+        else if (email.includes('business') || email.includes('entreprise')) {
+          console.log("🏢 Redirection par email vers le tableau de bord entreprise");
+          navigate("/entreprise", { replace: true });
+        } 
+        else if (email.includes('employee')) {
+          console.log("👔 Redirection par email vers le tableau de bord employé");
+          navigate("/employee", { replace: true });
+        } 
+        else {
+          console.log("🎓 Redirection par défaut vers le tableau de bord étudiant");
+          navigate("/dashboard", { replace: true });
+        }
+      } 
+      else {
+        // Default fallback if nothing else matches
+        console.log("🎓 Redirection vers le tableau de bord par défaut (étudiant)");
+        navigate("/dashboard", { replace: true });
+      }
+    }, 500); // Increased delay for more stability
     
     return () => clearTimeout(redirectTimer);
-  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt]);
+  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt, redirectStarted]);
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">

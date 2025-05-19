@@ -65,22 +65,44 @@ export const executeLogout = async (
       } finally {
         clearTimeout(timeoutId);
         
-        // Force delete local storage Supabase tokens - plus aggressif pour garantir la déconnexion
+        // Force delete all localStorage items related to authentication
         try {
-          // Vérifier tous les tokens potentiels et les supprimer
+          // Specific token removal for our project
           const authToken = localStorage.getItem('sb-iigenwvxvvfoywrhbwms-auth-token');
           if (authToken) {
-            console.log("🗑️ Suppression manuelle du token d'authentification");
+            console.log("🗑️ Suppression du token d'authentification");
             localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
           }
           
-          // Suppression plus agressive de tous les éléments qui pourraient contenir "auth"
+          // More aggressive removal of all auth-related items
+          const keysToCheck = [];
           for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.includes('auth') || key.includes('supabase'))) {
-              console.log(`🗑️ Suppression de clé localStorage potentielle: ${key}`);
+            keysToCheck.push(localStorage.key(i));
+          }
+          
+          for (const key of keysToCheck) {
+            if (key && (
+                key.includes('auth') || 
+                key.includes('supabase') || 
+                key.includes('sb-') ||
+                key.includes('token')
+              )) {
+              console.log(`🗑️ Suppression de clé localStorage: ${key}`);
               localStorage.removeItem(key);
             }
+          }
+          
+          // Also try to clear session storage items that might interfere
+          try {
+            for (let i = 0; i < sessionStorage.length; i++) {
+              const key = sessionStorage.key(i);
+              if (key && (key.includes('auth') || key.includes('supabase') || key.includes('sb-'))) {
+                console.log(`🗑️ Suppression de clé sessionStorage: ${key}`);
+                sessionStorage.removeItem(key);
+              }
+            }
+          } catch (e) {
+            console.error("❌ Erreur lors de la suppression des tokens de sessionStorage:", e);
           }
         } catch (e) {
           console.error("❌ Erreur lors de la suppression des tokens:", e);
@@ -106,7 +128,6 @@ export const executeLogout = async (
     
     // Execute callback if provided
     if (callback) {
-      // Assurons-nous que le callback est exécuté correctement
       try {
         console.log("🔄 Exécution du callback de déconnexion");
         callback();

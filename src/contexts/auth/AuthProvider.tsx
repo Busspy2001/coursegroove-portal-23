@@ -132,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Login with demo account
+  // Login with demo account - enhanced for better redirection
   const loginWithDemo = async (account: any, callback?: () => void): Promise<User> => {
     try {
       setIsLoggingIn(true);
@@ -155,8 +155,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log("✅ Demo login successful:", account.email);
       
-      // The user will be set by the auth state change listener
-      if (callback) callback();
+      // Pre-determine expected role based on email for more reliable redirection
+      let targetPath = "/demo-redirect"; // Default to our specialized redirection component
+      
+      const email = account.email.toLowerCase();
+      if (email.includes('prof') || email.includes('instructor')) {
+        console.log("👨‍🏫 Demo compte détecté: instructeur");
+        targetPath = "/instructor";
+      } 
+      else if (email.includes('admin')) {
+        console.log("👑 Demo compte détecté: administrateur");
+        targetPath = "/admin";
+      } 
+      else if (email.includes('business') || email.includes('entreprise')) {
+        console.log("🏢 Demo compte détecté: entreprise");
+        targetPath = "/entreprise";
+      } 
+      else if (email.includes('employee')) {
+        console.log("👔 Demo compte détecté: employé");
+        targetPath = "/employee";
+      }
+      
+      // Execute custom callback if provided, otherwise use our path-based callback
+      if (callback) {
+        callback();
+      } else {
+        // Use a small timeout to ensure authentication state has propagated
+        setTimeout(() => {
+          window.location.href = targetPath;
+        }, 250);
+      }
       
       // We need to fetch the user here because the auth state listener might not have fired yet
       const user = await getCurrentUser();
