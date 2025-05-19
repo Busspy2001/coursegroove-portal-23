@@ -92,20 +92,36 @@ export function useInstructorData(): UseInstructorDataReturn {
   ]);
 
   useEffect(() => {
-    if (hasRole("instructor")) {
-      // Simulate API call to fetch instructor dashboard data
+    const isDemoInstructor = currentUser?.is_demo && 
+      currentUser?.email?.toLowerCase().includes('prof');
+    
+    // Load data both for instructor role and demo instructor accounts
+    if (hasRole("instructor") || isDemoInstructor) {
+      console.log("Chargement des données du tableau de bord instructeur...");
       setLoading(true);
-      setTimeout(() => {
+      
+      // Simulate API call with a limited timeout to avoid infinite loading
+      const timeout = setTimeout(() => {
+        console.log("Données du tableau de bord instructeur chargées");
         setLoading(false);
-      }, 500);
+      }, 1000);
+      
+      // Cleanup timeout if component unmounts
+      return () => clearTimeout(timeout);
+    } else {
+      // Set loading to false if user is not an instructor
+      setLoading(false);
     }
   }, [currentUser, hasRole]);
 
   const refetch = () => {
+    console.log("Actualisation des données instructeur...");
     setLoading(true);
+    
     setTimeout(() => {
+      console.log("Données actualisées");
       setLoading(false);
-    }, 500);
+    }, 800);
   };
 
   return {

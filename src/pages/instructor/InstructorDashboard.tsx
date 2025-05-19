@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,27 @@ const adaptCourses = (instructorCourses: any[]): Course[] => {
 const InstructorDashboard = () => {
   const { loading, stats, courses, refetch } = useInstructorData();
   const navigate = useNavigate();
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Ensure we don't get stuck in a loading state
+  useEffect(() => {
+    // Set a timeout to force load completion after 3 seconds if still loading
+    const timer = setTimeout(() => {
+      if (!initialLoadComplete) {
+        setInitialLoadComplete(true);
+        console.log("Force-completing instructor dashboard load after timeout");
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [initialLoadComplete]);
+  
+  // Mark load as complete when data arrives
+  useEffect(() => {
+    if (!loading && stats && courses) {
+      setInitialLoadComplete(true);
+    }
+  }, [loading, stats, courses]);
   
   // Mock data for charts
   const revenueData = [
@@ -70,8 +92,11 @@ const InstructorDashboard = () => {
   // Convert InstructorCourse[] to Course[]
   const adaptedCourses = adaptCourses(courses);
 
+  // Use either the actual loading state or our safety timeout state
+  const effectiveLoading = loading && !initialLoadComplete;
+
   return (
-    <InstructorLayout loading={loading}>
+    <InstructorLayout loading={effectiveLoading}>
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Tableau de bord</h1>
         <p className="text-muted-foreground">

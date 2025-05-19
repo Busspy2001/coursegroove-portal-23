@@ -12,6 +12,7 @@ const AuthRedirect: React.FC = () => {
     if (isLoading) return;
     
     if (!isAuthenticated || !currentUser) {
+      console.log("Utilisateur non authentifié, redirection vers /login");
       navigate("/login", { replace: true });
       return;
     }
@@ -20,10 +21,17 @@ const AuthRedirect: React.FC = () => {
     const isDemoInstructor = currentUser.is_demo && 
       currentUser.email?.toLowerCase().includes('prof');
     
+    console.log(`Redirection basée sur le rôle: ${JSON.stringify({
+      roles: currentUser.roles,
+      isDemoInstructor,
+      email: currentUser.email
+    })}`);
+    
     // Redirect based on user role
     if (hasRole("admin") || hasRole("super_admin")) {
       navigate("/admin", { replace: true });
     } else if (hasRole("instructor") || isDemoInstructor) {
+      console.log("Redirection vers /instructor");
       navigate("/instructor", { replace: true });
     } else if (hasRole("business_admin")) {
       navigate("/entreprise", { replace: true });

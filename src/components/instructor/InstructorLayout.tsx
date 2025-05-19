@@ -34,18 +34,22 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
   // States for authentication and role warnings
   const [showAuthWarning, setShowAuthWarning] = useState(false);
   const [showRoleWarning, setShowRoleWarning] = useState(false);
+  const [isLayoutLoading, setIsLayoutLoading] = useState(true);
 
   // Show warnings instead of redirecting
   useEffect(() => {
     if (!isAuthenticated) {
       setShowAuthWarning(true);
       setShowRoleWarning(false);
+      setIsLayoutLoading(false);
     } else if (!hasInstructorAccess) {
       setShowAuthWarning(false);
       setShowRoleWarning(true);
+      setIsLayoutLoading(false);
     } else {
       setShowAuthWarning(false);
       setShowRoleWarning(false);
+      setIsLayoutLoading(false);
     }
   }, [isAuthenticated, hasInstructorAccess]);
 
@@ -103,6 +107,7 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
     );
   }
 
+  // Show loading state only when explicitly passed as prop, not for layout initialization
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">

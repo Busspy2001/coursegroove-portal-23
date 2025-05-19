@@ -60,53 +60,70 @@ const DemoRedirect = () => {
       if (roles.includes('instructor')) {
         console.log("👨‍🏫 Redirection par rôle vers le tableau de bord instructeur");
         navigate("/instructor", { replace: true });
+        return;
       } 
-      else if (roles.includes('admin') || roles.includes('super_admin')) {
+      
+      if (roles.includes('admin') || roles.includes('super_admin')) {
         console.log("👑 Redirection par rôle vers le tableau de bord administrateur");
         navigate("/admin", { replace: true });
+        return;
       } 
-      else if (roles.includes('business_admin')) {
+      
+      if (roles.includes('business_admin')) {
         console.log("🏢 Redirection par rôle vers le tableau de bord entreprise");
         navigate("/entreprise", { replace: true });
+        return;
       } 
-      else if (roles.includes('employee')) {
+      
+      if (roles.includes('employee')) {
         console.log("👔 Redirection par rôle vers le tableau de bord employé");
         navigate("/employee", { replace: true });
+        return;
       }
-      else if (roles.includes('student')) {
+      
+      if (roles.includes('student')) {
         console.log("🎓 Redirection par rôle vers le tableau de bord étudiant");
         navigate("/student", { replace: true });
+        return;
       }
-      // No role or special case - try to detect from email
-      else if (currentUser.is_demo) {
+      
+      // No role or special case - try to detect from email for demo accounts
+      if (currentUser.is_demo) {
         // Explicit redirection based on email patterns
         if (email.includes('prof') || email.includes('instructor')) {
           console.log("👨‍🏫 Redirection par email vers le tableau de bord instructeur");
           navigate("/instructor", { replace: true });
+          return;
         } 
-        else if (email.includes('admin')) {
+        
+        if (email.includes('admin')) {
           console.log("👑 Redirection par email vers le tableau de bord administrateur");
           navigate("/admin", { replace: true });
+          return;
         } 
-        else if (email.includes('business') || email.includes('entreprise')) {
+        
+        if (email.includes('business') || email.includes('entreprise')) {
           console.log("🏢 Redirection par email vers le tableau de bord entreprise");
           navigate("/entreprise", { replace: true });
+          return;
         } 
-        else if (email.includes('employee')) {
+        
+        if (email.includes('employee')) {
           console.log("👔 Redirection par email vers le tableau de bord employé");
           navigate("/employee", { replace: true });
+          return;
         } 
-        else {
-          console.log("🎓 Redirection par défaut vers le tableau de bord étudiant");
-          navigate("/student", { replace: true });
-        }
-      } 
-      else {
-        // Default fallback if nothing else matches
-        console.log("🎓 Redirection vers le tableau de bord par défaut (étudiant)");
+        
+        console.log("🎓 Redirection par défaut vers le tableau de bord étudiant");
         navigate("/student", { replace: true });
-      }
-    }, 500); // Increased delay for more stability
+        return;
+      } 
+      
+      // Default fallback if nothing else matches
+      console.log("🎓 Redirection vers le tableau de bord par défaut (étudiant)");
+      navigate("/student", { replace: true });
+      
+    }, 500); // Delay for more stability
     
     return () => clearTimeout(redirectTimer);
   }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt, redirectStarted]);
