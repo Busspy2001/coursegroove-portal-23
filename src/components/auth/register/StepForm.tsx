@@ -1,118 +1,118 @@
 
-import React, { useState } from "react";
+import React, { useState, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+interface Step {
+  title: string;
+  component: ReactNode;
+  isValid: boolean;
+}
+
 interface StepFormProps {
-  steps: {
-    title: string;
-    description?: string;
-    component: React.ReactNode;
-    isValid?: boolean;
-  }[];
-  onComplete: () => void;
+  steps: Step[];
+  onComplete: () => void;  // This expects a function with no parameters
   submitLabel?: string;
 }
 
-export const StepForm: React.FC<StepFormProps> = ({
-  steps,
-  onComplete,
-  submitLabel = "Terminer",
-}) => {
+export const StepForm: React.FC<StepFormProps> = ({ steps, onComplete, submitLabel = "Submit" }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      onComplete();
-    }
-  };
-  
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-  
   const isLastStep = currentStep === steps.length - 1;
-  const currentStepData = steps[currentStep];
-  const isStepValid = currentStepData.isValid !== undefined ? currentStepData.isValid : true;
+  const isFirstStep = currentStep === 0;
+  
+  const handleNext = () => {
+    if (isLastStep) {
+      onComplete();
+      return;
+    }
+    setCurrentStep(prev => prev + 1);
+  };
+  
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(0, prev - 1));
+  };
+
+  const variants = {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 }
+  };
 
   return (
-    <div className="space-y-4">
-      {/* Progress bar */}
-      <div className="mb-6">
-        <div className="flex justify-between mb-2">
+    <div className="space-y-6">
+      {/* Progress indicator */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
           {steps.map((step, index) => (
-            <div 
-              key={index} 
-              className={`text-xs font-medium ${index === currentStep ? 'text-primary' : 'text-muted-foreground'}`}
-            >
-              {index + 1}
-            </div>
+            <React.Fragment key={index}>
+              <div 
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  index === currentStep ? "bg-primary" : 
+                  index < currentStep ? "bg-primary/60" : "bg-gray-300 dark:bg-gray-600"
+                }`}
+              />
+              {index < steps.length - 1 && (
+                <div 
+                  className={`w-8 h-0.5 mx-1 transition-colors ${
+                    index < currentStep ? "bg-primary/60" : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                />
+              )}
+            </React.Fragment>
           ))}
         </div>
-        <div className="w-full bg-muted h-1 rounded-full">
-          <motion.div 
-            className="bg-primary h-1 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-        <div className="flex justify-between mt-1">
-          {steps.map((step, index) => (
-            <div 
-              key={index} 
-              className={`text-xs ${index === currentStep ? 'text-primary' : 'text-muted-foreground'}`}
-            >
-              {step.title}
-            </div>
-          ))}
-        </div>
+        <span className="text-sm text-muted-foreground font-medium">
+          {currentStep + 1}/{steps.length}
+        </span>
       </div>
-
+      
+      {/* Step title */}
+      <motion.h3
+        key={`title-${currentStep}`}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="font-medium text-lg text-center mb-4"
+      >
+        {steps[currentStep].title}
+      </motion.h3>
+      
       {/* Step content */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -10 }}
-          transition={{ duration: 0.2 }}
-          className="min-h-[200px]"
+          key={`step-${currentStep}`}
+          variants={variants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.3 }}
+          className="min-h-[300px]"
         >
-          {currentStepData.description && (
-            <p className="text-sm text-muted-foreground mb-4">{currentStepData.description}</p>
-          )}
-          {currentStepData.component}
+          {steps[currentStep].component}
         </motion.div>
       </AnimatePresence>
-
-      {/* Navigation */}
+      
+      {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
         <Button
-          type="button"
-          variant="ghost"
-          onClick={prevStep}
-          className={`${currentStep === 0 ? 'invisible' : ''}`}
-          size="sm"
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={isFirstStep}
+          className={`${isFirstStep ? 'opacity-0 pointer-events-none' : ''} transition-opacity`}
         >
-          <ChevronLeft className="mr-1 h-4 w-4" /> Retour
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Précédent
         </Button>
         
-        <Button
-          type="button"
-          onClick={nextStep}
-          disabled={!isStepValid}
+        <Button 
+          onClick={handleNext}
+          disabled={!steps[currentStep].isValid}
           className="ml-auto"
-          size="sm"
         >
           {isLastStep ? submitLabel : (
             <>
-              Suivant <ChevronRight className="ml-1 h-4 w-4" />
+              Suivant
+              <ChevronRight className="w-4 h-4 ml-2" />
             </>
           )}
         </Button>

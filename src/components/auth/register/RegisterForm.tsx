@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -47,6 +46,12 @@ export const RegisterForm = ({ profileType = "student" }: RegisterFormProps) => 
       opacity: 1,
       transition: { staggerChildren: 0.05 }
     }
+  };
+
+  // Create a wrapper function for StepForm onComplete that doesn't take any arguments
+  const handleFormComplete = () => {
+    // Call handleRegister with a synthetic event
+    handleRegister(new Event('submit') as unknown as React.FormEvent);
   };
 
   // For step form
@@ -137,7 +142,7 @@ export const RegisterForm = ({ profileType = "student" }: RegisterFormProps) => 
     return (
       <StepForm 
         steps={steps}
-        onComplete={handleRegister}
+        onComplete={handleFormComplete} // Fixed: Use the wrapper function with no parameters
         submitLabel="S'inscrire"
       />
     );
