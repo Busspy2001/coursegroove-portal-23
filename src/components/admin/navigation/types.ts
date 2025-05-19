@@ -17,6 +17,7 @@ export interface AdminNavItem {
 export interface AdminNavGroup {
   label: string;
   items: AdminNavItem[];
+  requiredRoles?: UserRole[]; // Added this property to fix the error
 }
 
 // Updated to use the hasRole function from context

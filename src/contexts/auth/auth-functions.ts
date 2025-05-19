@@ -54,7 +54,7 @@ export const handleLogin = async (
       throw new Error("Une erreur s'est produite lors de la connexion.");
     }
 
-    // Get user profile with role
+    // Get user profile with roles
     const { data: profile, error: profileError } = await supabase
       .from('profiles_unified')
       .select('*')
@@ -66,12 +66,22 @@ export const handleLogin = async (
       // Continue anyway with limited user info
     }
 
+    // Fetch user roles from our new system
+    const { data: roleData, error: roleError } = await supabase
+      .rpc('get_user_roles', { _user_id: data.user.id });
+      
+    if (roleError) {
+      console.error("❌ Erreur lors de la récupération des rôles:", roleError);
+    }
+    
+    const roles = roleData || [];
+
     // Create user object
     const user: User = {
       id: data.user.id,
       email: data.user.email || "",
       name: profile?.full_name || "",
-      role: profile?.role || "student",
+      roles: roles.length > 0 ? roles : (profile?.role ? [profile.role] : ['student']),
       is_demo: profile?.is_demo || false,
       avatar: profile?.avatar_url,
       company_id: profile?.company_id
@@ -86,7 +96,7 @@ export const handleLogin = async (
       callback();
     }
 
-    console.log(`✅ Connexion réussie pour: ${email} (${user.role})`);
+    console.log(`✅ Connexion réussie pour: ${email} (${user.roles.join(', ')})`);
     return user;
 
   } catch (error) {
@@ -157,7 +167,7 @@ export const handleLoginWithDemo = async (
       id: data.user.id,
       email: account.email,
       name: account.name,
-      role: account.role,
+      roles: [account.role], // Convert single role to array
       is_demo: true,
       avatar: account.avatar
     };
@@ -223,7 +233,7 @@ export const handleRegister = async (
       id: data.user.id,
       email: data.user.email || "",
       name: name,
-      role: "student", // By default, new users are students
+      roles: ["student"], // Default roles for new users
       is_demo: false
     };
 

@@ -36,10 +36,15 @@ const DemoRedirect = () => {
       setRedirectAttempt(prev => prev + 1);
       
       // Log information for debugging
-      console.log(`🧭 Redirection intelligente pour: ${currentUser.email} (${currentUser.role})`);
+      console.log(`🧭 Redirection intelligente pour: ${currentUser.email} (${currentUser.roles?.join(', ')})`);
+      
+      // Get primary role for redirection
+      const primaryRole = currentUser.roles && currentUser.roles.length > 0 
+        ? currentUser.roles[0] 
+        : 'student';
       
       // Redirect based on role with replace: true to prevent back button issues
-      switch(currentUser.role) {
+      switch(primaryRole) {
         case "student":
           console.log("🏫 Redirection vers le tableau de bord étudiant");
           navigate("/dashboard", { replace: true });

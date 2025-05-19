@@ -54,7 +54,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
           <h2 className="text-xl font-bold">{currentUser?.name}</h2>
           <p className="text-sm text-muted-foreground mb-1">{currentUser?.email}</p>
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 capitalize">
-            {currentUser?.role}
+            {currentUser?.roles && currentUser.roles.length > 0 ? currentUser.roles[0] : 'student'}
           </span>
         </div>
         

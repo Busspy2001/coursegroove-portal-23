@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -15,7 +14,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AdminDashboard = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showAuthWarning, setShowAuthWarning] = useState(false);
@@ -29,7 +28,7 @@ const AdminDashboard = () => {
       setIsLoading(true);
       
       console.log("AdminDashboard - Authenticated:", isAuthenticated);
-      console.log("AdminDashboard - Current user role:", currentUser?.role);
+      console.log("AdminDashboard - Current user roles:", currentUser?.roles);
       
       if (!isAuthenticated) {
         console.log("Non authentifié, affichage de l'avertissement");
@@ -39,17 +38,17 @@ const AdminDashboard = () => {
       } 
       
       // Check if user has admin permissions (super_admin, admin, or business_admin)
-      const validAdminRoles = ["super_admin", "admin", "business_admin"];
-      const hasAdminPermission = currentUser?.role && validAdminRoles.includes(currentUser.role);
+      const validAdminRoles: UserRole[] = ["super_admin", "admin", "business_admin"];
+      const hasAdminPermission = validAdminRoles.some(role => hasRole(role));
       
       if (!hasAdminPermission) {
-        console.log(`Utilisateur avec rôle ${currentUser?.role} n'a pas accès à l'administration`);
+        console.log(`Utilisateur avec rôles ${currentUser?.roles?.join(', ')} n'a pas accès à l'administration`);
         setShowRoleWarning(true);
         setIsLoading(false);
         return;
       }
       
-      console.log(`Utilisateur admin confirmé: ${currentUser?.role}`);
+      console.log(`Utilisateur admin confirmé: ${currentUser?.roles?.join(', ')}`);
       
       // Welcome toast for admin users
       toast({
@@ -61,7 +60,7 @@ const AdminDashboard = () => {
     };
     
     checkAuth();
-  }, [isAuthenticated, currentUser, navigate]);
+  }, [isAuthenticated, currentUser, navigate, hasRole]);
 
   const handleLogin = () => {
     navigate("/login", { state: { returnUrl: "/admin" } });
@@ -84,6 +83,13 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  // Get primary role for display
+  const userPrimaryRole = currentUser?.roles && currentUser.roles.length > 0 
+    ? currentUser.roles[0] as UserRole 
+    : 'student' as UserRole;
+  
+  const userName = currentUser?.name || "";
 
   // Authentication warning
   if (showAuthWarning) {
@@ -154,14 +160,10 @@ const AdminDashboard = () => {
     );
   }
 
-  // Cast role to a valid UserRole when it's known to be a valid role at this point
-  const userRole = currentUser?.role as UserRole;
-  const userName = currentUser?.name || "";
-
   return (
     <AdminLayout>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-        <AdminHeader role={userRole} name={userName} />
+        <AdminHeader role={userPrimaryRole} name={userName} />
         <Button 
           variant="outline" 
           size="sm"
