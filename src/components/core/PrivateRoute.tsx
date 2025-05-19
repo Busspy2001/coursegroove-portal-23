@@ -63,7 +63,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
     } else if (hasRole('business_admin')) {
       return <Navigate to="/entreprise" replace />;
     } else if (hasRole('employee')) {
-      return <Navigate to="/employee" replace />;
+      return <Navigate to="/employe" replace />; // Changed from "/employee" to "/employe"
     } else {
       return <Navigate to="/student" replace />;
     }

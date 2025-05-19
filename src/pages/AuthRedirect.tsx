@@ -36,7 +36,7 @@ const AuthRedirect: React.FC = () => {
     } else if (hasRole("business_admin")) {
       navigate("/entreprise", { replace: true });
     } else if (hasRole("employee")) {
-      navigate("/employee", { replace: true });
+      navigate("/employe", { replace: true }); // Changed from "/employee" to "/employe"
     } else {
       // Default to student dashboard
       navigate("/student", { replace: true });

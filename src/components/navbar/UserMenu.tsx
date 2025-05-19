@@ -104,7 +104,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     } else if (currentUser?.roles?.includes("business_admin")) {
       return "/entreprise";
     } else if (currentUser?.roles?.includes("employee")) {
-      return "/employee";
+      return "/employe"; // Changed from "/employee" to "/employe"
     } else {
       return "/student";
     }
@@ -199,6 +199,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             <DropdownMenuItem onClick={() => navigate("/entreprise")} className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               Gestion d'entreprise
+            </DropdownMenuItem>
+          )}
+          {currentUser?.roles?.includes("employee") && (
+            <DropdownMenuItem onClick={() => navigate("/employe")} className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              Espace employé
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
