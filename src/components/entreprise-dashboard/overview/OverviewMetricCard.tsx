@@ -14,6 +14,7 @@ interface OverviewMetricCardProps {
   description: string;
   icon: LucideIcon;
   trend?: TrendInfo;
+  onClick?: () => void;
 }
 
 export const OverviewMetricCard: React.FC<OverviewMetricCardProps> = ({
@@ -21,10 +22,11 @@ export const OverviewMetricCard: React.FC<OverviewMetricCardProps> = ({
   value,
   description,
   icon: Icon,
-  trend
+  trend,
+  onClick
 }) => {
   return (
-    <Card>
+    <Card className={onClick ? "cursor-pointer transition-shadow hover:shadow-md" : ""} onClick={onClick}>
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
           <div className="rounded-md p-2 bg-primary/10">
