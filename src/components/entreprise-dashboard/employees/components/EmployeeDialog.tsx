@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +11,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Department, Employee } from "@/services/supabase-business-data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Employee, Department } from "@/services/supabase-business-data";
 
 interface EmployeeDialogProps {
   isOpen: boolean;
@@ -24,106 +30,103 @@ interface EmployeeDialogProps {
   onInputChange: (field: string, value: string) => void;
 }
 
-export const EmployeeDialog: React.FC<EmployeeDialogProps> = ({
+export const EmployeeDialog = ({
   isOpen,
   onClose,
   onSubmit,
   isEditMode,
   currentEmployee,
   departments,
-  onInputChange
-}) => {
+  onInputChange,
+}: EmployeeDialogProps) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             {isEditMode ? "Modifier un employé" : "Ajouter un employé"}
           </DialogTitle>
           <DialogDescription>
-            {isEditMode 
-              ? "Modifiez les informations de cet employé." 
-              : "Ajoutez un nouvel employé à votre entreprise."}
+            {isEditMode
+              ? "Modifiez les informations de l'employé ci-dessous."
+              : "Remplissez le formulaire pour ajouter un nouvel employé."}
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nom
-            </Label>
-            <Input
-              id="name"
-              placeholder="Nom complet"
-              className="col-span-3"
-              value={currentEmployee.full_name || ""}
-              onChange={(e) => onInputChange("full_name", e.target.value)}
-              disabled={isEditMode}
-              required
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              placeholder="email@exemple.com"
-              type="email"
-              className="col-span-3"
-              value={currentEmployee.email || ""}
-              onChange={(e) => onInputChange("email", e.target.value)}
-              disabled={isEditMode}
-              required
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="department" className="text-right">
-              Département
-            </Label>
-            <Select
-              value={currentEmployee.department_id || ""}
-              onValueChange={(value) => onInputChange("department_id", value)}
-            >
-              <SelectTrigger id="department" className="col-span-3">
-                <SelectValue placeholder="Sélectionner un département" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Aucun département</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="job-title" className="text-right">
-              Titre
-            </Label>
-            <Input
-              id="job-title"
-              placeholder="Titre ou fonction"
-              className="col-span-3"
-              value={currentEmployee.job_title || ""}
-              onChange={(e) => onInputChange("job_title", e.target.value)}
-            />
-          </div>
-          
-          {isEditMode && (
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
+              <Label htmlFor="name" className="col-span-1">
+                Nom complet
+              </Label>
+              <Input
+                id="name"
+                value={currentEmployee.full_name || ""}
+                onChange={(e) => onInputChange("full_name", e.target.value)}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="col-span-1">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={currentEmployee.email || ""}
+                onChange={(e) => onInputChange("email", e.target.value)}
+                className="col-span-3"
+                required
+                disabled={isEditMode} // Email shouldn't change for existing employees
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="department" className="col-span-1">
+                Département
+              </Label>
+              <Select
+                value={currentEmployee.department_id || ""}
+                onValueChange={(value) => onInputChange("department_id", value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionner un département" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((department) => (
+                    <SelectItem key={department.id} value={department.id}>
+                      {department.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="col-span-1">
+                Titre
+              </Label>
+              <Input
+                id="title"
+                value={currentEmployee.job_title || ""}
+                onChange={(e) => onInputChange("job_title", e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="col-span-1">
                 Statut
               </Label>
               <Select
                 value={currentEmployee.status || "active"}
-                onValueChange={(value) => onInputChange("status", value)}
+                onValueChange={(value) =>
+                  onInputChange("status", value as "active" | "inactive")
+                }
               >
-                <SelectTrigger id="status" className="col-span-3">
+                <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Sélectionner un statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -132,17 +135,13 @@ export const EmployeeDialog: React.FC<EmployeeDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
-          )}
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button onClick={onSubmit}>
-            {isEditMode ? "Mettre à jour" : "Ajouter"}
-          </Button>
-        </DialogFooter>
+          </div>
+          <DialogFooter>
+            <Button type="submit">
+              {isEditMode ? "Enregistrer" : "Ajouter"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

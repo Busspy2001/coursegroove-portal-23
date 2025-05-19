@@ -1,15 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { 
   Sidebar, 
   SidebarContent, 
-  SidebarFooter,
+  SidebarFooter, 
   SidebarHeader,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton
@@ -17,30 +14,25 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
-  LayoutDashboard,
-  User,
-  BookOpen,
-  GraduationCap,
-  Award,
-  HelpCircle,
+  LayoutDashboard, 
+  BookOpen, 
+  Award, 
+  User, 
   LogOut,
-  Moon,
-  Sun,
   Loader2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useTheme } from "@/hooks/use-theme";
 
 const EmployeeSidebar = () => {
   const { currentUser, logout, isLoggingOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
+  const [isExpanded, setIsExpanded] = useState(true);
   
   const handleLogout = async () => {
-    if (isLoggingOut) return;
-    
     try {
+      if (isLoggingOut) return;
+      
       await logout(() => {
         toast({
           title: "Déconnexion réussie",
@@ -65,63 +57,43 @@ const EmployeeSidebar = () => {
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
-
-  // Employee menu items
-  const menuGroups = [
+  
+  const menuItems = [
     {
-      label: "Formation",
-      items: [
-        {
-          title: "Tableau de bord",
-          path: "/employe",
-          icon: LayoutDashboard,
-          tooltip: "Vue d'ensemble de votre espace"
-        },
-        {
-          title: "Profil",
-          path: "/employe/profil",
-          icon: User,
-          tooltip: "Gérer votre profil et informations"
-        },
-        {
-          title: "Mes formations",
-          path: "/employe/formations",
-          icon: BookOpen,
-          tooltip: "Accéder à vos formations en cours"
-        }
-      ]
+      title: "Tableau de bord",
+      path: "/employe",
+      icon: LayoutDashboard
     },
     {
-      label: "Apprentissage",
-      items: [
-        {
-          title: "Catalogue",
-          path: "/employe/catalogue",
-          icon: GraduationCap,
-          tooltip: "Découvrir de nouvelles formations"
-        },
-        {
-          title: "Certifications",
-          path: "/employe/certifications",
-          icon: Award,
-          tooltip: "Gérer vos certifications"
-        }
-      ]
+      title: "Mes formations",
+      path: "/employe/formations",
+      icon: BookOpen
+    },
+    {
+      title: "Catalogue",
+      path: "/employe/catalogue",
+      icon: BookOpen
+    },
+    {
+      title: "Certifications",
+      path: "/employe/certifications",
+      icon: Award
+    },
+    {
+      title: "Mon profil",
+      path: "/employe/profil",
+      icon: User
     }
   ];
 
-  // User data
+  // Handle both name formats (name and full_name)
   const userName = currentUser?.full_name || currentUser?.name || "Employé";
   const userAvatar = currentUser?.avatar_url || currentUser?.avatar;
-  
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   return (
     <Sidebar>
-      <SidebarHeader className="flex justify-start items-center p-4 bg-white dark:bg-gray-900 border-b">
-        <Avatar className="h-10 w-10 mr-3 bg-schoolier-blue">
+      <SidebarHeader className="flex justify-start items-center p-4 bg-gray-50 dark:bg-gray-800">
+        <Avatar className="h-10 w-10 mr-2 bg-schoolier-teal">
           <AvatarImage src={userAvatar} alt={userName} />
           <AvatarFallback>{getInitials(userName)}</AvatarFallback>
         </Avatar>
@@ -133,56 +105,27 @@ const EmployeeSidebar = () => {
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="bg-white dark:bg-gray-900 py-2">
-        {menuGroups.map((group, idx) => (
-          <SidebarGroup key={idx}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton 
-                      onClick={() => navigate(item.path)}
-                      tooltip={item.tooltip}
-                      isActive={isActive(item.path)}
-                      className="w-full justify-start"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+      <SidebarContent className="bg-gray-50 dark:bg-gray-800">
+        <SidebarMenu>
+          {menuItems.map((item) => (
+            <SidebarMenuItem key={item.path}>
+              <SidebarMenuButton 
+                onClick={() => navigate(item.path)}
+                tooltip={item.title}
+                isActive={isActive(item.path)}
+                className="w-full justify-start"
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 bg-white dark:bg-gray-900 border-t space-y-3">
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex-1 justify-start"
-            onClick={() => navigate('/support')}
-          >
-            <HelpCircle className="mr-2 h-4 w-4" />
-            Aide
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="w-10 p-0"
-            onClick={toggleTheme}
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
-        </div>
-        
+      <SidebarFooter className="p-4 bg-gray-50 dark:bg-gray-800">
         <Button 
           variant="ghost" 
-          size="sm"
           className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900" 
           onClick={handleLogout}
           disabled={isLoggingOut}

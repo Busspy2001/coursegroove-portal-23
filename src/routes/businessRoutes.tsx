@@ -1,22 +1,37 @@
 
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
+import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
 import BusinessDashboard from "@/pages/entreprise/BusinessDashboard";
-import { Navigate } from "react-router-dom";
+import BusinessEmployees from "@/components/entreprise-dashboard/employees/BusinessEmployees";
+import BusinessDepartments from "@/components/business-dashboard/departments/BusinessDepartments";
+import BusinessSettings from "@/components/business-dashboard/settings/BusinessSettings";
 
-// Routes d'entreprise avec des URL en français
+// Use the BusinessLayout component for all business routes
+const WithBusinessLayout = ({ children }: { children: React.ReactNode }) => (
+  <BusinessLayout>{children}</BusinessLayout>
+);
+
 export const businessRoutes: RouteObject[] = [
   {
-    path: "/entreprise/*",
-    element: <BusinessDashboard />,
+    path: "/entreprise",
+    element: <WithBusinessLayout><BusinessDashboard /></WithBusinessLayout>
   },
-  // Redirection des routes en anglais vers les routes en français
+  {
+    path: "/entreprise/employes",
+    element: <WithBusinessLayout><BusinessEmployees /></WithBusinessLayout>
+  },
+  {
+    path: "/entreprise/departements",
+    element: <WithBusinessLayout><BusinessDepartments /></WithBusinessLayout>
+  },
+  {
+    path: "/entreprise/parametres",
+    element: <WithBusinessLayout><BusinessSettings /></WithBusinessLayout>
+  },
+  // Redirect from English routes to French routes
   {
     path: "/business",
-    element: <Navigate to="/entreprise" replace />
-  },
-  {
-    path: "/business/*",
-    element: <Navigate to="/entreprise" replace />
+    element: <WithBusinessLayout><BusinessDashboard /></WithBusinessLayout>
   }
 ];
