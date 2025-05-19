@@ -92,8 +92,8 @@ const BusinessSidebar = () => {
           tooltip: "Vue d'ensemble de votre espace entreprise"
         },
         {
-          title: "Employés",
-          path: "/entreprise/employes",
+          title: "Collaborateurs",
+          path: "/entreprise/collaborateurs",
           icon: Users,
           tooltip: "Gestion des membres et assignation de formations"
         },

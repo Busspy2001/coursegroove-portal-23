@@ -6,6 +6,8 @@ import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
 // Business pages
 const BusinessDashboard = lazy(() => import("@/pages/entreprise/BusinessDashboard"));
 const BusinessTrainings = lazy(() => import("@/components/entreprise-dashboard/trainings/BusinessTrainings"));
+const BusinessAddTraining = lazy(() => import("@/components/entreprise-dashboard/trainings/BusinessAddTraining"));
+const BusinessAssignTraining = lazy(() => import("@/components/entreprise-dashboard/trainings/BusinessAssignTraining"));
 const BusinessStatistics = lazy(() => import("@/components/entreprise-dashboard/statistics/BusinessStatistics"));
 const BusinessEmployees = lazy(() => import("@/components/entreprise-dashboard/employees/BusinessEmployees"));
 const BusinessDepartments = lazy(() => import("@/components/entreprise-dashboard/departments/BusinessDepartments"));
@@ -24,6 +26,14 @@ export const businessRoutes: RouteObject[] = [
       {
         path: "formations",
         element: <BusinessTrainings />
+      },
+      {
+        path: "formations/ajouter",
+        element: <BusinessAddTraining />
+      },
+      {
+        path: "formations/assigner",
+        element: <BusinessAssignTraining />
       },
       {
         path: "statistiques",
