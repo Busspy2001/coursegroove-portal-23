@@ -55,6 +55,9 @@ const BusinessSidebar = () => {
       await logout(() => {
         // Callback exécuté après déconnexion réussie
         console.log("✅ Redirection après déconnexion depuis BusinessSidebar");
+        // Réinitialiser explicitement l'état de déconnexion
+        setIsLoggingOut(false);
+        // Puis rediriger
         navigate("/login?logout=true", { replace: true });
       });
       

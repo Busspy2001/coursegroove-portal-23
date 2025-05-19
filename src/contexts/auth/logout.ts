@@ -27,6 +27,8 @@ export const executeLogout = async (
   // Prevent multiple logout attempts
   if (isLogoutInProgress) {
     console.log("⚠️ Déconnexion déjà en cours, ignorée");
+    // Ensure we reset the loading state if we're ignoring the request
+    setIsLoggingOut(false);
     return;
   }
   
@@ -107,6 +109,7 @@ export const executeLogout = async (
     });
     throw error;
   } finally {
+    // Always ensure we reset the loading state, whether there was success or failure
     setIsLoggingOut(false);
     console.log("🔄 Processus de déconnexion terminé");
     
