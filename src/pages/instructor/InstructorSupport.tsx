@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -52,7 +51,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const InstructorSupport = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
@@ -62,15 +61,15 @@ const InstructorSupport = () => {
   const [sending, setSending] = React.useState(false);
 
   // Redirect if not authenticated or not an instructor
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
-    } else if (currentUser?.role !== "instructor") {
+    } else if (!hasRole("instructor")) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, currentUser, navigate]);
+  }, [isAuthenticated, hasRole, navigate]);
 
-  if (!isAuthenticated || currentUser?.role !== "instructor") {
+  if (!isAuthenticated || !hasRole("instructor")) {
     return null;
   }
 

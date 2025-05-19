@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -33,22 +32,22 @@ import {
 } from "recharts";
 
 const InstructorStats = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
   const [period, setPeriod] = React.useState("30days");
   const [courseFilter, setCourseFilter] = React.useState("all");
 
   // Redirect if not authenticated or not an instructor
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
-    } else if (currentUser?.role !== "instructor") {
+    } else if (!hasRole("instructor")) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, currentUser, navigate]);
+  }, [isAuthenticated, hasRole, navigate]);
 
-  if (!isAuthenticated || currentUser?.role !== "instructor") {
+  if (!isAuthenticated || !hasRole("instructor")) {
     return null;
   }
 

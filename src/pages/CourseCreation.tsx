@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -27,7 +27,7 @@ const formSchema = z.object({
 });
 
 const CourseCreation = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
@@ -49,10 +49,10 @@ const CourseCreation = () => {
   React.useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
-    } else if (currentUser?.role !== "instructor") {
+    } else if (!hasRole("instructor")) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, currentUser, navigate]);
+  }, [isAuthenticated, currentUser, navigate, hasRole]);
 
   const handleThumbnailUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) return;
@@ -109,7 +109,7 @@ const CourseCreation = () => {
     }
   };
 
-  if (!isAuthenticated || currentUser?.role !== "instructor") {
+  if (!isAuthenticated || !hasRole("instructor")) {
     return null; // Return nothing during redirect
   }
 

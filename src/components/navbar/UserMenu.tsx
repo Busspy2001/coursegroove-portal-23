@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
@@ -13,12 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { UserRole } from "@/contexts/auth/types";
 
 interface User {
   name?: string;
   email?: string;
   avatar?: string;
-  role?: string;
+  roles?: UserRole[];
 }
 
 interface UserMenuProps {
@@ -50,25 +50,40 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     }
   };
   
+  // Get primary role
+  const primaryRole = currentUser?.roles && currentUser.roles.length > 0
+    ? currentUser.roles[0]
+    : "student";
+  
   // Function to get role badge color
-  const getRoleBadgeColor = (role?: string) => {
+  const getRoleBadgeColor = (role?: UserRole) => {
     switch (role) {
       case "instructor":
         return "bg-schoolier-teal hover:bg-schoolier-dark-teal";
       case "admin":
+      case "super_admin":
         return "bg-schoolier-blue hover:bg-schoolier-dark-blue";
+      case "business_admin":
+        return "bg-amber-500 hover:bg-amber-600";
+      case "employee":
+        return "bg-purple-500 hover:bg-purple-600";
       default:
         return "bg-schoolier-gray hover:bg-schoolier-dark-gray";
     }
   };
 
   // Function to get role display name
-  const getRoleDisplayName = (role?: string) => {
+  const getRoleDisplayName = (role?: UserRole) => {
     switch (role) {
       case "instructor":
         return "Instructeur";
       case "admin":
+      case "super_admin":
         return "Admin";
+      case "business_admin":
+        return "Admin Entreprise";
+      case "employee":
+        return "Employé";
       default:
         return "Étudiant";
     }
@@ -134,8 +149,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-spartan flex items-center justify-between">
             <span>Mon compte</span>
-            <Badge className={`text-xs ${getRoleBadgeColor(currentUser?.role)}`}>
-              {getRoleDisplayName(currentUser?.role)}
+            <Badge className={`text-xs ${getRoleBadgeColor(primaryRole)}`}>
+              {getRoleDisplayName(primaryRole)}
             </Badge>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -147,16 +162,22 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             <User className="mr-2 h-4 w-4" />
             Mon profil
           </DropdownMenuItem>
-          {currentUser?.role === "instructor" && (
+          {currentUser?.roles?.includes("instructor") && (
             <DropdownMenuItem onClick={() => navigate("/instructor")} className="cursor-pointer">
               <Book className="mr-2 h-4 w-4" />
               Espace instructeur
             </DropdownMenuItem>
           )}
-          {currentUser?.role === "admin" && (
+          {(currentUser?.roles?.includes("admin") || currentUser?.roles?.includes("super_admin")) && (
             <DropdownMenuItem onClick={() => navigate("/admin")} className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               Administration
+            </DropdownMenuItem>
+          )}
+          {currentUser?.roles?.includes("business_admin") && (
+            <DropdownMenuItem onClick={() => navigate("/entreprise")} className="cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              Gestion d'entreprise
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />

@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -69,16 +68,16 @@ const SocialLink = ({ platform, icon, placeholder, value, onChange }: SocialLink
 };
 
 const InstructorSettings = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   
   // Form states for profile
-  const [avatar, setAvatar] = React.useState<string>(currentUser?.avatar || "");
-  const [name, setName] = React.useState<string>(currentUser?.name || "");
-  const [email, setEmail] = React.useState<string>(currentUser?.email || "");
+  const [avatar, setAvatar] = React.useState<string>(null);
+  const [name, setName] = React.useState<string>(null);
+  const [email, setEmail] = React.useState<string>(null);
   const [bio, setBio] = React.useState<string>("Enseignant passionné avec plus de 10 ans d'expérience dans le développement web. Spécialiste JavaScript et technologies modernes.");
   const [expertise, setExpertise] = React.useState<string>("JavaScript, React, Node.js, Web Development");
   const [website, setWebsite] = React.useState<string>("https://example.com");
@@ -120,15 +119,15 @@ const InstructorSettings = () => {
   const [publicProfile, setPublicProfile] = React.useState<boolean>(true);
 
   // Rediriger si pas authentifié ou pas un instructeur
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
-    } else if (currentUser?.role !== "instructor") {
+    } else if (!hasRole("instructor")) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, currentUser, navigate]);
+  }, [isAuthenticated, hasRole, navigate]);
 
-  if (!isAuthenticated || currentUser?.role !== "instructor") {
+  if (!isAuthenticated || !hasRole("instructor")) {
     return null;
   }
 

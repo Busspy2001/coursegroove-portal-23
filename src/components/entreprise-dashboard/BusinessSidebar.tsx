@@ -161,8 +161,9 @@ const BusinessSidebar = () => {
   // Handle both name formats (name and full_name)
   const userName = currentUser?.full_name || currentUser?.name || "Entreprise";
   const userAvatar = currentUser?.avatar_url || currentUser?.avatar;
-  const userRole = currentUser?.role || "business_admin";
-  const roleDisplay = userRole === "business_admin" ? "Administrateur" : "Responsable";
+  const userRoles = currentUser?.roles || [];
+  const userPrimaryRole = userRoles.length > 0 ? userRoles[0] : 'business_admin';
+  const roleDisplay = userPrimaryRole === "business_admin" ? "Administrateur" : "Responsable";
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");

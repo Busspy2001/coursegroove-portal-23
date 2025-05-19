@@ -5,12 +5,12 @@ import { useAuth } from "@/contexts/auth";
 import { toast } from "@/hooks/use-toast";
 
 const BusinessDashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, hasRole } = useAuth();
   
   console.log("BusinessDashboard: Loading with user", currentUser);
   
   // Vérifier si l'utilisateur est un administrateur d'entreprise
-  if (!currentUser || currentUser.role !== "business_admin") {
+  if (!currentUser || !hasRole("business_admin")) {
     toast({
       title: "Accès refusé",
       description: "Vous devez être connecté en tant qu'administrateur d'entreprise pour accéder à ce tableau de bord.",

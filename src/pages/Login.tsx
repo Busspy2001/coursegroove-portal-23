@@ -74,7 +74,7 @@ const profileConfig = {
 type ProfileType = "student" | "instructor" | "business" | "employee";
 
 const Login = () => {
-  const { currentUser, isAuthenticated, isLoading } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, getUserPrimaryRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -100,13 +100,15 @@ const Login = () => {
 
     if (currentUser && isAuthenticated) {
       let destination = "/dashboard";
-      if (currentUser.role === 'instructor') {
+      const primaryRole = getUserPrimaryRole();
+      
+      if (primaryRole === 'instructor') {
         destination = "/instructor";
         console.log("👨‍🏫 Redirection vers le tableau de bord instructeur");
-      } else if (currentUser.role === 'super_admin') {
+      } else if (primaryRole === 'super_admin') {
         destination = "/admin";
         console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
-      } else if (currentUser.role === 'business_admin') {
+      } else if (primaryRole === 'business_admin') {
         destination = "/entreprise";
         console.log("🏢 Redirection vers le tableau de bord entreprise");
       } else {
@@ -115,7 +117,7 @@ const Login = () => {
 
       navigate(destination, { replace: true });
     }
-  }, [currentUser, isAuthenticated, navigate, location, isLoading]);
+  }, [currentUser, isAuthenticated, navigate, location, isLoading, getUserPrimaryRole]);
 
   const handleTabChange = (value: string) => {
     if (value === "register") {

@@ -7,7 +7,7 @@ export interface InstructorStats {
   totalStudents: number;
   monthlyRevenue: number;
   averageRating: number;
-  studentsTrend: number; // Added missing property
+  studentsTrend: number;
 }
 
 export interface InstructorCourse {
@@ -30,13 +30,13 @@ export interface UseInstructorDataReturn {
 
 export function useInstructorData(): UseInstructorDataReturn {
   const [loading, setLoading] = useState(true);
-  const { currentUser } = useAuth();
+  const { currentUser, hasRole } = useAuth();
   const [stats, setStats] = useState<InstructorStats>({
     totalCourses: 5,
     totalStudents: 457,
     monthlyRevenue: 2850,
     averageRating: 4.8,
-    studentsTrend: 12 // Added missing property
+    studentsTrend: 12
   });
   const [courses, setCourses] = useState<InstructorCourse[]>([
     {
@@ -92,14 +92,14 @@ export function useInstructorData(): UseInstructorDataReturn {
   ]);
 
   useEffect(() => {
-    if (currentUser?.role === "instructor") {
+    if (hasRole("instructor")) {
       // Simulate API call to fetch instructor dashboard data
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
       }, 500);
     }
-  }, [currentUser]);
+  }, [currentUser, hasRole]);
 
   const refetch = () => {
     setLoading(true);

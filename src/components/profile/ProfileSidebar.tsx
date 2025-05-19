@@ -35,6 +35,11 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
     }
   };
   
+  // Get the user's primary role
+  const primaryRole = currentUser?.roles && currentUser.roles.length > 0 
+    ? currentUser.roles[0] 
+    : 'student';
+  
   return (
     <div className="lg:col-span-1">
       <div className="p-6 border rounded-lg shadow-sm bg-card">
@@ -54,7 +59,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ currentUser, onLogout }
           <h2 className="text-xl font-bold">{currentUser?.name}</h2>
           <p className="text-sm text-muted-foreground mb-1">{currentUser?.email}</p>
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 capitalize">
-            {currentUser?.roles && currentUser.roles.length > 0 ? currentUser.roles[0] : 'student'}
+            {primaryRole}
           </span>
         </div>
         

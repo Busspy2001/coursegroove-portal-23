@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
@@ -9,17 +8,17 @@ import { Progress } from "@/components/ui/progress";
 import { Calendar, BookOpen, Award, Bell } from "lucide-react";
 
 const EmployeeDashboard = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if not authenticated or not an employee
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login", { state: { returnUrl: "/employe" } });
-    } else if (currentUser?.role !== "employee") {
+    } else if (!hasRole("employee")) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, currentUser, navigate]);
+  }, [isAuthenticated, currentUser, navigate, hasRole]);
 
   // Mock data (to be replaced with actual data from Supabase)
   const assignedCourses = [

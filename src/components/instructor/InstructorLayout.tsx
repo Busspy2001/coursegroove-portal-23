@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -20,7 +19,7 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
   children, 
   loading = false 
 }) => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAuthWarning, setShowAuthWarning] = useState(false);
@@ -30,10 +29,10 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
   useEffect(() => {
     if (!isAuthenticated) {
       setShowAuthWarning(true);
-    } else if (currentUser?.role !== "instructor") {
+    } else if (!hasRole("instructor")) {
       setShowRoleWarning(true);
     }
-  }, [isAuthenticated, currentUser]);
+  }, [isAuthenticated, currentUser, hasRole]);
 
   const handleLogin = () => {
     navigate("/login");

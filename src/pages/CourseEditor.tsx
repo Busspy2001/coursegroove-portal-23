@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/contexts/auth";
 import {
   Form,
   FormControl,
@@ -63,20 +63,16 @@ type CourseFormValues = z.infer<typeof courseSchema>;
 const CourseEditor = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { currentUser, isAuthenticated } = useAuth();
-  const { toast } = useToast();
-  const isEditing = !!courseId;
-
-  const {
-    loading,
-    course,
-    sections,
-    thumbnailUrl,
-    setThumbnailUrl,
-    saveCourse,
-    saveCourseContent,
-    uploadThumbnail,
-  } = useCourseEditor(courseId);
+  const { currentUser, isAuthenticated, hasRole } = useAuth();
+  
+  // Redirect if not authenticated or not an instructor
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    } else if (!hasRole("instructor")) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, currentUser, navigate, hasRole]);
 
   // Form setup with proper type
   const form = useForm<CourseFormValues>({
@@ -103,15 +99,6 @@ const CourseEditor = () => {
       setThumbnailUrl(course.thumbnail_url);
     }
   }, [course, form]);
-
-  // Redirect if not authenticated or not an instructor
-  React.useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-    } else if (currentUser?.role !== "instructor") {
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated, currentUser, navigate]);
 
   // Handle form submission with proper types
   const onSubmit = async (values: CourseFormValues) => {
@@ -163,7 +150,7 @@ const CourseEditor = () => {
     uploadThumbnail(file);
   };
 
-  if (!isAuthenticated || currentUser?.role !== "instructor") {
+  if (!isAuthenticated || !hasRole("instructor")) {
     return null; // Return nothing during redirect
   }
 
