@@ -46,16 +46,18 @@ const BusinessSidebar = () => {
   
   const handleLogout = async () => {
     try {
+      // Éviter les doubles clics
       if (isLoggingOut) return;
       
       setIsLoggingOut(true);
       console.log("🔄 Déconnexion depuis BusinessSidebar en cours...");
       
-      await logout();
+      await logout(() => {
+        // Callback exécuté après déconnexion réussie
+        console.log("✅ Redirection après déconnexion depuis BusinessSidebar");
+        navigate("/login?logout=true", { replace: true });
+      });
       
-      // Navigation après déconnexion réussie
-      console.log("✅ Redirection après déconnexion depuis BusinessSidebar");
-      navigate("/login?logout=true", { replace: true });
     } catch (error) {
       console.error("❌ Erreur lors de la déconnexion depuis BusinessSidebar:", error);
       toast({
@@ -63,7 +65,7 @@ const BusinessSidebar = () => {
         description: "Un problème est survenu lors de la déconnexion.",
         variant: "destructive",
       });
-    } finally {
+      // En cas d'erreur, réinitialiser l'état pour permettre une nouvelle tentative
       setIsLoggingOut(false);
     }
   };
