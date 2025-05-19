@@ -53,12 +53,18 @@ const BusinessSidebar = () => {
       console.log("🔄 Déconnexion depuis BusinessSidebar en cours...");
       
       await logout(() => {
-        // Callback exécuté après déconnexion réussie
+        // IMPORTANT: Ordre inversé - d'abord rediriger, puis réinitialiser l'état
+        // Cela permet d'éviter que la réinitialisation de l'état ne soit pas effectuée
+        // avant la navigation, ce qui pourrait laisser l'état "isLoggingOut" à true
         console.log("✅ Redirection après déconnexion depuis BusinessSidebar");
-        // Réinitialiser explicitement l'état de déconnexion
-        setIsLoggingOut(false);
-        // Puis rediriger
         navigate("/login?logout=true", { replace: true });
+        
+        // Réinitialiser l'état APRÈS la redirection pour s'assurer
+        // que les changements d'état ne sont pas perdus pendant la navigation
+        setTimeout(() => {
+          setIsLoggingOut(false);
+          console.log("✅ État de déconnexion réinitialisé après redirection");
+        }, 50);
       });
       
     } catch (error) {

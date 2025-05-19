@@ -65,15 +65,25 @@ export const executeLogout = async (
       } finally {
         clearTimeout(timeoutId);
         
-        // Force delete local storage Supabase tokens
+        // Force delete local storage Supabase tokens - plus aggressif pour garantir la déconnexion
         try {
+          // Vérifier tous les tokens potentiels et les supprimer
           const authToken = localStorage.getItem('sb-iigenwvxvvfoywrhbwms-auth-token');
           if (authToken) {
             console.log("🗑️ Suppression manuelle du token d'authentification");
             localStorage.removeItem('sb-iigenwvxvvfoywrhbwms-auth-token');
           }
+          
+          // Suppression plus agressive de tous les éléments qui pourraient contenir "auth"
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('auth') || key.includes('supabase'))) {
+              console.log(`🗑️ Suppression de clé localStorage potentielle: ${key}`);
+              localStorage.removeItem(key);
+            }
+          }
         } catch (e) {
-          console.error("❌ Erreur lors de la suppression du token:", e);
+          console.error("❌ Erreur lors de la suppression des tokens:", e);
         }
         
         // Clear cache after a small delay to ensure it doesn't interfere with logout
@@ -96,6 +106,7 @@ export const executeLogout = async (
     
     // Execute callback with slight delay to ensure auth state is updated
     if (callback) {
+      // Exécuter le callback avec un délai pour éviter des problèmes de synchronisation
       setTimeout(() => {
         callback();
       }, 100);
@@ -116,6 +127,7 @@ export const executeLogout = async (
     // Reset the logout flag after a short delay
     setTimeout(() => {
       isLogoutInProgress = false;
+      console.log("🔄 Flag de déconnexion réinitialisé");
     }, 500);
   }
 };
