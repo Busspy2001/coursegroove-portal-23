@@ -1,80 +1,48 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  MonthlyEngagementChart,
-  DepartmentComparisonChart,
-  CourseCompletionChart,
-  EmployeeProgressChart
-} from "./StatisticsCharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth";
+import { useCompanyData } from "../overview/useCompanyData";
+import { NoCompanyMessage } from "../employees/components/NoCompanyMessage";
+import { useNavigate } from "react-router-dom";
 
-const BusinessStatistics = () => {
+export const BusinessStatistics: React.FC = () => {
+  const { currentUser } = useAuth();
+  const { companyData, loading, stats } = useCompanyData(currentUser);
+  const navigate = useNavigate();
+  
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-8 bg-gray-200 animate-pulse rounded w-1/3"></div>
+        <div className="h-64 bg-gray-200 animate-pulse rounded"></div>
+      </div>
+    );
+  }
+
+  if (!companyData) {
+    return <NoCompanyMessage onNavigate={navigate} isDemoUser={currentUser?.is_demo === true} />;
+  }
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Statistiques et rapports</h1>
-        <p className="text-muted-foreground">Analysez les performances de formation de votre entreprise.</p>
+        <h1 className="text-2xl font-bold tracking-tight">Statistiques</h1>
+        <p className="text-muted-foreground">
+          Suivez les performances et l'évolution de vos employés
+        </p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-          <TabsTrigger value="departments">Par département</TabsTrigger>
-          <TabsTrigger value="courses">Par formation</TabsTrigger>
-          <TabsTrigger value="employees">Par employé</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Engagement mensuel</CardTitle>
-              <CardDescription>Heures de formation par mois</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <MonthlyEngagementChart />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="departments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Comparaison entre départements</CardTitle>
-              <CardDescription>Taux de complétion par département</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <DepartmentComparisonChart />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="courses" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Complétion des formations</CardTitle>
-              <CardDescription>Répartition par cours</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <CourseCompletionChart />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="employees" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Progression des employés</CardTitle>
-              <CardDescription>Heures de formation par employé (top 8)</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <EmployeeProgressChart />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyse des formations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Les statistiques et graphiques d'analyse apparaîtront ici.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
-
-export default BusinessStatistics;

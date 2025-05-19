@@ -6,6 +6,9 @@ import BusinessDashboard from "@/pages/entreprise/BusinessDashboard";
 import BusinessEmployees from "@/components/entreprise-dashboard/employees/BusinessEmployees";
 import BusinessDepartments from "@/components/entreprise-dashboard/departments/BusinessDepartments";
 import BusinessSettings from "@/components/business-dashboard/settings/BusinessSettings";
+import { BusinessTrainings } from "@/components/entreprise-dashboard/trainings/BusinessTrainings";
+import { BusinessStatistics } from "@/components/entreprise-dashboard/statistics/BusinessStatistics";
+import { BusinessBilling } from "@/components/entreprise-dashboard/billing/BusinessBilling";
 
 // Use the BusinessLayout component for all business routes
 const WithBusinessLayout = ({ children }: { children: React.ReactNode }) => (
@@ -28,6 +31,18 @@ export const businessRoutes: RouteObject[] = [
   {
     path: "/entreprise/parametres",
     element: <WithBusinessLayout><BusinessSettings /></WithBusinessLayout>
+  },
+  {
+    path: "/entreprise/formations",
+    element: <WithBusinessLayout><BusinessTrainings /></WithBusinessLayout>
+  },
+  {
+    path: "/entreprise/statistiques",
+    element: <WithBusinessLayout><BusinessStatistics /></WithBusinessLayout>
+  },
+  {
+    path: "/entreprise/facturation",
+    element: <WithBusinessLayout><BusinessBilling /></WithBusinessLayout>
   },
   // Redirect from English routes to French routes
   {
