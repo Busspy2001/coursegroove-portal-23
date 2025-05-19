@@ -9,6 +9,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { motion } from 'framer-motion';
 
 interface EmployeePaginationProps {
   currentPage: number;
@@ -79,51 +80,58 @@ export const EmployeePagination: React.FC<EmployeePaginationProps> = ({
   };
 
   return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious 
-            href="#" 
-            onClick={(e) => {
-              e.preventDefault();
-              if (currentPage > 1) onPageChange(currentPage - 1);
-            }} 
-            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-            aria-disabled={currentPage === 1}
-          />
-        </PaginationItem>
-        
-        {getPageNumbers().map((page, index) => (
-          <PaginationItem key={index}>
-            {page === 'ellipsis' ? (
-              <span className="flex h-9 w-9 items-center justify-center">...</span>
-            ) : (
-              <PaginationLink 
-                href="#" 
-                isActive={page === currentPage}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onPageChange(page as number);
-                }}
-              >
-                {page}
-              </PaginationLink>
-            )}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (currentPage > 1) onPageChange(currentPage - 1);
+              }} 
+              className={`transition-all ${currentPage === 1 ? "pointer-events-none opacity-50" : "hover:bg-muted"}`}
+              aria-disabled={currentPage === 1}
+            />
           </PaginationItem>
-        ))}
-        
-        <PaginationItem>
-          <PaginationNext 
-            href="#" 
-            onClick={(e) => {
-              e.preventDefault();
-              if (currentPage < totalPages) onPageChange(currentPage + 1);
-            }} 
-            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-            aria-disabled={currentPage === totalPages}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+          
+          {getPageNumbers().map((page, index) => (
+            <PaginationItem key={index}>
+              {page === 'ellipsis' ? (
+                <span className="flex h-9 w-9 items-center justify-center text-muted-foreground">...</span>
+              ) : (
+                <PaginationLink 
+                  href="#" 
+                  isActive={page === currentPage}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPageChange(page as number);
+                  }}
+                  className="transition-all hover:bg-muted"
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          
+          <PaginationItem>
+            <PaginationNext 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) onPageChange(currentPage + 1);
+              }} 
+              className={`transition-all ${currentPage === totalPages ? "pointer-events-none opacity-50" : "hover:bg-muted"}`}
+              aria-disabled={currentPage === totalPages}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </motion.div>
   );
 };
