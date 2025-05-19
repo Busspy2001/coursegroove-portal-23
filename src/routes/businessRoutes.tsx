@@ -3,7 +3,7 @@ import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
 
-// Business pages
+// Business pages - Utilisons les chemins corrects pour les composants
 const BusinessDashboard = lazy(() => import("@/pages/entreprise/BusinessDashboard"));
 const BusinessTrainings = lazy(() => import("@/components/entreprise-dashboard/trainings/BusinessTrainings"));
 const BusinessAddTraining = lazy(() => import("@/components/entreprise-dashboard/trainings/BusinessAddTraining"));

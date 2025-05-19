@@ -27,6 +27,8 @@ const BusinessDashboard = () => {
   const { loading, error, stats } = useOverviewData();
   const navigate = useNavigate();
 
+  console.log("Rendering BusinessDashboard component", { currentUser, loading, error, stats });
+
   if (loading) {
     return <LoadingMessage message="Chargement du tableau de bord..." />;
   }

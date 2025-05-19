@@ -1,79 +1,115 @@
 
 import React, { useState } from 'react';
-import { Conversation } from '@/types/message-types';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Message, Conversation } from '@/types/message-types';
+import { getMockMessagesForConversation } from '@/services/mock-messages-data';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Info, Send } from 'lucide-react';
 import MessageBubble from './MessageBubble';
-import { getMockMessagesForConversation } from '@/services/mock-messages-data';
 
 interface ChatWindowProps {
-  conversation: Conversation;
-  onBack?: () => void;
+  activeConversation: Conversation | null;
 }
 
-const ChatWindow = ({ conversation, onBack }: ChatWindowProps) => {
-  const [newMessage, setNewMessage] = useState("");
-  const isMobile = useIsMobile();
-  const messages = getMockMessagesForConversation(conversation.id);
-  
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newMessage.trim()) {
-      console.log("Sending message:", newMessage);
-      setNewMessage("");
+export const ChatWindow: React.FC<ChatWindowProps> = ({ activeConversation }) => {
+  const [messages, setMessages] = useState<Message[]>(
+    activeConversation ? getMockMessagesForConversation(activeConversation.id) : []
+  );
+  const [newMessage, setNewMessage] = useState('');
+
+  // Update messages when conversation changes
+  React.useEffect(() => {
+    if (activeConversation) {
+      setMessages(getMockMessagesForConversation(activeConversation.id));
+    } else {
+      setMessages([]);
     }
+  }, [activeConversation]);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newMessage.trim() || !activeConversation) return;
+
+    // Add the new message
+    const newMsg: Message = {
+      id: `msg-new-${Date.now()}`,
+      content: newMessage,
+      sender: {
+        id: 'user-1',
+        name: 'Moi',
+        avatar: '',
+      },
+      timestamp: new Date(),
+      read: false,
+      isCurrentUser: true
+    };
+
+    setMessages([...messages, newMsg]);
+    setNewMessage('');
+
+    // Simulate a response after 1 second
+    setTimeout(() => {
+      if (!activeConversation) return;
+      
+      const responseMsg: Message = {
+        id: `msg-resp-${Date.now()}`,
+        content: `Merci pour votre message. Je vous répondrai prochainement.`,
+        sender: {
+          id: activeConversation.participant.id,
+          name: activeConversation.participant.name,
+          avatar: activeConversation.participant.avatar || '',
+        },
+        timestamp: new Date(),
+        read: true,
+        isCurrentUser: false
+      };
+      
+      setMessages(prev => [...prev, responseMsg]);
+    }, 1000);
   };
 
+  if (!activeConversation) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <p className="text-muted-foreground text-center">
+          Sélectionnez une conversation pour commencer à discuter
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
-      <div className="p-3 border-b flex items-center justify-between bg-white dark:bg-gray-900 shadow-sm">
-        {isMobile && onBack && (
-          <Button variant="ghost" size="icon" onClick={onBack} className="mr-2">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        )}
-        <div className="flex items-center">
-          <Avatar className="h-10 w-10 mr-3">
-            <AvatarImage src={conversation.participant.avatar} alt={conversation.participant.name} />
-            <AvatarFallback>{conversation.participant.name.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="text-sm font-medium">{conversation.participant.name}</h3>
-            <p className="text-xs text-muted-foreground">
-              {conversation.participant.role === 'instructor' ? 'Instructeur' : 
-              conversation.participant.role === 'admin' ? 'Administration' : 'Étudiant'}
-            </p>
+    <div className="flex-1 flex flex-col h-full border rounded-lg overflow-hidden">
+      {/* Chat header */}
+      <div className="p-3 border-b flex items-center gap-3 bg-white dark:bg-gray-950">
+        <div className="font-medium">{activeConversation.participant.name}</div>
+        {activeConversation.participant.role && (
+          <div className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-muted-foreground">
+            {activeConversation.participant.role}
           </div>
-        </div>
-        <Button variant="ghost" size="icon">
-          <Info className="h-5 w-5" />
-        </Button>
+        )}
       </div>
       
-      <ScrollArea className={`flex-grow overflow-y-auto px-4 py-2 ${isMobile ? "pb-20" : ""}`}>
-        <div className="pb-2">
+      {/* Message area */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
           {messages.map((message) => (
-            <MessageBubble 
-              key={message.id} 
-              message={message} 
-              isCurrentUser={message.sender.id === 'user-1'}
-            />
+            <MessageBubble key={message.id} message={message} />
           ))}
         </div>
       </ScrollArea>
       
-      <form onSubmit={sendMessage} className="p-3 border-t flex gap-2 bg-white dark:bg-gray-900">
+      {/* Message input */}
+      <form onSubmit={handleSendMessage} className="p-3 border-t flex gap-2 bg-white dark:bg-gray-950">
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Écrivez votre message..."
           className="flex-1"
         />
-        <Button type="submit" size="icon" className="shrink-0">
+        <Button type="submit" size="icon" disabled={!newMessage.trim()}>
           <Send className="h-4 w-4" />
         </Button>
       </form>

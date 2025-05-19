@@ -5,11 +5,9 @@ import BusinessSidebar from "./BusinessSidebar";
 import { BusinessAuthGuard } from "./BusinessAuthGuard";
 import { Outlet } from "react-router-dom";
 
-interface BusinessLayoutProps {
-  children?: ReactNode;
-}
-
-const BusinessLayout = ({ children }: BusinessLayoutProps) => {
+const BusinessLayout = () => {
+  console.log("Rendering BusinessLayout component");
+  
   return (
     <BusinessAuthGuard>
       <SidebarProvider>
@@ -19,7 +17,6 @@ const BusinessLayout = ({ children }: BusinessLayoutProps) => {
             <div className="flex-1 bg-gray-50 dark:bg-gray-800">
               <div className="container px-4 py-6 md:py-8 flex-grow max-w-7xl mx-auto">
                 <Outlet />
-                {children}
               </div>
             </div>
           </div>
