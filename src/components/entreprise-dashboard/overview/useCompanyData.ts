@@ -28,7 +28,12 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
   const [stats, setStats] = useState<BusinessStatistics | null>(null);
   
   // Get demo data if user is a demo account
-  const { demoCompanyData, demoStats } = useDemoCompanyData(currentUser);
+  const demoStats = useDemoCompanyData();
+  const demoCompanyData: Company = {
+    id: "demo-company",
+    name: "Entreprise de Démonstration",
+    admin_id: currentUser?.id || "demo-admin"
+  };
   
   // Fonction pour créer une entreprise de démonstration
   const createDemoCompany = useCallback(async () => {
@@ -214,15 +219,11 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
     loadData();
   }, [loadData]);
   
-  // Merge real data with demo data if needed
-  const finalCompanyData = companyData || demoCompanyData;
-  const finalStats = stats || demoStats;
-  
   return { 
     loading, 
     error,
-    companyData: finalCompanyData, 
-    stats: finalStats,
+    companyData: companyData || demoCompanyData, 
+    stats: stats || demoStats,
     refetch
   };
 };

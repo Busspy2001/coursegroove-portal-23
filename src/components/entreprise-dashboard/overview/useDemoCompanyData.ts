@@ -2,7 +2,7 @@
 import { BusinessStats } from './useOverviewData';
 
 export const useDemoCompanyData = (): BusinessStats => {
-  // Générer des dates relatives par rapport à la date actuelle
+  // Generate relative dates based on current date
   const now = new Date();
   const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString();
   const daysAhead = (days: number) => new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
