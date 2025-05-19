@@ -6,8 +6,21 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PlusCircle, Users, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
+import { NoCompanyMessage } from "../employees/components/NoCompanyMessage";
+import { useCompanyData } from "../overview/useCompanyData";
 
 const BusinessDepartments = () => {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const { companyData, loading, error } = useCompanyData(currentUser);
+  
+  // Show NoCompanyMessage if there's no company data
+  if (!loading && !companyData) {
+    return <NoCompanyMessage onNavigate={navigate} isDemoUser={currentUser?.is_demo === true} />;
+  }
+  
   // Données fictives des départements
   const departments = [
     { 
@@ -101,17 +114,26 @@ const BusinessDepartments = () => {
     return "bg-gray-100 text-gray-800 border-gray-300";
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-muted-foreground">Loading departments...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Départements</h1>
-          <p className="text-muted-foreground">Gérez vos équipes et suivez leur progression collective.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
+          <p className="text-muted-foreground">Manage your teams and track their collective progress.</p>
         </div>
         
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Créer un département
+          Create a department
         </Button>
       </div>
       
@@ -123,7 +145,7 @@ const BusinessDepartments = () => {
               <CardTitle className="text-xl">{department.name}</CardTitle>
               <CardDescription className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
-                <span>{department.employeeCount} employés</span>
+                <span>{department.employeeCount} employees</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -134,7 +156,7 @@ const BusinessDepartments = () => {
                   </Avatar>
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium">{department.manager}</p>
-                    <p className="text-xs text-muted-foreground">Responsable</p>
+                    <p className="text-xs text-muted-foreground">Manager</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1">
@@ -146,7 +168,7 @@ const BusinessDepartments = () => {
               
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progression globale</span>
+                  <span className="text-muted-foreground">Overall progress</span>
                   <span className="font-medium">{department.progress}%</span>
                 </div>
                 <Progress value={department.progress} />
@@ -155,11 +177,11 @@ const BusinessDepartments = () => {
               <div className="grid grid-cols-3 gap-2 pt-2">
                 <div className="space-y-1 text-center p-2 bg-gray-50 rounded-md">
                   <p className="text-xl font-semibold">{department.activeCoursesCount}</p>
-                  <p className="text-xs text-muted-foreground">Cours actifs</p>
+                  <p className="text-xs text-muted-foreground">Active courses</p>
                 </div>
                 <div className="space-y-1 text-center p-2 bg-gray-50 rounded-md">
                   <p className="text-xl font-semibold">{department.completedCoursesCount}</p>
-                  <p className="text-xs text-muted-foreground">Cours terminés</p>
+                  <p className="text-xs text-muted-foreground">Completed courses</p>
                 </div>
                 <div className="space-y-1 text-center p-2 bg-gray-50 rounded-md">
                   <div className="flex items-center justify-center">
@@ -172,7 +194,7 @@ const BusinessDepartments = () => {
               
               <div className="pt-2">
                 <Button variant="outline" className="w-full">
-                  Gérer le département
+                  Manage department
                 </Button>
               </div>
             </CardContent>

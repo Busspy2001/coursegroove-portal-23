@@ -10,7 +10,7 @@ const BusinessAddTraining = lazy(() => import("@/components/entreprise-dashboard
 const BusinessAssignTraining = lazy(() => import("@/components/entreprise-dashboard/trainings/BusinessAssignTraining"));
 const BusinessStatistics = lazy(() => import("@/components/entreprise-dashboard/statistics/BusinessStatistics"));
 const BusinessEmployees = lazy(() => import("@/components/entreprise-dashboard/employees/BusinessEmployees"));
-const BusinessDepartments = lazy(() => import("@/components/entreprise-dashboard/departments/BusinessDepartments"));
+const BusinessDepartments = lazy(() => import("@/components/business-dashboard/departments/BusinessDepartments"));
 const BusinessSettings = lazy(() => import("@/components/entreprise-dashboard/settings/BusinessSettings"));
 const BusinessBilling = lazy(() => import("@/components/entreprise-dashboard/billing/BusinessBilling"));
 
