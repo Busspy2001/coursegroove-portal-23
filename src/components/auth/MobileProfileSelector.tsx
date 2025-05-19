@@ -50,7 +50,7 @@ export const MobileProfileSelector: React.FC<MobileProfileSelectorProps> = ({ ac
   return (
     <div className="mb-4">
       <p className="text-sm text-center mb-3 text-muted-foreground">Type de compte</p>
-      <ScrollArea className="w-full pb-2" orientation="horizontal">
+      <ScrollArea className="w-full pb-2">
         <div className="flex space-x-2 px-1 pb-1 min-w-full">
           {profiles.map((profile) => (
             <ProfileButton
