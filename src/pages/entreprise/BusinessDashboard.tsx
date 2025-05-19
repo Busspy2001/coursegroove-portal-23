@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { NoCompanyMessage } from "@/components/entreprise-dashboard/employees/components/NoCompanyMessage";
 import { OverviewMetricCard } from "@/components/entreprise-dashboard/overview/OverviewMetricCard";
 import { OverviewActivityCard } from "@/components/entreprise-dashboard/overview/OverviewActivityCard";
+import { Users, BookOpen, Building2, Award } from "lucide-react";
 
 const BusinessDashboard = () => {
   const { currentUser } = useAuth();
@@ -46,28 +47,42 @@ const BusinessDashboard = () => {
         <OverviewMetricCard
           title="Employés actifs"
           value={stats?.total_employees?.toString() || "0"}
-          icon="users"
-          trend={"+2 ce mois"}
-          trendUp={true}
+          description="Membres de l'équipe"
+          icon={Users}
+          trend={{
+            value: "+2 ce mois",
+            positive: true
+          }}
         />
         <OverviewMetricCard
           title="Formations en cours"
           value={stats?.active_courses?.toString() || "0"}
-          icon="book"
-          trend={"+1 cette semaine"}
-          trendUp={true}
+          description="Cours suivis"
+          icon={BookOpen}
+          trend={{
+            value: "+1 cette semaine",
+            positive: true
+          }}
         />
         <OverviewMetricCard
           title="Départements"
           value={stats?.departments_count?.toString() || "0"}
-          icon="building"
+          description="Entités"
+          icon={Building2}
+          trend={{
+            value: "",
+            positive: true
+          }}
         />
         <OverviewMetricCard
           title="Taux de complétion"
           value={`${stats?.completion_rate || 0}%`}
-          icon="award"
-          trend={"+5% ce mois"}
-          trendUp={true}
+          description="Progression globale"
+          icon={Award}
+          trend={{
+            value: "+5% ce mois",
+            positive: true
+          }}
         />
       </div>
 
@@ -83,7 +98,7 @@ const BusinessDashboard = () => {
                   key={i}
                   type={activity.type}
                   message={activity.message}
-                  date={activity.date}
+                  timestamp={activity.date}
                 />
               ))}
             </div>
