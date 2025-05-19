@@ -48,10 +48,10 @@ export const MobileProfileSelector: React.FC<MobileProfileSelectorProps> = ({ ac
   ];
 
   return (
-    <div className="mb-4">
+    <div className="mb-6">
       <p className="text-sm text-center mb-3 text-muted-foreground">Type de compte</p>
       <ScrollArea className="w-full pb-2">
-        <div className="flex space-x-2 px-1 pb-1 min-w-full">
+        <div className="flex space-x-3 px-1 pb-1 min-w-full">
           {profiles.map((profile) => (
             <ProfileButton
               key={profile.id}
@@ -77,18 +77,22 @@ const ProfileButton: React.FC<ProfileButtonProps> = ({ profile, isActive, onClic
     <Button
       onClick={onClick}
       variant="ghost"
-      className={`relative flex flex-col items-center justify-center py-2 px-4 rounded-md h-auto transition-all ${
+      className={`relative flex-1 flex flex-col items-center justify-center py-2 px-3 rounded-lg h-auto min-w-16 transition-all ${
         isActive ? 'bg-muted' : ''
       }`}
     >
-      <div className={`rounded-full p-1.5 ${isActive ? profile.color : 'bg-gray-100 dark:bg-gray-800'} mb-1`}>
+      <motion.div 
+        className={`rounded-full p-2 ${isActive ? profile.color : 'bg-gray-100 dark:bg-gray-800'} mb-2`}
+        animate={{ scale: isActive ? 1.1 : 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+      >
         <profile.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-muted-foreground'}`} />
-      </div>
-      <span className="text-xs whitespace-nowrap">{profile.title}</span>
+      </motion.div>
+      <span className="text-xs whitespace-nowrap font-medium">{profile.title}</span>
       {isActive && (
         <motion.div
           layoutId="profileIndicator"
-          className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+          className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}

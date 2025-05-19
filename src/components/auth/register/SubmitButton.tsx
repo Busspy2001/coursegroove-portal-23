@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 type ProfileType = "student" | "instructor" | "business" | "employee";
 
@@ -34,14 +35,26 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({ profileType, isLoadi
   return (
     <motion.div 
       variants={formItemVariant}
-      className="pt-2"
+      className="pt-4"
     >
       <Button 
         type="submit" 
-        className={`w-full h-9 ${getButtonClass()}`} 
+        className={`w-full h-10 ${getButtonClass()} relative`} 
         disabled={isLoading || isDisabled}
       >
-        {isLoading ? "Inscription en cours..." : "S'inscrire"}
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Inscription en cours...
+          </>
+        ) : "S'inscrire"}
+        
+        <motion.span
+          className="absolute inset-0 bg-white rounded-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isDisabled ? 0.5 : 0 }}
+          transition={{ duration: 0.2 }}
+        />
       </Button>
     </motion.div>
   );

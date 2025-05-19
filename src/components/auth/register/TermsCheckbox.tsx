@@ -17,15 +17,15 @@ export const TermsCheckbox: React.FC<TermsCheckboxProps> = ({ acceptTerms, setAc
   };
 
   return (
-    <motion.div variants={formItemVariant} className="flex items-start space-x-2 pt-1">
+    <motion.div variants={formItemVariant} className="flex items-start space-x-2 pt-2">
       <Checkbox 
         id="terms" 
         checked={acceptTerms} 
         onCheckedChange={(checked) => setAcceptTerms(checked as boolean)} 
-        className="mt-1"
+        className="mt-0.5 data-[state=checked]:bg-schoolier-blue data-[state=checked]:border-schoolier-blue"
       />
-      <Label htmlFor="terms" className="text-xs">
-        J'accepte les <Link to="/terms" className="text-schoolier-blue hover:underline">conditions d'utilisation</Link> et la <Link to="/privacy" className="text-schoolier-blue hover:underline">politique de confidentialité</Link>
+      <Label htmlFor="terms" className="text-xs leading-tight">
+        J'accepte les <Link to="/terms" className="text-schoolier-blue hover:underline font-medium">conditions d'utilisation</Link> et la <Link to="/privacy" className="text-schoolier-blue hover:underline font-medium">politique de confidentialité</Link>
       </Label>
     </motion.div>
   );

@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Lock, CheckCircle } from "lucide-react";
-import { getPasswordStrength } from "@/utils/passwordUtils";
+import { Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface PasswordFieldProps {
@@ -17,31 +16,49 @@ export const PasswordField: React.FC<PasswordFieldProps> = ({
   password,
   setPassword,
   confirmPassword,
-  setConfirmPassword
+  setConfirmPassword,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  const passwordStrength = getPasswordStrength(password);
-  const isPasswordMatch = password === confirmPassword && confirmPassword !== "";
-  
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  const isPasswordMatch = password && confirmPassword && password === confirmPassword;
+  const isPasswordMisMatch = password && confirmPassword && password !== confirmPassword;
+
   const formItemVariant = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
 
+  const strengthClass = () => {
+    if (!password) return "";
+    if (password.length < 6) return "bg-red-500";
+    if (password.length < 8) return "bg-amber-500";
+    if (password.length >= 8) return "bg-green-500";
+    return "";
+  };
+
   return (
     <>
       <motion.div variants={formItemVariant} className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+          {passwordFocused && password && (
+            <span className="text-xs text-muted-foreground">
+              {password.length < 6 ? "Faible" : password.length < 8 ? "Moyen" : "Fort"}
+            </span>
+          )}
+        </div>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
+            placeholder="Votre mot de passe"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setPasswordFocused(true)}
+            onBlur={() => setPasswordFocused(false)}
             className="pl-10 pr-10 h-9"
             required
           />
@@ -53,39 +70,51 @@ export const PasswordField: React.FC<PasswordFieldProps> = ({
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        
-        {password && (
+        {passwordFocused && password && (
           <motion.div 
-            className="mt-1 space-y-1"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
+            className="h-1 w-full bg-gray-200 rounded-full overflow-hidden mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <div className="flex justify-between text-xs">
-              <span>Force du mot de passe:</span>
-              <span>{passwordStrength.text}</span>
-            </div>
-            <div className="h-1 rounded-full bg-gray-200">
-              <div
-                className={`h-full rounded-full ${passwordStrength.color}`}
-                style={{ width: `${passwordStrength.strength}%` }}
-              ></div>
-            </div>
+            <motion.div 
+              className={`h-full ${strengthClass()}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(100, (password.length / 12) * 100)}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </motion.div>
         )}
       </motion.div>
       
       <motion.div variants={formItemVariant} className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmer le mot de passe</Label>
+        <Label 
+          htmlFor="confirmPassword" 
+          className="text-sm font-medium flex justify-between items-center"
+        >
+          <span>Confirmer le mot de passe</span>
+          {confirmPassword && (
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`text-xs ${isPasswordMatch ? 'text-green-600' : isPasswordMisMatch ? 'text-red-500' : ''}`}
+            >
+              {isPasswordMatch ? "Mots de passe identiques" : isPasswordMisMatch ? "Mots de passe différents" : ""}
+            </motion.span>
+          )}
+        </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="••••••••"
+            placeholder="Confirmez votre mot de passe"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className={`pl-10 pr-10 h-9 ${confirmPassword && (isPasswordMatch ? 'border-green-500 dark:border-green-600' : 'border-red-500 dark:border-red-600')}`}
+            className={`pl-10 pr-10 h-9 ${
+              isPasswordMisMatch ? "border-red-500 focus-visible:ring-red-500" : 
+              isPasswordMatch ? "border-green-500 focus-visible:ring-green-500" : ""
+            }`}
             required
           />
           <button
@@ -96,23 +125,6 @@ export const PasswordField: React.FC<PasswordFieldProps> = ({
             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        
-        {confirmPassword && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            {!isPasswordMatch && (
-              <p className="text-xs text-red-500 mt-1">Les mots de passe ne correspondent pas</p>
-            )}
-            {isPasswordMatch && (
-              <p className="text-xs text-green-500 mt-1 flex items-center">
-                <CheckCircle className="h-3 w-3 mr-1" /> Les mots de passe correspondent
-              </p>
-            )}
-          </motion.div>
-        )}
       </motion.div>
     </>
   );

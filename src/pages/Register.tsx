@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap, Book, Building, Briefcase, ArrowLeft } from "lucide-react";
 import { RegisterForm } from "@/components/auth/register";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
-import { RegisterBenefits } from "@/components/auth/RegisterBenefits";
 import { useAuth } from "@/contexts/auth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -112,7 +112,7 @@ const Register = () => {
       <Navbar />
       
       <motion.div 
-        className={`flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 sm:py-12 px-3 sm:px-6 lg:px-8 ${isMobile ? "pb-20" : ""}`}
+        className={`flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 sm:py-12 px-3 sm:px-6 lg:px-8 ${isMobile ? "pb-24" : ""}`}
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -176,13 +176,13 @@ const Register = () => {
                   </div>
                 )}
                 
-                <ScrollArea className={`${isMobile ? "max-h-[70vh]" : ""}`}>
+                <ScrollArea className={`${isMobile ? "max-h-[75vh]" : ""}`}>
                   <Tabs defaultValue="register" className="w-full" onValueChange={handleTabChange}>
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-2 mb-2">
                       <TabsTrigger value="login">Connexion</TabsTrigger>
                       <TabsTrigger value="register">Inscription</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="register">
+                    <TabsContent value="register" className="focus-visible:outline-none focus-visible:ring-0">
                       <CardHeader className="space-y-1 pb-2">
                         <div className="flex items-center justify-center mb-2">
                           <currentProfile.icon className={`h-10 w-10 text-${activeProfile === "business" ? "amber-500" : activeProfile === "employee" ? "purple-500" : activeProfile === "instructor" ? "schoolier-teal" : "schoolier-blue"}`} />
@@ -195,9 +195,11 @@ const Register = () => {
                       </CardHeader>
                       <CardContent>
                         <RegisterForm profileType={activeProfile} />
-                        <div className="mt-4">
-                          <SocialLoginButtons />
-                        </div>
+                        {!isMobile && (
+                          <div className="mt-6">
+                            <SocialLoginButtons />
+                          </div>
+                        )}
                       </CardContent>
                       <CardFooter className="flex flex-col space-y-4 pt-0 pb-6">
                         <p className="text-center text-sm text-muted-foreground">
