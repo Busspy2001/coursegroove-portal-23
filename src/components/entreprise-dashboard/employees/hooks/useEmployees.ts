@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +30,29 @@ interface UseEmployeesResult {
   isDemo: boolean;
 }
 
+// Données de démonstration par défaut
+const demoCompanyData = {
+  id: "demo-company",
+  name: "Entreprise de Démonstration",
+  admin_id: "demo-admin",
+  created_at: new Date().toISOString()
+};
+
+const demoDepartments: Department[] = [
+  { id: "dept-1", name: "Marketing", description: "Département Marketing", company_id: "demo-company" },
+  { id: "dept-2", name: "IT", description: "Département Informatique", company_id: "demo-company" },
+  { id: "dept-3", name: "RH", description: "Ressources Humaines", company_id: "demo-company" },
+  { id: "dept-4", name: "Ventes", description: "Équipe commerciale", company_id: "demo-company" },
+];
+
+const demoEmployees: Employee[] = [
+  { id: "emp-1", full_name: "Sophie Martin", email: "sophie.martin@demo.com", department_id: "dept-1", department_name: "Marketing", job_title: "Responsable Marketing", status: "active" },
+  { id: "emp-2", full_name: "Thomas Dubois", email: "thomas.dubois@demo.com", department_id: "dept-2", department_name: "IT", job_title: "Développeur", status: "active" },
+  { id: "emp-3", full_name: "Julie Leclerc", email: "julie.leclerc@demo.com", department_id: "dept-1", department_name: "Marketing", job_title: "Chargée de communication", status: "active" },
+  { id: "emp-4", full_name: "Antoine Bernard", email: "antoine.bernard@demo.com", department_id: "dept-3", department_name: "RH", job_title: "Responsable RH", status: "inactive" },
+  { id: "emp-5", full_name: "Marie Dupont", email: "marie.dupont@demo.com", department_id: "dept-4", department_name: "Ventes", job_title: "Commerciale", status: "active" },
+];
+
 export const useEmployees = (): UseEmployeesResult => {
   const { currentUser } = useAuth();
   
@@ -59,119 +81,50 @@ export const useEmployees = (): UseEmployeesResult => {
         console.log("Demo user detected, checking for existing company");
         // For demo accounts, we need to make sure the company exists
         // and is correctly associated with the user
-        const { data: companyDataForDemo } = await supabase
+        const { data: companyDataForDemo, error: companyCheckError } = await supabase
           .from('companies')
           .select('*')
           .eq('admin_id', currentUser?.id)
           .maybeSingle();
         
+        if (companyCheckError) {
+          console.error("Error checking for existing demo company:", companyCheckError);
+          // Fallback to demo data
+          setCompanyData(demoCompanyData);
+          setDepartments(demoDepartments);
+          setEmployees(demoEmployees);
+          setLoading(false);
+          return;
+        }
+        
         if (companyDataForDemo) {
           console.log("Found existing demo company:", companyDataForDemo.name);
           company = companyDataForDemo;
         } else {
-          // If no company found, create a demo company for this user
-          console.log("Creating demo company for user:", currentUser?.id);
-          const { data: newCompany, error: companyError } = await supabase
-            .from('companies')
-            .insert({
-              name: `Entreprise de ${currentUser?.full_name || currentUser?.name || 'Demo'}`,
-              admin_id: currentUser?.id
-            })
-            .select()
-            .single();
-            
-          if (companyError) {
-            console.error("Error creating company:", companyError);
-            throw companyError;
-          }
-            
-          if (newCompany) {
-            console.log("Demo company created successfully:", newCompany.name);
-            company = newCompany;
-            
-            // Update the user with the company ID
-            await supabase
-              .from('profiles_unified')
-              .update({ company_id: newCompany.id })
-              .eq('id', currentUser?.id);
-              
-            console.log("User updated with company ID");
-              
-            // Create default departments
-            const deptNames = ['Marketing', 'IT', 'RH', 'Ventes'];
-            console.log("Creating default departments:", deptNames.join(", "));
-            
-            for (const name of deptNames) {
-              await supabase
-                .from('company_departments')
-                .insert({
-                  name,
-                  description: `Département ${name}`,
-                  company_id: newCompany.id
-                });
-            }
-            
-            // Add some demo employees
-            const demoEmployees = [
-              { name: 'Sophie Martin', email: 'sophie.martin@demo.com', dept: 'Marketing', role: 'Responsable' },
-              { name: 'Thomas Dubois', email: 'thomas.dubois@demo.com', dept: 'IT', role: 'Développeur' },
-              { name: 'Julie Leclerc', email: 'julie.leclerc@demo.com', dept: 'Finance', role: 'Comptable' }
-            ];
-            
-            console.log("Creating demo employees:", demoEmployees.map(e => e.name).join(", "));
-            
-            for (const emp of demoEmployees) {
-              const { data: newProfile, error: profileError } = await supabase
-                .from('profiles_unified')
-                .insert({
-                  id: crypto.randomUUID(),
-                  full_name: emp.name,
-                  email: emp.email,
-                  role: 'employee' as "student" | "instructor" | "admin" | "business_admin" | "employee" | "super_admin" | "demo",
-                  is_demo: true,
-                  company_id: newCompany.id
-                })
-                .select()
-                .single();
-                
-              if (profileError) {
-                console.error("Error creating employee profile:", profileError);
-                continue;
-              }
-                
-              if (newProfile) {
-                // Get department ID
-                const { data: dept } = await supabase
-                  .from('company_departments')
-                  .select('id')
-                  .eq('company_id', newCompany.id)
-                  .eq('name', emp.dept)
-                  .maybeSingle();
-                  
-                // Add to company_employees
-                await supabase
-                  .from('company_employees')
-                  .insert({
-                    company_id: newCompany.id,
-                    employee_id: newProfile.id,
-                    job_title: emp.role,
-                    department_id: dept?.id,
-                    status: 'active'
-                  });
-              }
-            }
-            
-            console.log("Demo data setup completed");
-          }
+          // Si on ne trouve pas l'entreprise, fournir des données de démo au lieu d'essayer d'en créer une
+          // car les erreurs de RLS peuvent empêcher la création
+          console.log("No company found, using demo data");
+          setCompanyData(demoCompanyData);
+          setDepartments(demoDepartments);
+          setEmployees(demoEmployees);
+          setLoading(false);
+          return;
         }
       } else {
         // For real users, just fetch their company data
         console.log("Regular user, fetching company data");
-        const { data: companyData } = await supabase
+        const { data: companyData, error: companyError } = await supabase
           .from('companies')
           .select('*')
           .eq('admin_id', currentUser?.id)
           .maybeSingle();
+          
+        if (companyError) {
+          console.error("Error fetching company data:", companyError);
+          setCompanyData(null);
+          setLoading(false);
+          return;
+        }
           
         company = companyData;
       }
@@ -180,23 +133,50 @@ export const useEmployees = (): UseEmployeesResult => {
       
       if (company) {
         console.log("Loading employees and departments for company:", company.id);
-        const employeesData = await fetchEmployees(company.id);
-        setEmployees(employeesData);
         
-        const departmentsData = await fetchDepartments(company.id);
-        setDepartments(departmentsData);
-        
-        console.log(`Loaded ${employeesData.length} employees and ${departmentsData.length} departments`);
+        try {
+          const employeesData = await fetchEmployees(company.id);
+          setEmployees(employeesData);
+          
+          const departmentsData = await fetchDepartments(company.id);
+          setDepartments(departmentsData);
+          
+          console.log(`Loaded ${employeesData.length} employees and ${departmentsData.length} departments`);
+        } catch (fetchError) {
+          console.error("Error fetching employees or departments:", fetchError);
+          
+          // For demo accounts, use demo data as fallback in case of fetch error
+          if (isUserDemo) {
+            setDepartments(demoDepartments);
+            setEmployees(demoEmployees);
+          }
+        }
       } else {
         console.log("No company found for this user");
+        
+        // For demo accounts, use demo data as fallback
+        if (isUserDemo) {
+          setCompanyData(demoCompanyData);
+          setDepartments(demoDepartments);
+          setEmployees(demoEmployees);
+        }
       }
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
-      toast({
-        title: "Erreur de chargement",
-        description: "Impossible de charger les données des employés.",
-        variant: "destructive",
-      });
+      
+      // Use demo data for demo users, even if there's an error
+      if (currentUser?.is_demo) {
+        console.log("Using demo data after error for demo user");
+        setCompanyData(demoCompanyData);
+        setDepartments(demoDepartments);
+        setEmployees(demoEmployees);
+      } else {
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les données des employés.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -42,6 +42,24 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
     try {
       console.log("Creating demo company for:", currentUser.email);
       
+      // Vérifier d'abord si l'entreprise existe déjà pour cet utilisateur
+      const { data: existingCompany, error: checkError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('admin_id', currentUser.id)
+        .maybeSingle();
+        
+      if (checkError) {
+        console.error("Error checking for existing company:", checkError);
+        throw new Error(`Impossible de vérifier l'existence de l'entreprise: ${checkError.message}`);
+      }
+      
+      // Si l'entreprise existe déjà, la retourner
+      if (existingCompany) {
+        console.log("Using existing demo company:", existingCompany.name);
+        return existingCompany;
+      }
+      
       // Créer une entreprise de démo
       const { data: newCompany, error: companyError } = await supabase
         .from('companies')
@@ -96,9 +114,13 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
       return null;
     } catch (error) {
       console.error("Error in createDemoCompany:", error);
+      // Retourner un faux objet d'entreprise pour les utilisateurs de démo en cas d'erreur
+      if (currentUser.is_demo) {
+        return demoCompanyData;
+      }
       throw error;
     }
-  }, [currentUser]);
+  }, [currentUser, demoCompanyData]);
   
   // Fonction principale pour charger les données
   const loadData = useCallback(async () => {
@@ -123,7 +145,11 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
         
         if (fetchError) {
           console.error("Error checking for existing company:", fetchError);
-          throw new Error(`Impossible de vérifier l'existence de l'entreprise: ${fetchError.message}`);
+          // Pour les utilisateurs de démo, on utilise des données factices en cas d'erreur
+          setCompanyData(demoCompanyData);
+          setStats(demoStats);
+          setLoading(false);
+          return;
         }
         
         // Si l'entreprise existe, l'utiliser
@@ -137,6 +163,7 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
           } catch (statsError) {
             console.error("Error fetching statistics:", statsError);
             // Ne pas échouer si les statistiques ne peuvent pas être récupérées
+            setStats(demoStats);
           }
         } 
         // Sinon, en créer une nouvelle
@@ -172,10 +199,16 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
               };
               
               setStats(demoStatistics);
+            } else {
+              // Fallback à des données fictives si la création échoue
+              setCompanyData(demoCompanyData);
+              setStats(demoStats);
             }
           } catch (createError) {
             console.error("Error creating demo company:", createError);
-            throw createError;
+            // Utiliser des données fictives en cas d'erreur
+            setCompanyData(demoCompanyData);
+            setStats(demoStats);
           }
         }
       } 
@@ -198,15 +231,22 @@ export const useCompanyData = (currentUser: User | null): UseCompanyDataResult =
       console.error("Error in loadData:", error);
       setError(error instanceof Error ? error : new Error(String(error)));
       
-      toast({
-        title: "Erreur de chargement",
-        description: error instanceof Error ? error.message : "Impossible de charger les données du tableau de bord.",
-        variant: "destructive",
-      });
+      // En mode démo, on utilise des données fictives même en cas d'erreur
+      if (currentUser.is_demo) {
+        console.log("Using demo data as fallback after error");
+        setCompanyData(demoCompanyData);
+        setStats(demoStats);
+      } else {
+        toast({
+          title: "Erreur de chargement",
+          description: error instanceof Error ? error.message : "Impossible de charger les données du tableau de bord.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
-  }, [currentUser, createDemoCompany]);
+  }, [currentUser, createDemoCompany, demoCompanyData, demoStats]);
   
   // Fonction pour recharger les données
   const refetch = useCallback(async () => {

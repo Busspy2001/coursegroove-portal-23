@@ -11,6 +11,12 @@ interface NoCompanyMessageProps {
 }
 
 export const NoCompanyMessage: React.FC<NoCompanyMessageProps> = ({ onNavigate, isDemoUser }) => {
+  const handleNavigation = () => {
+    // Redirection vers le tableau de bord pour les utilisateurs de démo
+    // Le tableau de bord créera automatiquement une entreprise via useCompanyData
+    onNavigate('/entreprise');
+  };
+  
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <Card className="w-full max-w-md">
@@ -20,8 +26,9 @@ export const NoCompanyMessage: React.FC<NoCompanyMessageProps> = ({ onNavigate, 
         </CardHeader>
         <CardContent className="text-center text-muted-foreground">
           <p className="mb-4">
-            Vous n'avez pas encore configuré votre entreprise. 
-            Pour gérer vos employés, vous devez d'abord créer une entreprise.
+            {isDemoUser 
+              ? "Votre compte de démonstration n'a pas encore d'entreprise configurée."
+              : "Vous n'avez pas encore configuré votre entreprise. Pour gérer vos employés, vous devez d'abord créer une entreprise."}
           </p>
           
           {isDemoUser && (
@@ -34,7 +41,7 @@ export const NoCompanyMessage: React.FC<NoCompanyMessageProps> = ({ onNavigate, 
         <CardFooter>
           <Button 
             className="w-full" 
-            onClick={() => onNavigate('/entreprise')}
+            onClick={handleNavigation}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             {isDemoUser ? "Aller au tableau de bord" : "Créer mon entreprise"}
