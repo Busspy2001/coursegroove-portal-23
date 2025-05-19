@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -64,6 +65,22 @@ const CourseEditor = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { currentUser, isAuthenticated, hasRole } = useAuth();
+  const { toast } = useToast();
+  
+  // Extract all required variables and functions from useCourseEditor
+  const { 
+    loading, 
+    course, 
+    sections, 
+    thumbnailUrl, 
+    setThumbnailUrl, 
+    saveCourse, 
+    saveCourseContent, 
+    uploadThumbnail 
+  } = useCourseEditor(courseId);
+  
+  // Determine if we're in editing mode
+  const isEditing = Boolean(courseId);
   
   // Redirect if not authenticated or not an instructor
   useEffect(() => {
@@ -98,7 +115,7 @@ const CourseEditor = () => {
       });
       setThumbnailUrl(course.thumbnail_url);
     }
-  }, [course, form]);
+  }, [course, form, setThumbnailUrl]);
 
   // Handle form submission with proper types
   const onSubmit = async (values: CourseFormValues) => {
