@@ -16,20 +16,29 @@ export interface Message {
     id: string;
     name: string;
     avatar: string;
+    role?: string;
   };
   timestamp: Date;
   read: boolean;
-  isCurrentUser: boolean;
+  isCurrentUser?: boolean;
 }
 
 export interface Conversation {
   id: string;
-  participants: {
+  participant: {
     id: string;
     name: string;
-    avatar: string;
-  }[];
+    avatar: string | undefined;
+    role?: string;
+  };
   lastMessage: {
+    id?: string;
+    sender?: {
+      id: string;
+      name: string;
+      avatar: string | undefined;
+      role?: string;
+    };
     content: string;
     timestamp: Date;
     read: boolean;

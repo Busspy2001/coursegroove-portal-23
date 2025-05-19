@@ -12,11 +12,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Notification } from '@/types/database';
+import { Notification as DatabaseNotification } from '@/types/database';
+import { Notification as UINotification } from '@/types/message-types';
 import NotificationsList from '@/components/messages/NotificationsList';
 
 export const NotificationsCenter = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<UINotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -29,10 +30,10 @@ export const NotificationsCenter = () => {
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user?.id) return;
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user?.id) return;
 
-      const userId = session.session.user.id;
+      const userId = sessionData.session.user.id;
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
@@ -43,13 +44,13 @@ export const NotificationsCenter = () => {
       if (error) throw error;
 
       // Transform the data to match the notification interface
-      const formattedNotifications = data.map(notification => ({
+      const formattedNotifications: UINotification[] = data.map((notification: DatabaseNotification) => ({
         id: notification.id,
         title: notification.type.charAt(0).toUpperCase() + notification.type.slice(1),
         message: notification.message,
         timestamp: new Date(notification.created_at),
         read: notification.is_read,
-        type: notification.type,
+        type: notification.type as UINotification['type'],
         link: notification.link,
       }));
 
@@ -77,30 +78,32 @@ export const NotificationsCenter = () => {
           schema: 'public',
           table: 'notifications',
         },
-        (payload) => {
-          const newNotification = payload.new as any;
+        async (payload) => {
+          const newNotification = payload.new as DatabaseNotification;
           
           // Check if the notification is for the current user
-          const { data: session } = supabase.auth.getSession();
-          if (session && newNotification.user_id === session.session?.user?.id) {
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData && newNotification.user_id === sessionData.session?.user?.id) {
             // Add the new notification to the list
-            setNotifications(prev => [{
+            const uiNotification: UINotification = {
               id: newNotification.id,
               title: newNotification.type.charAt(0).toUpperCase() + newNotification.type.slice(1),
               message: newNotification.message,
               timestamp: new Date(newNotification.created_at),
               read: newNotification.is_read,
-              type: newNotification.type,
+              type: newNotification.type as UINotification['type'],
               link: newNotification.link,
-            }, ...prev]);
+            };
+            
+            setNotifications(prev => [uiNotification, ...prev]);
             
             // Update unread count
             setUnreadCount(prev => prev + 1);
             
             // Show toast for new notification
             toast({
-              title: newNotification.type.charAt(0).toUpperCase() + newNotification.type.slice(1),
-              description: newNotification.message,
+              title: uiNotification.title,
+              description: uiNotification.message,
               variant: 'info',
             });
           }
@@ -115,10 +118,10 @@ export const NotificationsCenter = () => {
 
   const markAllAsRead = async () => {
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user?.id) return;
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user?.id) return;
 
-      const userId = session.session.user.id;
+      const userId = sessionData.session.user.id;
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true })
@@ -176,7 +179,7 @@ export const NotificationsCenter = () => {
     }
   };
 
-  const mockNotifications = [
+  const mockNotifications: UINotification[] = [
     {
       id: '1',
       title: 'Formation',

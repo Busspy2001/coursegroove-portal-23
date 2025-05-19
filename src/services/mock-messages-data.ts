@@ -13,13 +13,6 @@ export const getMockConversations = (): Conversation[] => {
         role: 'instructor'
       },
       lastMessage: {
-        id: 'msg-1',
-        sender: {
-          id: 'user-2',
-          name: 'Julie Martin',
-          avatar: undefined,
-          role: 'instructor'
-        },
         content: 'Bonjour ! Avez-vous des questions sur le devoir du module 3 ?',
         timestamp: new Date(2025, 4, 9, 14, 35),
         read: false
@@ -35,13 +28,6 @@ export const getMockConversations = (): Conversation[] => {
         role: 'instructor'
       },
       lastMessage: {
-        id: 'msg-2',
-        sender: {
-          id: 'user-3',
-          name: 'Thomas Dubois',
-          avatar: undefined,
-          role: 'instructor'
-        },
         content: 'Votre projet a été évalué. Vous pouvez consulter les résultats.',
         timestamp: new Date(2025, 4, 8, 11, 20),
         read: true
@@ -57,13 +43,6 @@ export const getMockConversations = (): Conversation[] => {
         role: 'admin'
       },
       lastMessage: {
-        id: 'msg-3',
-        sender: {
-          id: 'user-4',
-          name: 'Support Schoolier',
-          avatar: undefined,
-          role: 'admin'
-        },
         content: 'Merci pour votre message. Un membre de notre équipe vous répondra dans les 24 heures.',
         timestamp: new Date(2025, 4, 7, 9, 15),
         read: true
@@ -109,7 +88,8 @@ export const getMockNotifications = (): Notification[] => {
       title: 'Mise à jour de la plateforme',
       message: 'La plateforme sera en maintenance le 15 mai de 2h à 4h du matin.',
       timestamp: new Date(2025, 4, 6, 10, 15),
-      read: true
+      read: true,
+      link: null
     }
   ];
 };
