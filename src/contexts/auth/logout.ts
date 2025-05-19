@@ -104,12 +104,15 @@ export const executeLogout = async (
       description: "Vous avez été déconnecté avec succès.",
     });
     
-    // Execute callback with slight delay to ensure auth state is updated
+    // Execute callback if provided
     if (callback) {
-      // Exécuter le callback avec un délai pour éviter des problèmes de synchronisation
-      setTimeout(() => {
+      // Assurons-nous que le callback est exécuté correctement
+      try {
+        console.log("🔄 Exécution du callback de déconnexion");
         callback();
-      }, 100);
+      } catch (callbackError) {
+        console.error("❌ Erreur dans le callback de déconnexion:", callbackError);
+      }
     }
   } catch (error: any) {
     console.error("❌ Erreur critique de déconnexion:", error);

@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { AuthContext } from './context';
 import { User, UserRole } from './types';
 import { supabase } from '@/integrations/supabase/client';
-import { getCurrentUser, logoutUser } from './authService';
+import { getCurrentUser } from './authService';
+import { executeLogout } from './logout';
 import { clearUserCache } from './authUtils';
 
 interface AuthProviderProps {
@@ -220,24 +220,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Logout
   const logout = async (callback?: () => void): Promise<void> => {
+    console.log("🔄 Logout attempt");
+    setIsLoggingOut(true);
+    
     try {
-      setIsLoggingOut(true);
-      console.log("🔄 Logout attempt");
-      
-      await logoutUser();
-      
-      setCurrentUser(null);
-      setIsAuthenticated(false);
-      clearUserCache();
-      
-      console.log("✅ Logout successful");
-      
-      if (callback) callback();
+      await executeLogout(
+        setCurrentUser,
+        setIsAuthenticated,
+        setIsLoggingOut,
+        callback
+      );
     } catch (error) {
-      console.error("❌ Logout error:", error);
-      throw error;
-    } finally {
+      console.error("❌ Logout error in AuthProvider:", error);
       setIsLoggingOut(false);
+      throw error;
     }
   };
 
