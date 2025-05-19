@@ -1,14 +1,7 @@
 
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
-import BusinessOverview from "@/components/business-dashboard/overview/BusinessOverview";
-import BusinessEmployees from "@/components/business-dashboard/employees/BusinessEmployees";
-import BusinessDepartments from "@/components/business-dashboard/departments/BusinessDepartments";
-import BusinessTrainings from "@/components/business-dashboard/trainings/BusinessTrainings";
-import BusinessStatistics from "@/components/business-dashboard/statistics/BusinessStatistics";
-import BusinessSettings from "@/components/business-dashboard/settings/BusinessSettings";
 import { toast } from "@/hooks/use-toast";
 
 const BusinessDashboard = () => {
@@ -26,19 +19,9 @@ const BusinessDashboard = () => {
     return <Navigate to="/login" replace />;
   }
   
-  return (
-    <BusinessLayout>
-      <Routes>
-        <Route index element={<BusinessOverview />} />
-        <Route path="employees/*" element={<BusinessEmployees />} />
-        <Route path="departments/*" element={<BusinessDepartments />} />
-        <Route path="trainings/*" element={<BusinessTrainings />} />
-        <Route path="statistics/*" element={<BusinessStatistics />} />
-        <Route path="settings/*" element={<BusinessSettings />} />
-        <Route path="*" element={<Navigate to="/business" replace />} />
-      </Routes>
-    </BusinessLayout>
-  );
+  // Le composant BusinessLayout est maintenant configuré pour utiliser Outlet via routes
+  // Donc nous n'avons pas besoin de passer des enfants
+  return <Navigate to="/entreprise" replace />;
 };
 
 export default BusinessDashboard;
