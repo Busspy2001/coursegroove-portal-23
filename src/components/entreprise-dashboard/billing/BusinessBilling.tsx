@@ -6,7 +6,7 @@ import { useCompanyData } from "../overview/useCompanyData";
 import { NoCompanyMessage } from "../employees/components/NoCompanyMessage";
 import { useNavigate } from "react-router-dom";
 
-export const BusinessBilling: React.FC = () => {
+const BusinessBilling: React.FC = () => {
   const { currentUser } = useAuth();
   const { companyData, loading, stats } = useCompanyData(currentUser);
   const navigate = useNavigate();
@@ -46,3 +46,5 @@ export const BusinessBilling: React.FC = () => {
     </div>
   );
 };
+
+export default BusinessBilling;
