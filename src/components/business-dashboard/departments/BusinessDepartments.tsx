@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { PlusCircle, Users, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { NoCompanyMessage } from "../employees/components/NoCompanyMessage";
-import { useCompanyData } from "../overview/useCompanyData";
+import { NoCompanyMessage } from "@/components/entreprise-dashboard/employees/components/NoCompanyMessage";
+import { useCompanyData } from "@/components/entreprise-dashboard/overview/useCompanyData";
 
 const BusinessDepartments = () => {
   const { currentUser } = useAuth();
