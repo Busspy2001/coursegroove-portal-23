@@ -1,36 +1,41 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCompanyData } from "@/components/entreprise-dashboard/overview/useCompanyData";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { NoCompanyMessage } from "@/components/entreprise-dashboard/employees/components/NoCompanyMessage";
+import { PlusCircle } from "lucide-react";
+
+// Components
+import { LoadingMessage } from "@/components/entreprise-dashboard/shared/LoadingMessage";
+import { ErrorMessage } from "@/components/entreprise-dashboard/shared/ErrorMessage";
 import { OverviewMetricCard } from "@/components/entreprise-dashboard/overview/OverviewMetricCard";
 import { OverviewActivityCard } from "@/components/entreprise-dashboard/overview/OverviewActivityCard";
+import { OverviewChart } from "@/components/entreprise-dashboard/overview/OverviewChart";
+import { OverviewUpcomingTable } from "@/components/entreprise-dashboard/overview/OverviewUpcomingTable";
+import { OverviewTopPerformers } from "@/components/entreprise-dashboard/overview/OverviewTopPerformers";
+
+// Icons
 import { Users, BookOpen, Building2, Award } from "lucide-react";
+
+// Custom hook
+import { useOverviewData } from "@/components/entreprise-dashboard/overview/useOverviewData";
+import { NoCompanyMessage } from "@/components/entreprise-dashboard/employees/components/NoCompanyMessage";
 
 const BusinessDashboard = () => {
   const { currentUser } = useAuth();
-  const { companyData, stats, loading } = useCompanyData(currentUser);
+  const { loading, error, stats } = useOverviewData();
   const navigate = useNavigate();
 
-  // Loading state
   if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="h-8 bg-gray-200 animate-pulse rounded w-1/3"></div>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-gray-200 animate-pulse rounded"></div>
-          ))}
-        </div>
-        <div className="h-64 bg-gray-200 animate-pulse rounded"></div>
-      </div>
-    );
+    return <LoadingMessage message="Chargement du tableau de bord..." />;
   }
 
-  // No company state
-  if (!companyData) {
+  if (error) {
+    return <ErrorMessage message={error} onRetry={() => window.location.reload()} />;
+  }
+
+  if (!stats) {
     return <NoCompanyMessage onNavigate={navigate} isDemoUser={currentUser?.is_demo === true} />;
   }
 
@@ -46,7 +51,7 @@ const BusinessDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <OverviewMetricCard
           title="Employés actifs"
-          value={stats?.total_employees?.toString() || "0"}
+          value={stats.total_employees.toString()}
           description="Membres de l'équipe"
           icon={Users}
           trend={{
@@ -56,7 +61,7 @@ const BusinessDashboard = () => {
         />
         <OverviewMetricCard
           title="Formations en cours"
-          value={stats?.active_courses?.toString() || "0"}
+          value={stats.active_courses.toString()}
           description="Cours suivis"
           icon={BookOpen}
           trend={{
@@ -66,17 +71,13 @@ const BusinessDashboard = () => {
         />
         <OverviewMetricCard
           title="Départements"
-          value={stats?.departments_count?.toString() || "0"}
+          value={stats.departments_count.toString()}
           description="Entités"
           icon={Building2}
-          trend={{
-            value: "",
-            positive: true
-          }}
         />
         <OverviewMetricCard
           title="Taux de complétion"
-          value={`${stats?.completion_rate || 0}%`}
+          value={`${stats.completion_rate}%`}
           description="Progression globale"
           icon={Award}
           trend={{
@@ -86,16 +87,55 @@ const BusinessDashboard = () => {
         />
       </div>
 
-      {stats?.recent_activities && stats.recent_activities.length > 0 && (
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Évolution mensuelle</CardTitle>
+            <CardDescription>Suivi des formations assignées et complétées</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OverviewChart />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-base">Formations à venir</CardTitle>
+              <CardDescription>Planification des prochaines formations</CardDescription>
+            </div>
+            <Button size="sm" variant="ghost">
+              <PlusCircle className="h-4 w-4 mr-1" />
+              Ajouter
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <OverviewUpcomingTable trainings={stats.upcoming_trainings} />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Top performers</CardTitle>
+            <CardDescription>Employés les plus actifs en formation</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OverviewTopPerformers performers={stats.top_performers} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {stats.recent_activities && stats.recent_activities.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Activité récente</CardTitle>
+            <CardDescription>Les dernières actions de vos employés</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {stats.recent_activities.map((activity, i) => (
+            <div className="space-y-1">
+              {stats.recent_activities.map((activity) => (
                 <OverviewActivityCard
-                  key={i}
+                  key={activity.id}
                   type={activity.type}
                   message={activity.message}
                   timestamp={activity.date}

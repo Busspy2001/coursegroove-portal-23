@@ -1,53 +1,49 @@
 
 import React from "react";
-import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
+import { GraduationCap, User, Calendar, MessageSquare } from "lucide-react";
 
 interface OverviewActivityCardProps {
-  type?: string;
+  type: string;
   message: string;
-  timestamp: string;
-  department?: string;
+  timestamp: string | Date;
 }
 
-export const OverviewActivityCard: React.FC<OverviewActivityCardProps> = ({
-  type = "info",
-  message,
-  timestamp,
-  department
+export const OverviewActivityCard: React.FC<OverviewActivityCardProps> = ({ 
+  type, 
+  message, 
+  timestamp 
 }) => {
-  // Génération d'une couleur basée sur le département
-  const getDepartmentColor = (dept: string = "") => {
-    const colors: Record<string, string> = {
-      "IT": "bg-blue-100 text-blue-800",
-      "RH": "bg-green-100 text-green-800",
-      "Finance": "bg-yellow-100 text-yellow-800",
-      "Marketing": "bg-purple-100 text-purple-800",
-      "Ventes": "bg-pink-100 text-pink-800",
-      "Support": "bg-orange-100 text-orange-800"
-    };
-
-    return colors[dept] || "bg-gray-100 text-gray-800";
+  const getIcon = () => {
+    switch (type) {
+      case "course_completion":
+        return <GraduationCap className="h-4 w-4 text-green-500" />;
+      case "user_registration":
+        return <User className="h-4 w-4 text-blue-500" />;
+      case "course_enrollment":
+        return <Calendar className="h-4 w-4 text-purple-500" />;
+      default:
+        return <MessageSquare className="h-4 w-4 text-gray-500" />;
+    }
+  };
+  
+  const formatTimestamp = () => {
+    if (typeof timestamp === 'string') {
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: fr });
+    } 
+    return formatDistanceToNow(timestamp, { addSuffix: true, locale: fr });
   };
 
   return (
-    <div className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-      <div className="flex justify-between items-start mb-1">
-        <span className="font-medium text-sm">{type}</span>
-        <span className="text-xs text-muted-foreground">{timestamp}</span>
+    <div className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+      <div className="mt-0.5 bg-muted rounded-full p-1.5">
+        {getIcon()}
       </div>
-      <p className="text-sm text-muted-foreground mb-2">
-        {message}
-      </p>
-      {department && (
-        <div className="flex items-center justify-between">
-          <span className={cn(
-            "inline-block text-xs px-2 py-1 rounded-full",
-            getDepartmentColor(department)
-          )}>
-            {department}
-          </span>
-        </div>
-      )}
+      <div className="space-y-0.5">
+        <p className="text-sm">{message}</p>
+        <p className="text-xs text-muted-foreground">{formatTimestamp()}</p>
+      </div>
     </div>
   );
 };
