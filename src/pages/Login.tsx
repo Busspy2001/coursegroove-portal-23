@@ -14,6 +14,7 @@ import { Book, CheckCircle, Building, GraduationCap, Briefcase, ArrowLeft } from
 import { motion } from "framer-motion";
 import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 import { Button } from "@/components/ui/button";
+import { MobileProfileSelector } from "@/components/auth/MobileProfileSelector";
 
 // Define the profile types and their properties
 const profileConfig = {
@@ -203,26 +204,10 @@ const Login = () => {
                 {/* Profile tabs for mobile view only */}
                 {isMobile && (
                   <div className="pt-4 px-4">
-                    <Tabs value={activeProfile} onValueChange={(v) => setActiveProfile(v as ProfileType)}>
-                      <TabsList className="grid grid-cols-2 lg:grid-cols-4">
-                        <TabsTrigger value="student" className="text-xs md:text-sm">
-                          <GraduationCap className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Étudiant</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="instructor" className="text-xs md:text-sm">
-                          <Book className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Enseignant</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="business" className="text-xs md:text-sm">
-                          <Building className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Entreprise</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="employee" className="text-xs md:text-sm">
-                          <Briefcase className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Employé</span>
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
+                    <MobileProfileSelector 
+                      activeProfile={activeProfile} 
+                      onProfileChange={setActiveProfile} 
+                    />
                   </div>
                 )}
               
