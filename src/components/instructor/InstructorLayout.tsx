@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -22,6 +23,15 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
   const { currentUser, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  
+  // Detect demo instructor account based on email
+  const isDemoInstructor = currentUser?.is_demo && 
+    currentUser?.email?.toLowerCase().includes('prof');
+  
+  // Check if user has instructor role or is a demo instructor
+  const hasInstructorAccess = hasRole("instructor") || isDemoInstructor;
+  
+  // States for authentication and role warnings
   const [showAuthWarning, setShowAuthWarning] = useState(false);
   const [showRoleWarning, setShowRoleWarning] = useState(false);
 
@@ -29,17 +39,22 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
   useEffect(() => {
     if (!isAuthenticated) {
       setShowAuthWarning(true);
-    } else if (!hasRole("instructor")) {
+      setShowRoleWarning(false);
+    } else if (!hasInstructorAccess) {
+      setShowAuthWarning(false);
       setShowRoleWarning(true);
+    } else {
+      setShowAuthWarning(false);
+      setShowRoleWarning(false);
     }
-  }, [isAuthenticated, currentUser, hasRole]);
+  }, [isAuthenticated, hasInstructorAccess]);
 
   const handleLogin = () => {
     navigate("/login");
   };
 
   const handleGoToDashboard = () => {
-    navigate("/dashboard");
+    navigate("/redirect");
   };
 
   // Authentication warning
