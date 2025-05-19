@@ -189,7 +189,7 @@ export const fetchEmployees = async (companyId: string): Promise<Employee[]> => 
       return [];
     }
 
-    // Map to expected Employee format
+    // Map to expected Employee format - ensuring status is always 'active' or 'inactive'
     const employees: Employee[] = data.map(item => ({
       id: item.employee_id,
       full_name: item.profiles_unified?.full_name,
@@ -198,7 +198,7 @@ export const fetchEmployees = async (companyId: string): Promise<Employee[]> => 
       department_id: item.department_id,
       department_name: item.company_departments?.name,
       job_title: item.job_title,
-      status: item.status,
+      status: (item.status === 'active' || item.status === 'inactive') ? item.status : 'inactive',
       hire_date: item.joined_at,
     }));
 
