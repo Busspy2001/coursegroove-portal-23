@@ -2,7 +2,7 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import BusinessLayout from "@/components/business-dashboard/BusinessLayout";
+import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
 import BusinessOverview from "@/components/business-dashboard/overview/BusinessOverview";
 import BusinessEmployees from "@/components/business-dashboard/employees/BusinessEmployees";
 import BusinessDepartments from "@/components/business-dashboard/departments/BusinessDepartments";
@@ -13,6 +13,8 @@ import { toast } from "@/hooks/use-toast";
 
 const BusinessDashboard = () => {
   const { currentUser } = useAuth();
+  
+  console.log("BusinessDashboard: Loading with user", currentUser);
   
   // Vérifier si l'utilisateur est un administrateur d'entreprise
   if (!currentUser || currentUser.role !== "business_admin") {

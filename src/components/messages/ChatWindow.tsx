@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Message, Conversation } from '@/types/message-types';
 import { getMockMessagesForConversation } from '@/services/mock-messages-data';
-import { Send } from 'lucide-react';
+import { Send, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,9 +10,10 @@ import MessageBubble from './MessageBubble';
 
 interface ChatWindowProps {
   activeConversation: Conversation | null;
+  onBack?: () => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ activeConversation }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ activeConversation, onBack }) => {
   const [messages, setMessages] = useState<Message[]>(
     activeConversation ? getMockMessagesForConversation(activeConversation.id) : []
   );
@@ -84,6 +85,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ activeConversation }) =>
     <div className="flex-1 flex flex-col h-full border rounded-lg overflow-hidden">
       {/* Chat header */}
       <div className="p-3 border-b flex items-center gap-3 bg-white dark:bg-gray-950">
+        {onBack && (
+          <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
         <div className="font-medium">{activeConversation.participant.name}</div>
         {activeConversation.participant.role && (
           <div className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-muted-foreground">

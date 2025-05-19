@@ -90,7 +90,7 @@ const Messages = () => {
               <div className="flex-grow h-full overflow-hidden">
                 {selectedConversation ? (
                   <ChatWindow 
-                    conversation={selectedConversation} 
+                    activeConversation={selectedConversation} 
                     onBack={isMobile ? handleBackToList : undefined}
                   />
                 ) : (

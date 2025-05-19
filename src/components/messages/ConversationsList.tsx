@@ -31,7 +31,7 @@ const ConversationsList = ({ conversations, selectedConversation, onSelectConver
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
-              selected={selectedConversation?.id === conversation.id}
+              isActive={selectedConversation?.id === conversation.id}
               onClick={() => onSelectConversation(conversation)}
             />
           ))}
