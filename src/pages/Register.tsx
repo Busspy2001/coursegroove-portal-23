@@ -14,6 +14,8 @@ import BottomNavigation from "@/components/mobile/BottomNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { MobileProfileSelector } from "@/components/auth/MobileProfileSelector";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Define the profile types and their properties
 const profileConfig = {
@@ -111,21 +113,22 @@ const Register = () => {
       <Navbar />
       
       <motion.div 
-        className={`flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 ${isMobile ? "pb-16" : ""}`}
+        className={`flex-grow flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 sm:py-12 px-3 sm:px-6 lg:px-8 ${isMobile ? "pb-20" : ""}`}
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         <div className="max-w-5xl w-full flex flex-col">
           {/* Back to profile selection */}
-          <div className="mb-6 self-start">
+          <div className={`mb-4 self-start ${isMobile ? "px-2" : ""}`}>
             <Button 
               variant="ghost" 
+              size="sm"
               onClick={() => navigate("/auth")}
               className="flex items-center text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour à la sélection de profil
+              <span className="whitespace-nowrap">Retour à la sélection</span>
             </Button>
           </div>
           
@@ -148,7 +151,7 @@ const Register = () => {
                 >
                   {currentProfile.benefits.map((benefit, index) => (
                     <div key={index} className="flex items-center space-x-4">
-                      <div className="rounded-full bg-white/20 p-2">
+                      <div className="rounded-full bg-white/20 p-2 flex-shrink-0">
                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                       </div>
                       <p className="text-lg">{benefit}</p>
@@ -167,59 +170,47 @@ const Register = () => {
                 {/* Profile tabs for mobile view only */}
                 {isMobile && (
                   <div className="pt-4 px-4">
-                    <Tabs value={activeProfile} onValueChange={(v) => setActiveProfile(v as ProfileType)}>
-                      <TabsList className="grid grid-cols-2 lg:grid-cols-4">
-                        <TabsTrigger value="student" className="text-xs md:text-sm">
-                          <GraduationCap className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Étudiant</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="instructor" className="text-xs md:text-sm">
-                          <Book className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Enseignant</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="business" className="text-xs md:text-sm">
-                          <Building className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Entreprise</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="employee" className="text-xs md:text-sm">
-                          <Briefcase className="h-4 w-4 mr-1 md:mr-2" />
-                          <span className="hidden md:inline">Employé</span>
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
+                    <MobileProfileSelector 
+                      activeProfile={activeProfile} 
+                      onProfileChange={setActiveProfile} 
+                    />
                   </div>
                 )}
                 
-                <Tabs defaultValue="register" className="w-full" onValueChange={handleTabChange}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login">Connexion</TabsTrigger>
-                    <TabsTrigger value="register">Inscription</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="register">
-                    <CardHeader>
-                      <div className="flex items-center justify-center mb-4">
-                        <currentProfile.icon className={`h-12 w-12 text-${activeProfile === "business" ? "amber-500" : activeProfile === "employee" ? "purple-500" : activeProfile === "instructor" ? "schoolier-teal" : "schoolier-blue"}`} />
-                        <span className="text-3xl font-bold ml-2">Schoolier</span>
-                      </div>
-                      <CardTitle className="text-2xl text-center">{currentProfile.title}</CardTitle>
-                      <CardDescription className="text-center">
-                        {currentProfile.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <RegisterForm profileType={activeProfile} />
-                      <SocialLoginButtons />
-                    </CardContent>
-                    <CardFooter className="flex flex-col space-y-4">
-                      <p className="text-center text-sm text-muted-foreground">
-                        Vous avez déjà un compte ?{" "}
-                        <Link to={`/login${profileParam ? `?profile=${profileParam}` : ""}`} className="text-schoolier-blue hover:underline">
-                          Se connecter
-                        </Link>
-                      </p>
-                    </CardFooter>
-                  </TabsContent>
-                </Tabs>
+                <ScrollArea className={`${isMobile ? "max-h-[70vh]" : ""}`}>
+                  <Tabs defaultValue="register" className="w-full" onValueChange={handleTabChange}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="login">Connexion</TabsTrigger>
+                      <TabsTrigger value="register">Inscription</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="register">
+                      <CardHeader className="space-y-1 pb-2">
+                        <div className="flex items-center justify-center mb-2">
+                          <currentProfile.icon className={`h-10 w-10 text-${activeProfile === "business" ? "amber-500" : activeProfile === "employee" ? "purple-500" : activeProfile === "instructor" ? "schoolier-teal" : "schoolier-blue"}`} />
+                          <span className="text-2xl font-bold ml-2">Schoolier</span>
+                        </div>
+                        <CardTitle className="text-xl text-center">{currentProfile.title}</CardTitle>
+                        <CardDescription className="text-center">
+                          {currentProfile.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <RegisterForm profileType={activeProfile} />
+                        <div className="mt-4">
+                          <SocialLoginButtons />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex flex-col space-y-4 pt-0 pb-6">
+                        <p className="text-center text-sm text-muted-foreground">
+                          Vous avez déjà un compte ?{" "}
+                          <Link to={`/login${profileParam ? `?profile=${profileParam}` : ""}`} className="text-schoolier-blue hover:underline">
+                            Se connecter
+                          </Link>
+                        </p>
+                      </CardFooter>
+                    </TabsContent>
+                  </Tabs>
+                </ScrollArea>
               </Card>
             </motion.div>
           </div>

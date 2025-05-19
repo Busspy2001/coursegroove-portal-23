@@ -34,5 +34,22 @@ export const authRoutes: RouteObject[] = [
   {
     path: "/demo-redirect",
     element: <DemoRedirect />
+  },
+  // Routes d'inscription directe pour chaque profil
+  {
+    path: "/register/student",
+    element: <Register />
+  },
+  {
+    path: "/register/instructor",
+    element: <Register />
+  },
+  {
+    path: "/register/business",
+    element: <Register />
+  },
+  {
+    path: "/register/employee",
+    element: <Register />
   }
 ];
