@@ -10,7 +10,7 @@ interface BusinessAuthGuardProps {
 }
 
 export const BusinessAuthGuard: React.FC<BusinessAuthGuardProps> = ({ children }) => {
-  const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, authStateReady, hasRole } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,11 +28,12 @@ export const BusinessAuthGuard: React.FC<BusinessAuthGuardProps> = ({ children }
       }
 
       // Check if user is a business admin or employee (with demo accounts being allowed)
-      const allowedRoles = ["business_admin", "employee"];
-      const isAllowed = currentUser.is_demo || (currentUser.role && allowedRoles.includes(currentUser.role));
+      const isAllowed = currentUser.is_demo || 
+                       hasRole('business_admin') || 
+                       hasRole('employee');
 
       if (!isAllowed) {
-        console.log(`⚠️ BusinessAuthGuard: User role not allowed: ${currentUser.role}`);
+        console.log(`⚠️ BusinessAuthGuard: User roles not allowed`);
         toast({
           title: "Accès non autorisé",
           description: "Vous n'avez pas les autorisations nécessaires pour accéder au tableau de bord entreprise.",
@@ -46,7 +47,7 @@ export const BusinessAuthGuard: React.FC<BusinessAuthGuardProps> = ({ children }
     };
 
     checkAccess();
-  }, [isAuthenticated, currentUser, navigate, authStateReady, isLoading]);
+  }, [isAuthenticated, currentUser, navigate, authStateReady, isLoading, hasRole]);
 
   if (isLoading || !authStateReady) {
     return (

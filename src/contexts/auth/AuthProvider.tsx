@@ -1,239 +1,305 @@
 
-import React, { useState, useEffect, ReactNode } from 'react';
-import { User } from './types';
-import * as authService from './authService';
-import { clearUserCache } from './authUtils';
-import { supabase, setLogoutActive, isLogoutActive } from '@/integrations/supabase/client';
+import React, { useEffect, useState, useCallback } from 'react';
 import { AuthContext } from './context';
-import { executeLogout } from './logout';
-import { handleLogin, handleLoginWithDemo, handleRegister, handleResetPassword } from './auth-functions';
-import { useLocation } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { User, UserRole } from './types';
+import { supabase } from '@/integrations/supabase/client';
+import { getCurrentUser, logoutUser } from './authService';
+import { clearUserCache } from './authUtils';
 
-// Provider component
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [authStateReady, setAuthStateReady] = useState<boolean>(false);
-  const location = useLocation();
-  const [initialCheckDone, setInitialCheckDone] = useState<boolean>(false);
 
-  // Check for logout parameter in URL
+  // Initialize auth state
   useEffect(() => {
-    // Si l'URL contient ?logout=true, marquer l'état de déconnexion
-    if (location.search.includes('logout=true')) {
-      console.log("📍 Paramètre de déconnexion détecté dans l'URL, blocage de la reconnexion automatique");
-      setLogoutActive(true);
-      // Vérifier si l'utilisateur est encore authentifié et forcer la déconnexion si nécessaire
-      if (isAuthenticated && currentUser) {
-        console.log("🔐 Utilisateur toujours authentifié après redirection, forçage de la déconnexion");
-        logout();
-      }
-    } else if (isLogoutActive) {
-      // Réinitialiser le statut de déconnexion si on navigue sur une autre page (sauf login)
-      if (!location.pathname.includes('/login')) {
-        console.log("📍 Navigation vers une page non-login, réinitialisation du statut de déconnexion");
-        setLogoutActive(false);
-      }
-    }
-  }, [location, isAuthenticated, currentUser]);
-
-  // Check if the user is authenticated on component mount
-  useEffect(() => {
-    let isMounted = true;
-    
-    const checkAuth = async () => {
-      // Avoid checking auth multiple times
-      if (initialCheckDone) return;
+    // Setting up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("🔄 Auth state changed:", event);
       
-      try {
-        setIsLoading(true);
-        
-        // Skip auth check if logout is active
-        if (isLogoutActive) {
-          console.log("🛑 État de déconnexion actif, vérification d'authentification ignorée");
-          if (isMounted) {
+      if (event === 'SIGNED_OUT') {
+        console.log("🔒 User signed out");
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+        clearUserCache();
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        if (session?.user?.id) {
+          console.log("🔑 User authenticated, fetching profile");
+          setIsLoading(true);
+          
+          try {
+            // Use setTimeout to prevent potential recursion issues
+            setTimeout(async () => {
+              const user = await getCurrentUser();
+              if (user) {
+                setCurrentUser(user);
+                setIsAuthenticated(true);
+                console.log("✅ User authenticated:", user.email);
+              } else {
+                console.log("❌ Could not fetch user profile");
+                setCurrentUser(null);
+                setIsAuthenticated(false);
+              }
+              setIsLoading(false);
+            }, 0);
+          } catch (error) {
+            console.error("❌ Error in auth state change:", error);
             setCurrentUser(null);
             setIsAuthenticated(false);
             setIsLoading(false);
-            setAuthStateReady(true);
-            setInitialCheckDone(true);
           }
-          return;
         }
+      }
+    });
+
+    // Initial auth check
+    const initializeAuth = async () => {
+      try {
+        const user = await getCurrentUser();
         
-        const user = await authService.getCurrentUser();
-        if (user && isMounted) {
+        if (user) {
+          console.log("🔑 User found on initialization:", user.email);
           setCurrentUser(user);
           setIsAuthenticated(true);
-          console.log("🔓 Utilisateur authentifié:", user.email, "Rôle:", user.role);
-          
-          // Verify if user is demo 
-          if (user.is_demo) {
-            console.log("👨‍💼 Compte de démonstration détecté");
-          }
+        } else {
+          console.log("🔒 No authenticated user found on initialization");
+          setCurrentUser(null);
+          setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error("Error checking authentication:", error);
-        if (isMounted) {
-          toast({
-            title: "Erreur d'authentification",
-            description: "Un problème est survenu lors de la vérification de votre session.",
-            variant: "destructive",
-          });
-        }
+        console.error("❌ Error during auth initialization:", error);
+        setCurrentUser(null);
+        setIsAuthenticated(false);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-          setAuthStateReady(true);
-          setInitialCheckDone(true);
-        }
+        setIsLoading(false);
+        setAuthStateReady(true);
+        console.log("✅ Auth state initialization complete");
       }
     };
 
-    // Setup auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!isMounted) return;
-        
-        console.log("🔄 Changement d'état d'authentification:", event);
-        
-        // Si un logout est actif, ignorer les événements de session
-        if (isLogoutActive && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          console.log("🛑 Blocage de la reconnexion automatique car déconnexion active");
-          
-          // Force logout if a session is detected while logout is active
-          if (session) {
-            console.log("⚠️ Session détectée pendant la déconnexion active, forçage de la déconnexion");
-            setTimeout(() => {
-              if (isMounted) {
-                supabase.auth.signOut({ scope: 'global' }).then(() => {
-                  clearUserCache();
-                });
-              }
-            }, 100);
-          }
-          
-          setCurrentUser(null);
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          setAuthStateReady(true);
-          return;
-        }
-        
-        // Using setTimeout to prevent infinite recursion with RLS policies
-        setTimeout(async () => {
-          if (!isMounted) return;
-          
-          if (session && event !== 'SIGNED_OUT') {
-            try {
-              const user = await authService.getCurrentUser();
-              if (user && isMounted) {
-                setCurrentUser(user);
-                setIsAuthenticated(true);
-                console.log("👤 Utilisateur mis à jour:", user.email, "Rôle:", user.role);
-              }
-            } catch (error) {
-              console.error("Error getting user after auth state change:", error);
-            }
-          } else {
-            setCurrentUser(null);
-            setIsAuthenticated(false);
-            clearUserCache();
-          }
-          
-          setIsLoading(false);
-          setAuthStateReady(true);
-        }, 100);
-      }
-    );
+    initializeAuth();
 
-    checkAuth();
-
-    // Cleanup subscription and prevent state updates after unmount
+    // Cleanup subscription
     return () => {
-      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  // Login function
-  const login = async (email: string, password: string, callback?: () => void) => {
-    // Reset logout status when logging in
-    setLogoutActive(false);
+  // Login with email and password
+  const login = async (email: string, password: string, callback?: () => void): Promise<User> => {
     try {
       setIsLoggingIn(true);
-      const user = await handleLogin(email, password, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
-      console.log(`✅ Login successful for ${user.email} (${user.role})`);
+      console.log("🔄 Login attempt:", email);
       
-      // Return user for additional processing if needed
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error("❌ Login error:", error.message);
+        throw error;
+      }
+      
+      if (!data.user) {
+        console.error("❌ Login failed: No user returned");
+        throw new Error("Login failed");
+      }
+      
+      console.log("✅ Login successful:", email);
+      
+      // The user will be set by the auth state change listener
+      if (callback) callback();
+      
+      // We need to fetch the user here because the auth state listener might not have fired yet
+      const user = await getCurrentUser();
+      if (!user) {
+        throw new Error("Failed to get user profile after login");
+      }
       return user;
     } catch (error) {
-      setIsLoggingIn(false);
-      console.error("❌ Login failed:", error);
+      console.error("❌ Login exception:", error);
       throw error;
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   // Login with demo account
-  const loginWithDemo = async (account: any, callback?: () => void) => {
-    // Reset logout status when logging in
-    setLogoutActive(false);
+  const loginWithDemo = async (account: any, callback?: () => void): Promise<User> => {
     try {
       setIsLoggingIn(true);
-      const user = await handleLoginWithDemo(account, setCurrentUser, setIsAuthenticated, setIsLoggingIn, callback);
-      console.log(`✅ Demo login successful for ${user.email} (${user.role})`);
-
-      // Return the user for additional processing if needed
+      console.log("🎭 Demo login attempt:", account.email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: account.email,
+        password: account.password || 'password123'
+      });
+      
+      if (error) {
+        console.error("❌ Demo login error:", error.message);
+        throw error;
+      }
+      
+      if (!data.user) {
+        console.error("❌ Demo login failed: No user returned");
+        throw new Error("Demo login failed");
+      }
+      
+      console.log("✅ Demo login successful:", account.email);
+      
+      // The user will be set by the auth state change listener
+      if (callback) callback();
+      
+      // We need to fetch the user here because the auth state listener might not have fired yet
+      const user = await getCurrentUser();
+      if (!user) {
+        throw new Error("Failed to get user profile after demo login");
+      }
       return user;
     } catch (error) {
-      setIsLoggingIn(false);
-      console.error("❌ Demo login failed:", error);
+      console.error("❌ Demo login exception:", error);
       throw error;
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
-  // Register function
-  const register = async (email: string, password: string, name: string, callback?: () => void) => {
-    // Reset logout status when registering
-    setLogoutActive(false);
-    return handleRegister(email, password, name, setCurrentUser, setIsAuthenticated, callback);
+  // Register new user
+  const register = async (email: string, password: string, name: string, callback?: () => void): Promise<User> => {
+    try {
+      setIsLoggingIn(true);
+      console.log("🔄 Registration attempt:", email);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            full_name: name
+          }
+        }
+      });
+      
+      if (error) {
+        console.error("❌ Registration error:", error.message);
+        throw error;
+      }
+      
+      if (!data.user) {
+        console.error("❌ Registration failed: No user returned");
+        throw new Error("Registration failed");
+      }
+      
+      console.log("✅ Registration successful:", email);
+      
+      // The user will be set by the auth state change listener
+      if (callback) callback();
+      
+      // We need to fetch the user here because the auth state listener might not have fired yet
+      const user = await getCurrentUser();
+      if (!user) {
+        throw new Error("Failed to get user profile after registration");
+      }
+      return user;
+    } catch (error) {
+      console.error("❌ Registration exception:", error);
+      throw error;
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
-  // Logout function
-  const logout = async (callback?: () => void) => {
-    if (isLoggingOut) {
-      console.log("⚠️ Déconnexion déjà en cours, ignoré");
-      return;
+  // Logout
+  const logout = async (callback?: () => void): Promise<void> => {
+    try {
+      setIsLoggingOut(true);
+      console.log("🔄 Logout attempt");
+      
+      await logoutUser();
+      
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      clearUserCache();
+      
+      console.log("✅ Logout successful");
+      
+      if (callback) callback();
+    } catch (error) {
+      console.error("❌ Logout error:", error);
+      throw error;
+    } finally {
+      setIsLoggingOut(false);
     }
-    
-    // Activer le drapeau de déconnexion
-    setLogoutActive(true);
-    setIsLoggingOut(true);
-    return executeLogout(setCurrentUser, setIsAuthenticated, setIsLoggingOut, callback);
   };
 
   // Reset password
-  const resetPassword = async (email: string) => {
-    return handleResetPassword(email);
+  const resetPassword = async (email: string): Promise<void> => {
+    try {
+      console.log("🔄 Password reset attempt:", email);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password'
+      });
+      
+      if (error) {
+        console.error("❌ Password reset error:", error.message);
+        throw error;
+      }
+      
+      console.log("✅ Password reset email sent to:", email);
+    } catch (error) {
+      console.error("❌ Password reset exception:", error);
+      throw error;
+    }
   };
+  
+  // Check if user has a specific role - new function for multi-role support
+  const hasRole = useCallback((role: UserRole): boolean => {
+    if (!currentUser || !currentUser.roles) return false;
+    return currentUser.roles.includes(role);
+  }, [currentUser]);
+  
+  // Get the primary role for display purposes
+  const getUserPrimaryRole = useCallback((): UserRole => {
+    if (!currentUser || !currentUser.roles || currentUser.roles.length === 0) {
+      return 'student';
+    }
+    
+    // Priority order for primary role
+    const rolePriority: UserRole[] = ['super_admin', 'admin', 'business_admin', 'instructor', 'employee', 'student'];
+    
+    for (const role of rolePriority) {
+      if (currentUser.roles.includes(role)) {
+        return role;
+      }
+    }
+    
+    return currentUser.roles[0];
+  }, [currentUser]);
 
-  // Context value to be provided
   const contextValue = {
     currentUser,
     isAuthenticated,
     isLoading,
-    isLoggingOut,
     isLoggingIn,
+    isLoggingOut,
     authStateReady,
     login,
     loginWithDemo,
     register,
     logout,
     resetPassword,
+    hasRole,
+    getUserPrimaryRole
   };
 
   return (
@@ -242,6 +308,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-
-// Re-export the useAuth hook
-export { useAuth } from './hooks';

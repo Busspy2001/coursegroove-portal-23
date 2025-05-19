@@ -12,7 +12,7 @@ import StudentDashboard from "./StudentDashboard";
 import { Layout } from "@/components/layout/Layout";
 
 const Dashboard = () => {
-  const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, authStateReady, hasRole, getUserPrimaryRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [redirecting, setRedirecting] = useState(false);
@@ -45,64 +45,62 @@ const Dashboard = () => {
     }
 
     // Afficher le rôle détecté pour le débogage
-    console.log(`👤 Utilisateur authentifié: ${currentUser.email} (Rôle: ${currentUser.role})`);
+    console.log(`👤 Utilisateur authentifié: ${currentUser.email} (Rôle principal: ${getUserPrimaryRole()})`);
     
     // Use a timeout to ensure state is settled before potentially redirecting
     const redirectTimeout = setTimeout(() => {
       // Redirect based on role if we're not on a logout page
       if (!location.pathname.includes('logout=true')) {
-        switch (currentUser.role) {
-          case "instructor":
-            console.log("🚀 Redirection vers /instructor pour le rôle instructor");
-            setRedirecting(true);
-            navigate("/instructor", { replace: true });
-            break;
-          case "admin":
-          case "super_admin":
-            console.log("🚀 Redirection vers /admin pour le rôle admin");
-            setRedirecting(true);
-            navigate("/admin", { replace: true });
-            break;
-          case "business_admin":
-            console.log("🚀 Redirection vers /entreprise pour le rôle business_admin");
-            setRedirecting(true);
-            navigate("/entreprise", { replace: true });
-            break;
-          case "employee":
-            console.log("🚀 Redirection vers /employee pour le rôle employee");
-            setRedirecting(true);
-            navigate("/employee", { replace: true });
-            break;
-          case "student":
-            // Déjà sur le bon tableau de bord
-            console.log("✅ Déjà sur le dashboard étudiant");
-            break;
-          default:
-            if (currentUser.is_demo) {
-              // For demo users, determine appropriate dashboard based on email
-              const email = currentUser.email?.toLowerCase() || '';
-              if (email.includes('business') || email.includes('entreprise')) {
-                console.log("🚀 Redirection vers /entreprise pour le compte démo d'entreprise");
-                setRedirecting(true);
-                navigate("/entreprise", { replace: true });
-              } else if (email.includes('employee')) {
-                console.log("🚀 Redirection vers /employee pour le compte démo d'employé");
-                setRedirecting(true);
-                navigate("/employee", { replace: true });
-              } else if (email.includes('prof') || email.includes('instructor')) {
-                console.log("🚀 Redirection vers /instructor pour le compte démo d'instructeur");
-                setRedirecting(true);
-                navigate("/instructor", { replace: true });
-              } else if (email.includes('admin')) {
-                console.log("🚀 Redirection vers /admin pour le compte démo d'admin");
-                setRedirecting(true);
-                navigate("/admin", { replace: true });
-              } else {
-                console.log("✅ Utilisation du dashboard étudiant pour le compte démo par défaut");
-              }
+        if (hasRole('instructor')) {
+          console.log("🚀 Redirection vers /instructor pour le rôle instructor");
+          setRedirecting(true);
+          navigate("/instructor", { replace: true });
+        } 
+        else if (hasRole('super_admin') || hasRole('admin')) {
+          console.log("🚀 Redirection vers /admin pour le rôle admin");
+          setRedirecting(true);
+          navigate("/admin", { replace: true });
+        } 
+        else if (hasRole('business_admin')) {
+          console.log("🚀 Redirection vers /entreprise pour le rôle business_admin");
+          setRedirecting(true);
+          navigate("/entreprise", { replace: true });
+        } 
+        else if (hasRole('employee')) {
+          console.log("🚀 Redirection vers /employee pour le rôle employee");
+          setRedirecting(true);
+          navigate("/employee", { replace: true });
+        } 
+        else if (hasRole('student')) {
+          // Déjà sur le bon tableau de bord
+          console.log("✅ Déjà sur le dashboard étudiant");
+        }
+        else {
+          if (currentUser.is_demo) {
+            // For demo users, determine appropriate dashboard based on email
+            const email = currentUser.email?.toLowerCase() || '';
+            if (email.includes('business') || email.includes('entreprise')) {
+              console.log("🚀 Redirection vers /entreprise pour le compte démo d'entreprise");
+              setRedirecting(true);
+              navigate("/entreprise", { replace: true });
+            } else if (email.includes('employee')) {
+              console.log("🚀 Redirection vers /employee pour le compte démo d'employé");
+              setRedirecting(true);
+              navigate("/employee", { replace: true });
+            } else if (email.includes('prof') || email.includes('instructor')) {
+              console.log("🚀 Redirection vers /instructor pour le compte démo d'instructeur");
+              setRedirecting(true);
+              navigate("/instructor", { replace: true });
+            } else if (email.includes('admin')) {
+              console.log("🚀 Redirection vers /admin pour le compte démo d'admin");
+              setRedirecting(true);
+              navigate("/admin", { replace: true });
             } else {
-              console.warn(`⚠️ Rôle non reconnu: ${currentUser.role}, utilisation du dashboard étudiant par défaut`);
+              console.log("✅ Utilisation du dashboard étudiant pour le compte démo par défaut");
             }
+          } else {
+            console.warn(`⚠️ Aucun rôle reconnu, utilisation du dashboard étudiant par défaut`);
+          }
         }
       } else {
         console.log("🛑 Redirection bloquée car déconnexion active");
@@ -112,7 +110,7 @@ const Dashboard = () => {
     }, 300);
     
     return () => clearTimeout(redirectTimeout);
-  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, location.pathname]);
+  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, location.pathname, hasRole, getUserPrimaryRole]);
 
   // Show loading state
   if (isLoading || !authStateReady || redirecting || !isAuthenticated || !currentUser) {
@@ -129,7 +127,6 @@ const Dashboard = () => {
   }
 
   // Only show StudentDashboard if we're still here and the user is a student or default to student dashboard
-  // For other roles, redirection should have happened in the useEffect
   return (
     <Layout>
       <motion.div

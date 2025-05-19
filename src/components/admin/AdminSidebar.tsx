@@ -15,7 +15,7 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar = ({ onNavigate }: AdminSidebarProps) => {
-  const { currentUser, logout, isLoggingOut } = useAuth();
+  const { currentUser, logout, isLoggingOut, getUserPrimaryRole } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -31,14 +31,13 @@ const AdminSidebar = ({ onNavigate }: AdminSidebarProps) => {
   };
   
   console.log("Admin navigation groups:", adminNavigation.map(g => g.label));
-  console.log("Current user role:", currentUser?.role);
   
   return (
     <Sidebar>
       <AdminSidebarHeader 
         name={currentUser?.name || ""} 
         avatar={currentUser?.avatar} 
-        role={currentUser?.role || "admin"} 
+        role={getUserPrimaryRole()} 
       />
       
       <SidebarContent>
@@ -46,7 +45,6 @@ const AdminSidebar = ({ onNavigate }: AdminSidebarProps) => {
           <AdminNavGroup
             key={group.label}
             group={group}
-            userRole={currentUser?.role}
             onNavigate={onNavigate}
           />
         ))}

@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User } from './types';
-import { getUserFromCache, cacheUser } from './authUtils';
+import { User, UserRole } from './types';
+import { getUserFromCache, cacheUser, fetchUserRoles } from './authUtils';
 import { isDemoAccount, getDemoAccountInfo } from '@/components/auth/demo/demoAccountService';
 
 // Function to retrieve the current user
@@ -32,11 +32,14 @@ export const getCurrentUser = async (): Promise<User | null> => {
       const demoInfo = getDemoAccountInfo(email);
       
       if (demoInfo) {
+        // Get roles even for demo accounts
+        const roles = await fetchUserRoles(userId);
+        
         const demoUser: User = {
           id: userId,
           email: email,
           name: demoInfo.name,
-          role: demoInfo.role,
+          roles: roles.length ? roles : [demoInfo.role], // Use fetched roles or fallback to demo role
           is_demo: true,
           avatar: demoInfo.avatar
         };
@@ -59,16 +62,30 @@ export const getCurrentUser = async (): Promise<User | null> => {
       return null;
     }
     
+    // Fetch user roles from our new system
+    const roles = await fetchUserRoles(userId);
+    
     if (!profile) {
       console.log("❌ Aucun profil trouvé pour l'utilisateur:", userId);
-      return null;
+      
+      // Even if no profile, we can still return a user with roles
+      const user: User = {
+        id: userId,
+        email: session.user.email || "",
+        name: session.user.user_metadata?.name || "User",
+        roles: roles,
+        is_demo: session.user.user_metadata?.is_demo || false
+      };
+      
+      cacheUser(user);
+      return user;
     }
     
     const user: User = {
       id: userId,
       email: session.user.email || "",
       name: profile.full_name || "",
-      role: profile.role,
+      roles: roles,
       is_demo: profile.is_demo || false,
       avatar: profile.avatar_url,
       company_id: profile.company_id

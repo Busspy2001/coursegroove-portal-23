@@ -4,17 +4,18 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { isLogoutActive } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { UserRole } from "@/contexts/auth/types";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
-  requiredRoles?: string[];
+  requiredRoles?: UserRole[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ 
   children, 
   requiredRoles = [] 
 }) => {
-  const { currentUser, isAuthenticated, isLoading, authStateReady } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, authStateReady, hasRole } = useAuth();
   const location = useLocation();
 
   // Montrer un écran de chargement tant que l'état d'authentification n'est pas prêt
@@ -42,7 +43,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   }
 
   // Vérifier si l'utilisateur a le rôle requis
-  if (requiredRoles.length > 0 && currentUser.role && !requiredRoles.includes(currentUser.role)) {
+  if (requiredRoles.length > 0 && !requiredRoles.some(role => hasRole(role))) {
     console.log("🚫 PrivateRoute: Utilisateur n'a pas les rôles requis, redirection vers /dashboard");
     return <Navigate to="/dashboard" replace />;
   }

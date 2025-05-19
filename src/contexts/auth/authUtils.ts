@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "./types";
 import { userCache } from "@/integrations/supabase/client";
@@ -41,6 +42,46 @@ export const cacheUser = (user: User): void => {
   }
 };
 
+// Fetch user roles with the new system
+export const fetchUserRoles = async (userId: string): Promise<UserRole[]> => {
+  try {
+    // First try to use our new security definer function that prevents RLS recursion
+    const { data: roles, error } = await supabase
+      .rpc('get_user_roles', { _user_id: userId });
+      
+    if (error) {
+      console.error("Error fetching user roles:", error);
+      return [];
+    }
+    
+    if (roles && roles.length > 0) {
+      return roles as UserRole[];
+    }
+    
+    // Fallback to the old method (profiles_unified) if no roles found
+    // This is transitional code during migration
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles_unified')
+      .select('role')
+      .eq('id', userId)
+      .single();
+      
+    if (profileError) {
+      console.error("Error in fallback role fetch:", profileError);
+      return ['student']; // Default to student as fallback
+    }
+    
+    if (profile && profile.role) {
+      return [profile.role as UserRole];
+    }
+    
+    return ['student']; // Default to student if all else fails
+  } catch (error) {
+    console.error("Error in fetchUserRoles:", error);
+    return ['student']; // Default to student as fallback
+  }
+};
+
 // Mapping Supabase user to our app's user model
 export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> => {
   try {
@@ -61,6 +102,9 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       .eq('id', supabaseUser.id)
       .single();
     
+    // Get the user's roles using our new system
+    const roles = await fetchUserRoles(supabaseUser.id);
+    
     // If there's an error with profiles_unified (likely RLS policy issue)
     if (error) {
       console.error("Error fetching user profile:", error);
@@ -70,21 +114,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
                    supabaseUser.user_metadata?.full_name || 
                    'User';
       
-      // Create a fallback role based on user metadata or default to student
-      let role: UserRole = 'student';
-      
-      if (supabaseUser.email === 'admin@schoolier.com') {
-        role = 'super_admin';
-      } else if (supabaseUser.email === 'prof@schoolier.com') {
-        role = 'instructor';
-      } else if (supabaseUser.email === 'business@schoolier.com' || supabaseUser.email === 'entreprise@schoolier.com') {
-        role = 'business_admin';
-      } else if (supabaseUser.email?.includes('employee')) {
-        role = 'employee';
-      } else if (supabaseUser.email?.includes('admin')) {
-        role = 'admin';
-      }
-      
+      // Default roles already set from fetchUserRoles
       // Construct user from auth data as fallback
       const user: User = {
         id: supabaseUser.id,
@@ -93,7 +123,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         full_name: name,
         avatar: supabaseUser.user_metadata?.avatar_url,
         avatar_url: supabaseUser.user_metadata?.avatar_url,
-        role: role,
+        roles: roles,
         is_demo: supabaseUser.user_metadata?.is_demo || false
       };
       
@@ -105,33 +135,6 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
     
     // If profile was successfully retrieved
     if (profile) {
-      // Convertir le rôle de la base de données en type UserRole pour l'application
-      // Cela permet d'éviter les problèmes de type entre Supabase et notre app
-      let appRole: UserRole;
-      
-      switch(profile.role) {
-        case 'super_admin':
-          appRole = 'super_admin';
-          break;
-        case 'business_admin':
-          appRole = 'business_admin';
-          break;
-        case 'instructor':
-          appRole = 'instructor';
-          break;
-        case 'employee':
-          appRole = 'employee';
-          break;
-        case 'demo':
-          appRole = 'demo';
-          break;
-        case 'admin':
-          appRole = 'admin';
-          break;
-        default:
-          appRole = 'student';
-      }
-      
       const user: User = {
         id: profile.id,
         email: profile.email || supabaseUser.email || '',
@@ -139,10 +142,11 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         full_name: profile.full_name,
         avatar: profile.avatar_url,
         avatar_url: profile.avatar_url,
-        role: appRole,
+        roles: roles,
         bio: profile.bio,
         phone: profile.phone || undefined,
-        is_demo: profile.is_demo || false
+        is_demo: profile.is_demo || false,
+        company_id: profile.company_id
       };
       
       // Cache the user

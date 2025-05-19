@@ -1,6 +1,6 @@
 
 import { createContext } from 'react';
-import { User } from './types';
+import { User, UserRole } from './types';
 
 export interface AuthContextType {
   currentUser: User | null;
@@ -14,6 +14,8 @@ export interface AuthContextType {
   register: (email: string, password: string, name: string, callback?: () => void) => Promise<User>;
   logout: (callback?: () => void) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  hasRole: (role: UserRole) => boolean;
+  getUserPrimaryRole: () => UserRole;
 }
 
 // Create the context with a default empty implementation
@@ -28,5 +30,7 @@ export const AuthContext = createContext<AuthContextType>({
   loginWithDemo: async () => { throw new Error('AuthContext not initialized'); },
   register: async () => { throw new Error('AuthContext not initialized'); },
   logout: async () => { throw new Error('AuthContext not initialized'); },
-  resetPassword: async () => { throw new Error('AuthContext not initialized'); }
+  resetPassword: async () => { throw new Error('AuthContext not initialized'); },
+  hasRole: () => false,
+  getUserPrimaryRole: () => 'student'
 });
