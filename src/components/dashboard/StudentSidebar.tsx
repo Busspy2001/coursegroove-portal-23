@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -36,7 +37,7 @@ const StudentSidebar = () => {
   
   const menuItems = [{
     title: "Accueil",
-    path: "/dashboard",
+    path: "/student",
     icon: Home
   }, {
     title: "Mes cours",

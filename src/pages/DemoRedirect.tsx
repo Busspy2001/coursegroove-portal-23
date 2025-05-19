@@ -75,7 +75,7 @@ const DemoRedirect = () => {
       }
       else if (roles.includes('student')) {
         console.log("🎓 Redirection par rôle vers le tableau de bord étudiant");
-        navigate("/dashboard", { replace: true });
+        navigate("/student", { replace: true });
       }
       // No role or special case - try to detect from email
       else if (currentUser.is_demo) {
@@ -98,13 +98,13 @@ const DemoRedirect = () => {
         } 
         else {
           console.log("🎓 Redirection par défaut vers le tableau de bord étudiant");
-          navigate("/dashboard", { replace: true });
+          navigate("/student", { replace: true });
         }
       } 
       else {
         // Default fallback if nothing else matches
         console.log("🎓 Redirection vers le tableau de bord par défaut (étudiant)");
-        navigate("/dashboard", { replace: true });
+        navigate("/student", { replace: true });
       }
     }, 500); // Increased delay for more stability
     

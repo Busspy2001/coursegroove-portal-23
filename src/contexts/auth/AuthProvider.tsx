@@ -155,9 +155,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log("✅ Demo login successful:", account.email);
       
-      // Pre-determine expected role based on email for more reliable redirection
+      // Pre-determine expected path based on email for more reliable redirection
       let targetPath = "/demo-redirect"; // Default to our specialized redirection component
       
+      // No longer redirect to /dashboard, instead use specific paths or redirection component
       const email = account.email.toLowerCase();
       if (email.includes('prof') || email.includes('instructor')) {
         console.log("👨‍🏫 Demo compte détecté: instructeur");

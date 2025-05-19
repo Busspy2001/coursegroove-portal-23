@@ -44,8 +44,20 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 
   // Vérifier si l'utilisateur a le rôle requis
   if (requiredRoles.length > 0 && !requiredRoles.some(role => hasRole(role))) {
-    console.log("🚫 PrivateRoute: Utilisateur n'a pas les rôles requis, redirection vers /dashboard");
-    return <Navigate to="/dashboard" replace />;
+    console.log("🚫 PrivateRoute: Utilisateur n'a pas les rôles requis");
+    
+    // Redirection vers le tableau de bord approprié en fonction du rôle
+    if (hasRole('instructor')) {
+      return <Navigate to="/instructor" replace />;
+    } else if (hasRole('admin') || hasRole('super_admin')) {
+      return <Navigate to="/admin" replace />;
+    } else if (hasRole('business_admin')) {
+      return <Navigate to="/entreprise" replace />;
+    } else if (hasRole('employee')) {
+      return <Navigate to="/employee" replace />;
+    } else {
+      return <Navigate to="/student" replace />;
+    }
   }
 
   // Si tout est en ordre, afficher le contenu protégé

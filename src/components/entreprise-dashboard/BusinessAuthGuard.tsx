@@ -51,7 +51,16 @@ export const BusinessAuthGuard: React.FC<BusinessAuthGuardProps> = ({ children }
           description: "Vous n'avez pas les autorisations nécessaires pour accéder au tableau de bord entreprise.",
           variant: "destructive",
         });
-        navigate("/dashboard");
+        // Redirect to role-specific page instead of dashboard
+        if (hasRole('instructor')) {
+          navigate("/instructor");
+        } else if (hasRole('admin') || hasRole('super_admin')) {
+          navigate("/admin");
+        } else if (hasRole('student')) {
+          navigate("/student");
+        } else {
+          navigate("/"); // Fallback to home page
+        }
         return false;
       }
 

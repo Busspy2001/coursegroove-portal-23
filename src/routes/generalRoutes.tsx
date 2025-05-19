@@ -2,8 +2,8 @@
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 
-// Import critical pages directly to avoid dynamic loading issues
-import Dashboard from "@/pages/Dashboard";
+// New AuthRedirect component that replaces Dashboard
+import AuthRedirect from "@/pages/AuthRedirect";
 
 // General pages
 const Index = lazy(() => import("@/pages/Index"));
@@ -22,6 +22,7 @@ const Instructors = lazy(() => import("@/pages/Instructors"));
 const Courses = lazy(() => import("@/pages/Courses"));
 const CourseDetails = lazy(() => import("@/pages/CourseDetails"));
 const Profile = lazy(() => import("@/pages/Profile"));
+const DemoRedirect = lazy(() => import("@/pages/DemoRedirect"));
 
 export const generalRoutes: RouteObject[] = [
   {
@@ -29,8 +30,12 @@ export const generalRoutes: RouteObject[] = [
     element: <Index />
   },
   {
-    path: "/dashboard",
-    element: <Dashboard />
+    path: "/redirect",
+    element: <AuthRedirect />
+  },
+  {
+    path: "/demo-redirect",
+    element: <DemoRedirect />
   },
   {
     path: "/about",

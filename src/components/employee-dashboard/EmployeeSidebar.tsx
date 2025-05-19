@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -61,27 +60,27 @@ const EmployeeSidebar = () => {
   const menuItems = [
     {
       title: "Tableau de bord",
-      path: "/employe",
+      path: "/employee",
       icon: LayoutDashboard
     },
     {
       title: "Mes formations",
-      path: "/employe/formations",
+      path: "/employee/formations",
       icon: BookOpen
     },
     {
       title: "Catalogue",
-      path: "/employe/catalogue",
+      path: "/employee/catalogue",
       icon: BookOpen
     },
     {
       title: "Certifications",
-      path: "/employe/certifications",
+      path: "/employee/certifications",
       icon: Award
     },
     {
       title: "Mon profil",
-      path: "/employe/profil",
+      path: "/employee/profil",
       icon: User
     }
   ];
