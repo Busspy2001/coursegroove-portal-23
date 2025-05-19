@@ -42,12 +42,21 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Detect demo accounts based on email
+  const isDemoInstructor = currentUser.is_demo && 
+    currentUser.email?.toLowerCase().includes('prof');
+  
+  // Special handling for demo instructor
+  if (requiredRoles.includes('instructor') && isDemoInstructor) {
+    return <>{children}</>;
+  }
+
   // Vérifier si l'utilisateur a le rôle requis
   if (requiredRoles.length > 0 && !requiredRoles.some(role => hasRole(role))) {
     console.log("🚫 PrivateRoute: Utilisateur n'a pas les rôles requis");
     
     // Redirection vers le tableau de bord approprié en fonction du rôle
-    if (hasRole('instructor')) {
+    if (hasRole('instructor') || isDemoInstructor) {
       return <Navigate to="/instructor" replace />;
     } else if (hasRole('admin') || hasRole('super_admin')) {
       return <Navigate to="/admin" replace />;
