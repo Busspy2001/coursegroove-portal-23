@@ -18,23 +18,15 @@ import { motion } from "framer-motion";
 const Index = () => {
   const isMobile = useIsMobile();
   
-  // Animation variants for the page content
-  const pageVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <motion.div 
         className={`flex-1 ${isMobile ? "pb-16" : ""}`}
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       >
         <HeroSection />

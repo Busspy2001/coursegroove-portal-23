@@ -3,9 +3,10 @@ import React, { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import BusinessSidebar from "./BusinessSidebar";
 import { BusinessAuthGuard } from "./BusinessAuthGuard";
+import { Outlet } from "react-router-dom";
 
 interface BusinessLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const BusinessLayout = ({ children }: BusinessLayoutProps) => {
@@ -17,6 +18,7 @@ const BusinessLayout = ({ children }: BusinessLayoutProps) => {
             <BusinessSidebar />
             <div className="flex-1 bg-gray-50 dark:bg-gray-800">
               <div className="container px-4 py-6 md:py-8 flex-grow max-w-7xl mx-auto">
+                <Outlet />
                 {children}
               </div>
             </div>
