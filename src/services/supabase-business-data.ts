@@ -22,9 +22,143 @@ export interface Department {
   company_id: string;
   head_id?: string;
   head_name?: string;
+  manager_id?: string;
+  manager_name?: string;
   employee_count?: number;
   created_at?: string;
 }
+
+export interface BusinessStatistics {
+  total_employees: number;
+  departments_count: number;
+  active_courses: number;
+  completion_rate: number;
+  recent_activities: Array<{
+    type: string;
+    message: string;
+    date: string;
+  }>;
+}
+
+// Fetch company data
+export const fetchCompanyData = async () => {
+  try {
+    // Get user ID from session
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userId = sessionData.session?.user.id;
+    
+    if (!userId) {
+      console.log("No user ID found in session");
+      return null;
+    }
+
+    // First check if the user has a company_id in their profile
+    const { data: userData, error: userError } = await supabase
+      .from('profiles_unified')
+      .select('company_id')
+      .eq('id', userId)
+      .single();
+
+    if (userError) {
+      console.error("Error fetching user profile:", userError);
+      return null;
+    }
+
+    if (userData?.company_id) {
+      // Fetch company using company_id
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', userData.company_id)
+        .single();
+
+      if (companyError) {
+        console.error("Error fetching company:", companyError);
+        return null;
+      }
+
+      return companyData;
+    } else {
+      // Check if user is admin of any company
+      const { data: adminCompany, error: adminError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('admin_id', userId)
+        .maybeSingle();
+
+      if (adminError) {
+        console.error("Error fetching admin company:", adminError);
+        return null;
+      }
+
+      return adminCompany;
+    }
+  } catch (error) {
+    console.error("Error in fetchCompanyData:", error);
+    return null;
+  }
+};
+
+// Fetch business statistics
+export const fetchBusinessStatistics = async (companyId: string): Promise<BusinessStatistics | null> => {
+  try {
+    // Count employees
+    const { count: employeeCount, error: empError } = await supabase
+      .from('company_employees')
+      .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId);
+
+    if (empError) {
+      console.error("Error counting employees:", empError);
+      return null;
+    }
+
+    // Count departments
+    const { count: deptCount, error: deptError } = await supabase
+      .from('company_departments')
+      .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId);
+
+    if (deptError) {
+      console.error("Error counting departments:", deptError);
+      return null;
+    }
+
+    // Mock data for active courses and completion rate (would be implemented with real data)
+    const activeCourses = 5;
+    const completionRate = 72;
+
+    // Get some recent activities
+    const recentActivities = [
+      {
+        type: "Nouveau",
+        message: "L'employé Jean Dupont a rejoint l'équipe Marketing",
+        date: "Il y a 2 heures"
+      },
+      {
+        type: "Complétion",
+        message: "Marie Martin a terminé sa formation sur Excel",
+        date: "Il y a 1 jour"
+      },
+      {
+        type: "Assignation",
+        message: "Formation 'Leadership' assignée au département RH",
+        date: "Il y a 3 jours"
+      }
+    ];
+
+    return {
+      total_employees: employeeCount || 0,
+      departments_count: deptCount || 0,
+      active_courses: activeCourses,
+      completion_rate: completionRate,
+      recent_activities: recentActivities
+    };
+  } catch (error) {
+    console.error("Error in fetchBusinessStatistics:", error);
+    return null;
+  }
+};
 
 // Fetch employees for a company
 export const fetchEmployees = async (companyId: string): Promise<Employee[]> => {
@@ -32,11 +166,12 @@ export const fetchEmployees = async (companyId: string): Promise<Employee[]> => 
     const { data, error } = await supabase
       .from('company_employees')
       .select(`
+        id,
         employee_id,
         job_title,
         department_id,
         status,
-        hire_date,
+        joined_at,
         profiles_unified (
           id,
           full_name,
@@ -64,7 +199,7 @@ export const fetchEmployees = async (companyId: string): Promise<Employee[]> => 
       department_name: item.company_departments?.name,
       job_title: item.job_title,
       status: item.status,
-      hire_date: item.hire_date,
+      hire_date: item.joined_at,
     }));
 
     return employees;
@@ -98,8 +233,8 @@ export const fetchDepartments = async (companyId: string): Promise<Department[]>
       name: item.name,
       description: item.description,
       company_id: item.company_id,
-      head_id: item.head_id,
-      head_name: item.profiles_unified?.full_name,
+      manager_id: item.manager_id,
+      manager_name: item.profiles_unified?.full_name || 'Non assigné',
       created_at: item.created_at,
     }));
 
@@ -107,6 +242,83 @@ export const fetchDepartments = async (companyId: string): Promise<Department[]>
   } catch (error) {
     console.error("Error in fetchDepartments:", error);
     return [];
+  }
+};
+
+// Create a department
+export const createDepartment = async (
+  companyId: string, 
+  departmentData: Partial<Department>
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('company_departments')
+      .insert({
+        name: departmentData.name,
+        description: departmentData.description,
+        company_id: companyId,
+        manager_id: departmentData.manager_id
+      });
+
+    if (error) {
+      console.error("Error creating department:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in createDepartment:", error);
+    return false;
+  }
+};
+
+// Update a department
+export const updateDepartment = async (
+  departmentId: string,
+  departmentData: Partial<Department>
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('company_departments')
+      .update({
+        name: departmentData.name,
+        description: departmentData.description,
+        manager_id: departmentData.manager_id
+      })
+      .eq('id', departmentId);
+
+    if (error) {
+      console.error("Error updating department:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in updateDepartment:", error);
+    return false;
+  }
+};
+
+// Delete a department
+export const deleteDepartment = async (
+  departmentId: string,
+  departmentName: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('company_departments')
+      .delete()
+      .eq('id', departmentId);
+
+    if (error) {
+      console.error(`Error deleting department ${departmentName}:`, error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(`Error in deleteDepartment for ${departmentName}:`, error);
+    return false;
   }
 };
 
@@ -129,10 +341,13 @@ export const addEmployee = async (companyId: string, employeeData: Partial<Emplo
     if (existingUser) {
       employeeId = existingUser.id;
     } else {
-      // Create new user profile
+      // Create new user profile with a generated UUID
+      const newUserId = crypto.randomUUID();
+      
       const { data: newUser, error: createError } = await supabase
         .from('profiles_unified')
         .insert({
+          id: newUserId,
           full_name: employeeData.full_name,
           email: employeeData.email,
           role: 'employee',

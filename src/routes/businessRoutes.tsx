@@ -4,7 +4,7 @@ import { RouteObject } from "react-router-dom";
 import BusinessLayout from "@/components/entreprise-dashboard/BusinessLayout";
 import BusinessDashboard from "@/pages/entreprise/BusinessDashboard";
 import BusinessEmployees from "@/components/entreprise-dashboard/employees/BusinessEmployees";
-import BusinessDepartments from "@/components/business-dashboard/departments/BusinessDepartments";
+import BusinessDepartments from "@/components/entreprise-dashboard/departments/BusinessDepartments";
 import BusinessSettings from "@/components/business-dashboard/settings/BusinessSettings";
 
 // Use the BusinessLayout component for all business routes

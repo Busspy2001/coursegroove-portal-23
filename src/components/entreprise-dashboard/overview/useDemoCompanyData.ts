@@ -19,7 +19,7 @@ export const useDemoCompanyData = (currentUser: User | null) => {
       };
       
       // Statistiques fictives pour la démonstration
-      const demoStats = {
+      const demoStats: BusinessStatistics = {
         total_employees: 24,
         departments_count: 3,
         active_courses: 8,

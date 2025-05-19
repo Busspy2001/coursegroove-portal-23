@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -190,15 +191,15 @@ const BusinessSidebar = () => {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton 
+                    <SidebarMenuSubButton 
                       onClick={() => handleNavigation(item.path)}
-                      tooltip={item.tooltip}
+                      title={item.tooltip}
                       isActive={isActive(item.path)}
                       className="w-full justify-start"
                     >
                       <item.icon className={`mr-2 h-4 w-4 ${item.path.includes('ajouter') ? 'text-schoolier-teal' : ''}`} />
                       <span>{item.title}</span>
-                    </SidebarMenuButton>
+                    </SidebarMenuSubButton>
                     
                     {item.subItems && (
                       <SidebarMenuSub>
