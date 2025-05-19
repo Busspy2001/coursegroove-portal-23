@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap, Book, Building, Briefcase, ArrowLeft } from "lucide-react";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import { RegisterForm } from "@/components/auth/register";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { RegisterBenefits } from "@/components/auth/RegisterBenefits";
 import { useAuth } from "@/contexts/auth";
