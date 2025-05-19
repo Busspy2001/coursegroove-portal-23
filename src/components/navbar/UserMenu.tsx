@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
@@ -19,6 +20,7 @@ interface User {
   email?: string;
   avatar?: string;
   roles?: UserRole[];
+  is_demo?: boolean;
 }
 
 interface UserMenuProps {
@@ -29,6 +31,10 @@ interface UserMenuProps {
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  // Detect if user is a demo instructor based on email
+  const isDemoInstructor = currentUser?.is_demo && 
+    currentUser?.email?.toLowerCase().includes('prof');
   
   const handleLogout = async () => {
     try {
@@ -86,6 +92,21 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         return "Employé";
       default:
         return "Étudiant";
+    }
+  };
+  
+  // Function to determine the correct dashboard path based on user role
+  const getDashboardPath = () => {
+    if (currentUser?.roles?.includes("admin") || currentUser?.roles?.includes("super_admin")) {
+      return "/admin";
+    } else if (currentUser?.roles?.includes("instructor") || isDemoInstructor) {
+      return "/instructor";
+    } else if (currentUser?.roles?.includes("business_admin")) {
+      return "/entreprise";
+    } else if (currentUser?.roles?.includes("employee")) {
+      return "/employee";
+    } else {
+      return "/student";
     }
   };
   
@@ -154,7 +175,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             </Badge>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+          <DropdownMenuItem onClick={() => navigate(getDashboardPath())} className="cursor-pointer">
             <Home className="mr-2 h-4 w-4" />
             Tableau de bord
           </DropdownMenuItem>
@@ -162,7 +183,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             <User className="mr-2 h-4 w-4" />
             Mon profil
           </DropdownMenuItem>
-          {currentUser?.roles?.includes("instructor") && (
+          {(currentUser?.roles?.includes("instructor") || isDemoInstructor) && (
             <DropdownMenuItem onClick={() => navigate("/instructor")} className="cursor-pointer">
               <Book className="mr-2 h-4 w-4" />
               Espace instructeur
