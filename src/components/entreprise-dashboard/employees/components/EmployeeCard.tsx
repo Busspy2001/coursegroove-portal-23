@@ -1,19 +1,23 @@
 
-import React from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React from 'react';
+import { 
+  Card, 
+  CardContent, 
+  CardFooter, 
+  CardHeader 
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Check, X, Edit, Trash2, Mail, Phone } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Check, MoreHorizontal, X } from "lucide-react";
 import { Employee } from "@/services/supabase-business-data";
+import { motion } from "framer-motion";
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -22,11 +26,11 @@ interface EmployeeCardProps {
   onUpdateEmployeeStatus: (employee: Employee) => void;
 }
 
-export const EmployeeCard = ({ 
-  employee, 
-  onEditEmployee, 
-  onDeleteEmployee, 
-  onUpdateEmployeeStatus 
+export const EmployeeCard = ({
+  employee,
+  onEditEmployee,
+  onDeleteEmployee,
+  onUpdateEmployeeStatus
 }: EmployeeCardProps) => {
   // Helper for initials
   const getInitials = (name: string = "") => {
@@ -46,103 +50,98 @@ export const EmployeeCard = ({
     
     return deptMap[dept] || "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   };
-
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      layout
     >
-      <Card className="overflow-hidden hover:shadow-md transition-shadow">
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-14 w-14 border-2 border-primary/10">
-                <AvatarImage src={employee.avatar_url || ""} alt={employee.full_name} />
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {getInitials(employee.full_name)}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="space-y-1">
-                <h3 className="font-medium text-base">{employee.full_name}</h3>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Mail className="mr-1.5 h-3.5 w-3.5" />
-                  <span className="truncate max-w-[180px]">{employee.email}</span>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {employee.department_name && (
-                    <Badge variant="outline" className={getDepartmentClass(employee.department_name)}>
-                      {employee.department_name}
-                    </Badge>
-                  )}
-                  
-                  <Badge 
-                    variant={employee.status === 'active' ? 'default' : 'outline'}
-                    className={employee.status === 'active' 
-                      ? 'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-800' 
-                      : 'border-gray-200 text-muted-foreground hover:bg-gray-100'}
-                  >
-                    {employee.status === 'active' ? (
-                      <Check className="mr-1 h-3 w-3" />
-                    ) : (
-                      <X className="mr-1 h-3 w-3" />
-                    )}
-                    {employee.status === 'active' ? 'Actif' : 'Inactif'}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            
+      <Card className="h-full transition-all hover:shadow-md">
+        <CardHeader className="pb-2 relative">
+          <div className="absolute top-3 right-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Actions</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => onEditEmployee(employee)} className="flex items-center cursor-pointer">
-                  <Edit className="mr-2 h-4 w-4" />
-                  <span>Modifier</span>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onEditEmployee(employee)} className="cursor-pointer">
+                  Modifier
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => onUpdateEmployeeStatus(employee)}
-                  className="flex items-center cursor-pointer"
-                >
-                  {employee.status === 'active' ? (
-                    <>
-                      <X className="mr-2 h-4 w-4" />
-                      <span>Désactiver</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      <span>Activer</span>
-                    </>
-                  )}
+                <DropdownMenuItem onClick={() => onUpdateEmployeeStatus(employee)} className="cursor-pointer">
+                  {employee.status === 'active' ? 'Désactiver' : 'Activer'}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50 flex items-center cursor-pointer" 
-                  onClick={() => onDeleteEmployee(employee)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  <span>Supprimer</span>
+                <DropdownMenuItem onClick={() => onDeleteEmployee(employee)} className="text-red-600 focus:text-red-600 cursor-pointer">
+                  Supprimer
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
           
-          {employee.job_title && (
-            <div className="mt-3 pt-3 border-t">
-              <span className="text-sm font-medium text-muted-foreground">Poste:</span> 
-              <span className="text-sm ml-1">{employee.job_title}</span>
+          <div className="flex flex-col items-center pt-2">
+            <Avatar className="h-16 w-16 mb-2">
+              <AvatarFallback className="text-xl bg-primary/10">
+                {getInitials(employee.full_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold">{employee.full_name || 'Sans nom'}</h3>
+              <p className="text-sm text-muted-foreground">{employee.email}</p>
             </div>
-          )}
+          </div>
+        </CardHeader>
+        
+        <CardContent className="pb-2">
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Département:</span>
+              {employee.department_name ? (
+                <Badge className={getDepartmentClass(employee.department_name)}>
+                  {employee.department_name}
+                </Badge>
+              ) : (
+                <span className="text-xs text-muted-foreground">Non assigné</span>
+              )}
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Poste:</span>
+              <span className="text-sm">{employee.job_title || '-'}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Statut:</span>
+              <Badge 
+                variant={employee.status === 'active' ? 'default' : 'outline'}
+                className={`${employee.status === 'active' 
+                  ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                  : 'text-muted-foreground'} flex items-center gap-1`}
+              >
+                {employee.status === 'active' ? (
+                  <Check className="mr-1 h-3 w-3" />
+                ) : (
+                  <X className="mr-1 h-3 w-3" />
+                )}
+                {employee.status === 'active' ? 'Actif' : 'Inactif'}
+              </Badge>
+            </div>
+          </div>
         </CardContent>
+        
+        <CardFooter className="pt-2">
+          <Button 
+            variant="outline" 
+            className="w-full text-sm" 
+            onClick={() => onEditEmployee(employee)}
+          >
+            Voir le profil
+          </Button>
+        </CardFooter>
       </Card>
     </motion.div>
   );

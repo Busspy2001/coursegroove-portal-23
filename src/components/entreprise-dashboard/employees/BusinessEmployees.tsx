@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Upload } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Import custom components
 import { EmployeeList } from "./components/EmployeeList";
@@ -15,11 +16,13 @@ import { EmployeeStats } from "./components/EmployeeStats";
 import { ViewToggle } from "./components/ViewToggle";
 import { NoCompanyMessage } from "./components/NoCompanyMessage";
 import { EmployeeSkeleton } from "./components/EmployeeSkeleton";
+import { EmployeePagination } from "./components/EmployeePagination";
 import { useEmployees } from "./hooks/useEmployees";
 import { Employee } from "@/services/supabase-business-data";
 
 const BusinessEmployees: React.FC = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Custom hook to handle all employee data and operations
   const { 
@@ -39,13 +42,21 @@ const BusinessEmployees: React.FC = () => {
     isDemo
   } = useEmployees();
   
-  // Local state for dialogs and view
+  // Local state for dialogs, view, and pagination
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState<Partial<Employee>>({});
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+  
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentEmployees = filteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
   
   // Dialog handlers
   const openAddDialog = () => {
@@ -103,6 +114,11 @@ const BusinessEmployees: React.FC = () => {
     }
   };
   
+  // Pagination handler
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  
   // Loading state
   if (loading) {
     return <EmployeeSkeleton />;
@@ -123,27 +139,36 @@ const BusinessEmployees: React.FC = () => {
           </p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="flex-1 md:flex-none">
-            <Upload className="mr-2 h-4 w-4" />
-            Importer
-          </Button>
-          <Button variant="outline" className="flex-1 md:flex-none">
-            <Download className="mr-2 h-4 w-4" />
-            Exporter
-          </Button>
-          <Button onClick={openAddDialog} className="flex-1 md:flex-none">
+        {isMobile ? (
+          <Button onClick={openAddDialog} className="fixed bottom-6 right-6 rounded-full shadow-lg z-10">
             <Plus className="mr-2 h-4 w-4" />
             Ajouter
           </Button>
-        </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" className="flex-1 md:flex-none">
+              <Upload className="mr-2 h-4 w-4" />
+              Importer
+            </Button>
+            <Button variant="outline" className="flex-1 md:flex-none">
+              <Download className="mr-2 h-4 w-4" />
+              Exporter
+            </Button>
+            <Button onClick={openAddDialog} className="flex-1 md:flex-none">
+              <Plus className="mr-2 h-4 w-4" />
+              Ajouter
+            </Button>
+          </div>
+        )}
       </div>
 
-      <EmployeeStats 
-        employees={employees} 
-        departments={departments}
-        onAddEmployee={openAddDialog}
-      />
+      {!isMobile && (
+        <EmployeeStats 
+          employees={employees} 
+          departments={departments}
+          onAddEmployee={openAddDialog}
+        />
+      )}
       
       <Card>
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
@@ -165,35 +190,32 @@ const BusinessEmployees: React.FC = () => {
           />
           
           {viewMode === "list" ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Département</TableHead>
-                    <TableHead>Titre</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <EmployeeList
-                    employees={filteredEmployees} 
-                    onEditEmployee={openEditDialog}
-                    onDeleteEmployee={openDeleteDialog}
-                    onUpdateEmployeeStatus={handleUpdateEmployeeStatus}
-                    companyId={companyData.id}
-                  />
-                </TableBody>
-              </Table>
+            <div className="rounded-md border overflow-x-auto">
+              <EmployeeList 
+                employees={currentEmployees} 
+                onEditEmployee={openEditDialog}
+                onDeleteEmployee={openDeleteDialog}
+                onUpdateEmployeeStatus={handleUpdateEmployeeStatus}
+                companyId={companyData.id}
+              />
             </div>
           ) : (
             <EmployeeGrid 
-              employees={filteredEmployees}
+              employees={currentEmployees}
               onEditEmployee={openEditDialog}
               onDeleteEmployee={openDeleteDialog}
               onUpdateEmployeeStatus={handleUpdateEmployeeStatus}
             />
+          )}
+          
+          {filteredEmployees.length > itemsPerPage && (
+            <div className="mt-4">
+              <EmployeePagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

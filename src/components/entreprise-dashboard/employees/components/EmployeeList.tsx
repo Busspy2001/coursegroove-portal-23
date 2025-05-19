@@ -1,6 +1,6 @@
 
 import React from "react";
-import { TableBody, TableRow, TableCell, TableHead, TableHeader } from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Check, X } from "lucide-react";
 import { Employee } from "@/services/supabase-business-data";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EmployeeListProps {
   employees: Employee[];
@@ -28,6 +29,7 @@ export const EmployeeList = ({
   onUpdateEmployeeStatus,
   companyId 
 }: EmployeeListProps) => {
+  const isMobile = useIsMobile();
   
   // Helper for initials
   const getInitials = (name: string = "") => {
@@ -50,31 +52,33 @@ export const EmployeeList = ({
   
   if (employees.length === 0) {
     return (
-      <TableBody>
-        <TableRow>
-          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-            Aucun employé trouvé.
-          </TableCell>
-        </TableRow>
-      </TableBody>
+      <table className="w-full">
+        <tbody>
+          <tr>
+            <td colSpan={5} className="text-center py-8 text-muted-foreground">
+              Aucun employé trouvé.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
   
   return (
-    <>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nom</TableHead>
-          <TableHead>Département</TableHead>
-          <TableHead>Titre</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <table className="w-full">
+      <thead className="bg-muted/50">
+        <tr>
+          <th className="p-4 text-left font-medium text-muted-foreground">Nom</th>
+          {!isMobile && <th className="p-4 text-left font-medium text-muted-foreground">Département</th>}
+          {!isMobile && <th className="p-4 text-left font-medium text-muted-foreground">Titre</th>}
+          <th className="p-4 text-left font-medium text-muted-foreground">Statut</th>
+          <th className="p-4 text-right font-medium text-muted-foreground">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
         {employees.map((employee) => (
-          <TableRow key={employee.id} className="group hover:bg-muted/50">
-            <TableCell>
+          <tr key={employee.id} className="group hover:bg-muted/50 border-t">
+            <td className="p-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className="bg-primary/10">
@@ -84,22 +88,33 @@ export const EmployeeList = ({
                 <div>
                   <div className="font-medium">{employee.full_name}</div>
                   <div className="text-xs text-muted-foreground">{employee.email}</div>
+                  {isMobile && employee.department_name && (
+                    <div className="mt-1">
+                      <Badge className={`${getDepartmentClass(employee.department_name)} text-xs`}>
+                        {employee.department_name}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               </div>
-            </TableCell>
-            <TableCell>
-              {employee.department_name ? (
-                <Badge className={getDepartmentClass(employee.department_name)}>
-                  {employee.department_name}
-                </Badge>
-              ) : (
-                <span className="text-muted-foreground text-xs">Non assigné</span>
-              )}
-            </TableCell>
-            <TableCell>
-              {employee.job_title || "-"}
-            </TableCell>
-            <TableCell>
+            </td>
+            {!isMobile && (
+              <td className="p-4">
+                {employee.department_name ? (
+                  <Badge className={getDepartmentClass(employee.department_name)}>
+                    {employee.department_name}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground text-xs">Non assigné</span>
+                )}
+              </td>
+            )}
+            {!isMobile && (
+              <td className="p-4">
+                {employee.job_title || "-"}
+              </td>
+            )}
+            <td className="p-4">
               <Badge 
                 variant={employee.status === 'active' ? 'default' : 'outline'}
                 className={employee.status === 'active' 
@@ -113,36 +128,38 @@ export const EmployeeList = ({
                 )}
                 {employee.status === 'active' ? 'Actif' : 'Inactif'}
               </Badge>
-            </TableCell>
-            <TableCell className="text-right">
+            </td>
+            <td className="p-4 text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-50 group-hover:opacity-100">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-60 group-hover:opacity-100">
                     <MoreHorizontal className="h-4 w-4" />
                     <span className="sr-only">Menu</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEditEmployee(employee)}>
+                  <DropdownMenuItem onClick={() => onEditEmployee(employee)}
+                    className="flex items-center cursor-pointer">
                     Modifier
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => onUpdateEmployeeStatus(employee)}
+                    className="flex items-center cursor-pointer"
                   >
                     {employee.status === 'active' ? 'Désactiver' : 'Activer'}
                   </DropdownMenuItem>
                   <DropdownMenuItem 
-                    className="text-red-600 focus:text-red-600" 
+                    className="text-red-600 focus:text-red-600 flex items-center cursor-pointer" 
                     onClick={() => onDeleteEmployee(employee)}
                   >
                     Supprimer
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </TableCell>
-          </TableRow>
+            </td>
+          </tr>
         ))}
-      </TableBody>
-    </>
+      </tbody>
+    </table>
   );
 };
