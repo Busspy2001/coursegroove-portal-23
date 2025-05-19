@@ -8,7 +8,6 @@ import { PlusCircle } from "lucide-react";
 
 // Components
 import { LoadingMessage } from "@/components/entreprise-dashboard/shared/LoadingMessage";
-import { ErrorMessage } from "@/components/entreprise-dashboard/shared/ErrorMessage";
 import { OverviewMetricCard } from "@/components/entreprise-dashboard/overview/OverviewMetricCard";
 import { OverviewActivityCard } from "@/components/entreprise-dashboard/overview/OverviewActivityCard";
 import { OverviewChart } from "@/components/entreprise-dashboard/overview/OverviewChart";
@@ -24,21 +23,19 @@ import { NoCompanyMessage } from "@/components/entreprise-dashboard/employees/co
 
 const BusinessDashboard = () => {
   const { currentUser } = useAuth();
-  const { loading, error, stats } = useOverviewData();
+  const { loading, stats } = useOverviewData();
   const navigate = useNavigate();
 
-  console.log("Rendering BusinessDashboard component", { currentUser, loading, error, stats });
+  console.log("Rendering BusinessDashboard component", { currentUser, loading, stats });
 
   if (loading) {
     return <LoadingMessage message="Chargement du tableau de bord..." />;
   }
 
-  if (error) {
-    return <ErrorMessage message={error} onRetry={() => window.location.reload()} />;
-  }
-
-  if (!stats) {
-    return <NoCompanyMessage onNavigate={navigate} isDemoUser={currentUser?.is_demo === true} />;
+  // Nous utilisons toujours des données de démo comme fallback, donc pas besoin de vérifier si stats est null
+  // Si on veut quand même afficher un message pour les utilisateurs réels sans entreprise:
+  if (!currentUser?.is_demo && !stats) {
+    return <NoCompanyMessage onNavigate={navigate} isDemoUser={false} />;
   }
 
   return (

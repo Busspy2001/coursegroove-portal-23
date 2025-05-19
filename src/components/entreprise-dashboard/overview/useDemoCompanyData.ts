@@ -1,52 +1,92 @@
 
-import { useState, useEffect } from "react";
-import { User } from "@/contexts/auth/types";
-import { BusinessStatistics } from "@/services/supabase-business-data";
+import { BusinessStats } from './useOverviewData';
 
-export const useDemoCompanyData = (currentUser: User | null) => {
-  const [companyData, setCompanyData] = useState<any>(null);
-  const [stats, setStats] = useState<BusinessStatistics | null>(null);
+export const useDemoCompanyData = (): BusinessStats => {
+  // Générer des dates relatives par rapport à la date actuelle
+  const now = new Date();
+  const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString();
+  const daysAhead = (days: number) => new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
 
-  useEffect(() => {
-    if (currentUser?.is_demo) {
-      console.log("Chargement des données de démonstration pour:", currentUser.email);
-      
-      // Données fictives de l'entreprise pour les comptes de démonstration
-      const demoCompany = {
-        id: currentUser.company_id || "demo-company-id",
-        name: `Entreprise de ${currentUser.full_name || "Démonstration"}`,
-        admin_id: currentUser.id
-      };
-      
-      // Statistiques fictives pour la démonstration
-      const demoStats: BusinessStatistics = {
-        total_employees: 24,
-        departments_count: 3,
-        active_courses: 8,
-        completion_rate: 68,
-        recent_activities: [
-          {
-            type: "Assignation",
-            message: "Formation 'Sécurité informatique' assignée à 5 employés",
-            date: "Il y a 2 heures"
-          },
-          {
-            type: "Complétion",
-            message: "Thomas Dubois a complété 'Leadership et gestion d'équipe'",
-            date: "Il y a 3 heures"
-          },
-          {
-            type: "Nouveau",
-            message: "Nouvelle formation 'Excel avancé' ajoutée au catalogue",
-            date: "Il y a 5 heures"
-          }
-        ]
-      };
-      
-      setCompanyData(demoCompany);
-      setStats(demoStats);
-    }
-  }, [currentUser]);
-
-  return { demoCompanyData: companyData, demoStats: stats };
+  return {
+    total_employees: 124,
+    active_courses: 32,
+    departments_count: 8,
+    completion_rate: 78,
+    recent_activities: [
+      {
+        id: "1",
+        type: "course_completion",
+        message: "Sophie Martin a terminé \"Introduction à la cybersécurité\"",
+        date: hoursAgo(2)
+      },
+      {
+        id: "2",
+        type: "user_registration",
+        message: "Thomas Dubois a rejoint l'équipe IT",
+        date: hoursAgo(5)
+      },
+      {
+        id: "3",
+        type: "course_enrollment",
+        message: "Julie Leclerc s'est inscrite à \"Leadership et management d'équipe\"",
+        date: hoursAgo(8)
+      },
+      {
+        id: "4",
+        type: "course_completion",
+        message: "Antoine Bernard a obtenu la certification \"Excel avancé\"",
+        date: hoursAgo(24)
+      }
+    ],
+    upcoming_trainings: [
+      {
+        id: "1",
+        title: "Cybersécurité - Niveau intermédiaire",
+        date: daysAhead(2),
+        assignees: 15
+      },
+      {
+        id: "2",
+        title: "Leadership et gestion de conflits",
+        date: daysAhead(5),
+        assignees: 8
+      },
+      {
+        id: "3",
+        title: "Analyse de données avec Power BI",
+        date: daysAhead(7),
+        assignees: 12
+      }
+    ],
+    top_performers: [
+      {
+        id: "1",
+        name: "Sophie Martin",
+        department: "Marketing",
+        completion: 95,
+        courses_completed: 12
+      },
+      {
+        id: "2",
+        name: "Thomas Dubois",
+        department: "IT",
+        completion: 92,
+        courses_completed: 15
+      },
+      {
+        id: "3",
+        name: "Julie Leclerc",
+        department: "Finance",
+        completion: 88,
+        courses_completed: 10
+      },
+      {
+        id: "4",
+        name: "Antoine Bernard",
+        department: "RH",
+        completion: 85,
+        courses_completed: 9
+      }
+    ]
+  };
 };
