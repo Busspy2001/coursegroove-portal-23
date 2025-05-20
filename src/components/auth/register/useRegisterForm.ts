@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type ProfileType = "student" | "instructor" | "business" | "employee";
 
 export const useRegisterForm = (profileType: ProfileType = "student") => {
   const { register, isLoggingIn } = useAuth();
+  const { toast } = useToast();
   
   // Form fields
   const [name, setName] = useState<string>("");
@@ -55,8 +57,8 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     
     if (!isFormValid()) {
       toast({
-        title: "Formulaire incomplet",
-        description: "Veuillez remplir tous les champs obligatoires",
+        title: "Incomplete form",
+        description: "Please fill in all required fields",
         variant: "destructive"
       });
       return;
@@ -64,8 +66,8 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     
     if (!isPasswordMatch) {
       toast({
-        title: "Erreur de mot de passe",
-        description: "Les mots de passe ne correspondent pas",
+        title: "Password error",
+        description: "Passwords do not match",
         variant: "destructive"
       });
       return;
@@ -74,8 +76,12 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     setIsLoading(true);
     
     try {
-      // Prepare additional user metadata based on profile type
+      console.log(`Starting registration for ${email} as ${profileType}`);
+      
+      // Prepare user metadata based on profile type
       const userMetadata: Record<string, any> = {
+        name,
+        full_name: name,
         profileType
       };
       
@@ -91,19 +97,62 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
         userMetadata.specialization = specialization;
       }
       
-      // Register the user
-      await register(email, password, name);
+      // Register the user with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userMetadata
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data.user) {
+        // Additional role assignment based on profile type
+        if (profileType === "instructor") {
+          try {
+            await supabase.from('user_roles').insert({
+              user_id: data.user.id,
+              role: 'instructor'
+            });
+          } catch (roleError) {
+            console.error("Error assigning instructor role:", roleError);
+            // Continue despite role assignment error
+          }
+        } else if (profileType === "business") {
+          try {
+            await supabase.from('user_roles').insert({
+              user_id: data.user.id,
+              role: 'business_admin'
+            });
+          } catch (roleError) {
+            console.error("Error assigning business admin role:", roleError);
+          }
+        } else if (profileType === "employee") {
+          try {
+            await supabase.from('user_roles').insert({
+              user_id: data.user.id,
+              role: 'employee'
+            });
+          } catch (roleError) {
+            console.error("Error assigning employee role:", roleError);
+          }
+        }
+      }
       
       toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès"
+        title: "Registration successful",
+        description: "Your account has been created successfully"
       });
+      
+      // We don't call register() from useAuth because signUp already did the registration
       
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
-        title: "Erreur d'inscription",
-        description: error.message || "Une erreur s'est produite lors de l'inscription",
+        title: "Registration error",
+        description: error.message || "An error occurred during registration",
         variant: "destructive"
       });
     } finally {
