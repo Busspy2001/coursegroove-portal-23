@@ -19,18 +19,25 @@ const AuthRedirect: React.FC = () => {
       return;
     }
     
-    // Check for demo instructor account based on email
+    // Check for demo instructor account based on email or specific demo flag
     const isDemoInstructor = currentUser.is_demo && 
       currentUser.email?.toLowerCase().includes('prof');
     
     console.log(`Redirecting based on role: ${JSON.stringify({
       roles: currentUser.roles,
       isDemoInstructor,
-      email: currentUser.email
+      email: currentUser.email,
+      is_demo: currentUser.is_demo
     })}`);
     
-    // Redirect based on user role
-    if (hasRole("super_admin") || hasRole("admin")) {
+    // Redirect based on user role with priority order
+    if (hasRole("super_admin")) {
+      navigate("/admin", { replace: true });
+      toast({
+        title: "Welcome, Super Administrator",
+        description: "You are now logged in with full administrative privileges."
+      });
+    } else if (hasRole("admin")) {
       navigate("/admin", { replace: true });
       toast({
         title: "Welcome, Administrator",
