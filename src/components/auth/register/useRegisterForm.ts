@@ -1,87 +1,116 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 type ProfileType = "student" | "instructor" | "business" | "employee";
 
 export const useRegisterForm = (profileType: ProfileType = "student") => {
-  const { register } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const { register, isLoggingIn } = useAuth();
   
-  // Form fields state
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
-
-  // Additional fields for specific profiles
-  const [company, setCompany] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [specialization, setSpecialization] = useState("");
-
+  // Form fields
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
+  
+  // Additional fields based on profile type
+  const [company, setCompany] = useState<string>("");
+  const [jobTitle, setJobTitle] = useState<string>("");
+  const [specialization, setSpecialization] = useState<string>("");
+  
+  // Form state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  // Computed values
+  const isPasswordMatch = password === confirmPassword;
+  
   // Form validation
-  const isPasswordMatch = password === confirmPassword && confirmPassword !== "";
-  const isFormValid = name && email && password && confirmPassword && isPasswordMatch && acceptTerms;
-  if (profileType === "business" || profileType === "employee") {
-    isFormValid && company;
-  }
-  if (profileType === "instructor") {
-    isFormValid && specialization;
-  }
-  if (profileType === "employee") {
-    isFormValid && jobTitle;
-  }
+  const isFormValid = () => {
+    // Basic validation for all profile types
+    if (!name || !email || !password || !confirmPassword || !isPasswordMatch || !acceptTerms) {
+      return false;
+    }
+    
+    // Additional validation based on profile type
+    if (profileType === "business" && !company) {
+      return false;
+    }
+    
+    if (profileType === "employee" && (!company || !jobTitle)) {
+      return false;
+    }
+    
+    if (profileType === "instructor" && !specialization) {
+      return false;
+    }
+    
+    return true;
+  };
   
+  // Handle register
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
+    if (!isFormValid()) {
       toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas.",
-        variant: "destructive",
+        title: "Formulaire incomplet",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive"
       });
       return;
     }
     
-    if (!acceptTerms) {
+    if (!isPasswordMatch) {
       toast({
-        title: "Erreur",
-        description: "Vous devez accepter les conditions d'utilisation pour vous inscrire.",
-        variant: "destructive",
+        title: "Erreur de mot de passe",
+        description: "Les mots de passe ne correspondent pas",
+        variant: "destructive"
       });
       return;
     }
     
     setIsLoading(true);
+    
     try {
-      // We would need to extend the register function to handle different roles
-      // For now, we'll use the standard register function and handle role assignment later
-      await register(name, email, password);
+      // Prepare additional user metadata based on profile type
+      const userMetadata: Record<string, any> = {
+        profileType
+      };
+      
+      if (profileType === "business" || profileType === "employee") {
+        userMetadata.company = company;
+      }
+      
+      if (profileType === "employee") {
+        userMetadata.jobTitle = jobTitle;
+      }
+      
+      if (profileType === "instructor") {
+        userMetadata.specialization = specialization;
+      }
+      
+      // Register the user
+      await register(email, password, name);
+      
       toast({
-        title: "Inscription réussie !",
-        description: `Bienvenue sur Schoolier en tant que ${profileType}.`,
+        title: "Inscription réussie",
+        description: "Votre compte a été créé avec succès"
       });
-      navigate("/dashboard");
-    } catch (error) {
+      
+    } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         title: "Erreur d'inscription",
-        description: "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.",
-        variant: "destructive",
+        description: error.message || "Une erreur s'est produite lors de l'inscription",
+        variant: "destructive"
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return {
     name,
     setName,
@@ -91,11 +120,6 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    showPassword,
-    setShowPassword,
-    showConfirmPassword, 
-    setShowConfirmPassword,
-    isLoading,
     acceptTerms,
     setAcceptTerms,
     company,
@@ -104,8 +128,9 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     setJobTitle,
     specialization,
     setSpecialization,
+    isLoading: isLoading || isLoggingIn,
     isPasswordMatch,
     handleRegister,
-    isFormValid: Boolean(isFormValid)
+    isFormValid: isFormValid()
   };
 };

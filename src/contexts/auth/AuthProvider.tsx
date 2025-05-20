@@ -1,10 +1,10 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { AuthContext } from './context';
 import { User, UserRole } from './types';
 import { supabase } from '@/integrations/supabase/client';
-import { getCurrentUser } from './authService';
-import { executeLogout } from './logout';
-import { clearUserCache } from './authUtils';
+import { authService } from '@/services/auth-service';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state
   useEffect(() => {
-    // Setting up auth state change listener
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("🔄 Auth state changed:", event);
       
@@ -28,7 +28,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log("🔒 User signed out");
         setCurrentUser(null);
         setIsAuthenticated(false);
-        clearUserCache();
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         if (session?.user?.id) {
           console.log("🔑 User authenticated, fetching profile");
@@ -37,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           try {
             // Use setTimeout to prevent potential recursion issues
             setTimeout(async () => {
-              const user = await getCurrentUser();
+              const user = await authService.getCurrentUser();
               if (user) {
                 setCurrentUser(user);
                 setIsAuthenticated(true);
@@ -62,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Initial auth check
     const initializeAuth = async () => {
       try {
-        const user = await getCurrentUser();
+        const user = await authService.getCurrentUser();
         
         if (user) {
           console.log("🔑 User found on initialization:", user.email);
@@ -98,31 +97,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggingIn(true);
       console.log("🔄 Login attempt:", email);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) {
-        console.error("❌ Login error:", error.message);
-        throw error;
-      }
-      
-      if (!data.user) {
-        console.error("❌ Login failed: No user returned");
-        throw new Error("Login failed");
-      }
+      const user = await authService.login(email, password);
       
       console.log("✅ Login successful:", email);
       
-      // The user will be set by the auth state change listener
+      // Execute callback if provided
       if (callback) callback();
       
-      // We need to fetch the user here because the auth state listener might not have fired yet
-      const user = await getCurrentUser();
-      if (!user) {
-        throw new Error("Failed to get user profile after login");
-      }
       return user;
     } catch (error) {
       console.error("❌ Login exception:", error);
@@ -132,66 +113,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Login with demo account - enhanced for better redirection
+  // Login with demo account
   const loginWithDemo = async (account: any, callback?: () => void): Promise<User> => {
     try {
       setIsLoggingIn(true);
       console.log("🎭 Demo login attempt:", account.email);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: account.email,
-        password: account.password || 'password123'
-      });
-      
-      if (error) {
-        console.error("❌ Demo login error:", error.message);
-        throw error;
-      }
-      
-      if (!data.user) {
-        console.error("❌ Demo login failed: No user returned");
-        throw new Error("Demo login failed");
-      }
+      // For demo accounts, just use normal login
+      const user = await authService.login(account.email, account.password || 'password123');
       
       console.log("✅ Demo login successful:", account.email);
       
-      // Pre-determine expected path based on email for more reliable redirection
-      let targetPath = "/demo-redirect"; // Default to our specialized redirection component
+      // Execute callback if provided
+      if (callback) callback();
       
-      // No longer redirect to /dashboard, instead use specific paths or redirection component
-      const email = account.email.toLowerCase();
-      if (email.includes('prof') || email.includes('instructor')) {
-        console.log("👨‍🏫 Demo compte détecté: instructeur");
-        targetPath = "/instructor";
-      } 
-      else if (email.includes('admin')) {
-        console.log("👑 Demo compte détecté: administrateur");
-        targetPath = "/admin";
-      } 
-      else if (email.includes('business') || email.includes('entreprise')) {
-        console.log("🏢 Demo compte détecté: entreprise");
-        targetPath = "/entreprise";
-      } 
-      else if (email.includes('employee')) {
-        console.log("👔 Demo compte détecté: employé");
-        targetPath = "/employee";
-      }
-      
-      // Execute custom callback if provided, otherwise use our path-based callback
-      if (callback) {
-        callback();
-      } else {
-        // Use a small timeout to ensure authentication state has propagated
-        setTimeout(() => {
-          window.location.href = targetPath;
-        }, 250);
-      }
-      
-      // We need to fetch the user here because the auth state listener might not have fired yet
-      const user = await getCurrentUser();
-      if (!user) {
-        throw new Error("Failed to get user profile after demo login");
-      }
       return user;
     } catch (error) {
       console.error("❌ Demo login exception:", error);
@@ -207,37 +142,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggingIn(true);
       console.log("🔄 Registration attempt:", email);
       
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-            full_name: name
-          }
-        }
-      });
-      
-      if (error) {
-        console.error("❌ Registration error:", error.message);
-        throw error;
-      }
-      
-      if (!data.user) {
-        console.error("❌ Registration failed: No user returned");
-        throw new Error("Registration failed");
-      }
+      const user = await authService.register(email, password, name);
       
       console.log("✅ Registration successful:", email);
       
-      // The user will be set by the auth state change listener
+      // Execute callback if provided
       if (callback) callback();
       
-      // We need to fetch the user here because the auth state listener might not have fired yet
-      const user = await getCurrentUser();
-      if (!user) {
-        throw new Error("Failed to get user profile after registration");
-      }
       return user;
     } catch (error) {
       console.error("❌ Registration exception:", error);
@@ -249,20 +160,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Logout
   const logout = async (callback?: () => void): Promise<void> => {
-    console.log("🔄 Logout attempt");
-    setIsLoggingOut(true);
-    
     try {
-      await executeLogout(
-        setCurrentUser,
-        setIsAuthenticated,
-        setIsLoggingOut,
-        callback
-      );
+      setIsLoggingOut(true);
+      console.log("🔄 Logout attempt");
+      
+      await authService.logout();
+      
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      
+      // Execute callback if provided
+      if (callback) callback();
+      
+      console.log("✅ Logout successful");
     } catch (error) {
-      console.error("❌ Logout error in AuthProvider:", error);
-      setIsLoggingOut(false);
+      console.error("❌ Logout error:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Une erreur s'est produite lors de la déconnexion",
+        variant: "destructive"
+      });
       throw error;
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -281,34 +201,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       console.log("✅ Password reset email sent to:", email);
-    } catch (error) {
+      
+      toast({
+        title: "Email de réinitialisation envoyé",
+        description: "Consultez votre boîte mail pour réinitialiser votre mot de passe"
+      });
+    } catch (error: any) {
       console.error("❌ Password reset exception:", error);
+      toast({
+        title: "Erreur de réinitialisation",
+        description: error.message || "Une erreur s'est produite lors de l'envoi de l'email",
+        variant: "destructive"
+      });
       throw error;
     }
   };
   
-  // Check if user has a specific role - new function for multi-role support
+  // Check if user has a specific role
   const hasRole = useCallback((role: UserRole): boolean => {
-    if (!currentUser || !currentUser.roles) return false;
-    return currentUser.roles.includes(role);
+    return authService.hasRole(currentUser, role);
   }, [currentUser]);
   
   // Get the primary role for display purposes
   const getUserPrimaryRole = useCallback((): UserRole => {
-    if (!currentUser || !currentUser.roles || currentUser.roles.length === 0) {
-      return 'student';
-    }
-    
-    // Priority order for primary role
-    const rolePriority: UserRole[] = ['super_admin', 'admin', 'business_admin', 'instructor', 'employee', 'student'];
-    
-    for (const role of rolePriority) {
-      if (currentUser.roles.includes(role)) {
-        return role;
-      }
-    }
-    
-    return currentUser.roles[0];
+    return authService.getPrimaryRole(currentUser);
   }, [currentUser]);
 
   const contextValue = {
