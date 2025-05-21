@@ -9,6 +9,9 @@ export const useCourses = (options: {
   search?: string;
   limit?: number;
   page?: number;
+  sort?: 'newest' | 'popularity' | 'rating';
+  level?: 'débutant' | 'intermédiaire' | 'avancé';
+  price?: 'free' | 'paid' | 'all';
 } = {}) => {
   const [courses, setCourses] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -26,7 +29,7 @@ export const useCourses = (options: {
         const { courses, count } = await courseService.getCourses(options);
         setCourses(courses);
         setTotalCount(count || 0);
-        console.log(`Fetched ${courses.length} courses`);
+        console.log(`Fetched ${courses.length} courses out of ${count} total`);
       } catch (err) {
         console.error("Error fetching courses:", err);
         setError("An error occurred while loading courses");
@@ -41,7 +44,17 @@ export const useCourses = (options: {
     };
     
     fetchCourses();
-  }, [options.category, options.instructorId, options.search, options.limit, options.page, toast]);
+  }, [
+    options.category, 
+    options.instructorId, 
+    options.search, 
+    options.limit, 
+    options.page, 
+    options.sort, 
+    options.level, 
+    options.price, 
+    toast
+  ]);
   
   const refresh = async () => {
     setIsLoading(true);
@@ -142,10 +155,33 @@ export const useCourse = (courseId: string) => {
     }
   };
   
+  const enrollInCourse = async (userId: string) => {
+    if (!courseId || !userId) return false;
+    
+    try {
+      await courseService.enrollUserInCourse(userId, courseId);
+      toast({
+        title: "Enrolled successfully",
+        description: "You have been enrolled in this course.",
+        variant: "success"
+      });
+      return true;
+    } catch (err) {
+      console.error("Error enrolling in course:", err);
+      toast({
+        title: "Enrollment failed",
+        description: "We couldn't enroll you in this course. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+  
   return {
     course,
     isLoading,
     error,
-    refresh
+    refresh,
+    enrollInCourse
   };
 };

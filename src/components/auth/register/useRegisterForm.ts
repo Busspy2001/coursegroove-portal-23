@@ -21,9 +21,11 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
   const [company, setCompany] = useState<string>("");
   const [jobTitle, setJobTitle] = useState<string>("");
   const [specialization, setSpecialization] = useState<string>("");
+  const [bio, setBio] = useState<string>("");
   
   // Form state
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState<boolean>(false);
   
   // Computed values
   const isPasswordMatch = password === confirmPassword;
@@ -57,8 +59,8 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     
     if (!isFormValid()) {
       toast({
-        title: "Incomplete form",
-        description: "Please fill in all required fields",
+        title: "Formulaire incomplet",
+        description: "Veuillez remplir tous les champs requis",
         variant: "destructive"
       });
       return;
@@ -66,8 +68,8 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     
     if (!isPasswordMatch) {
       toast({
-        title: "Password error",
-        description: "Passwords do not match",
+        title: "Erreur de mot de passe",
+        description: "Les mots de passe ne correspondent pas",
         variant: "destructive"
       });
       return;
@@ -95,6 +97,7 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
       
       if (profileType === "instructor") {
         userMetadata.specialization = specialization;
+        if (bio) userMetadata.bio = bio;
       }
       
       // Register the user with Supabase
@@ -102,7 +105,8 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
         email,
         password,
         options: {
-          data: userMetadata
+          data: userMetadata,
+          emailRedirectTo: window.location.origin + '/auth-redirect'
         }
       });
       
@@ -139,20 +143,50 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
             console.error("Error assigning employee role:", roleError);
           }
         }
+        
+        // If the user is a business admin, create a company record
+        if (profileType === "business" && company) {
+          try {
+            const { error: companyError } = await supabase
+              .from('companies')
+              .insert({
+                name: company,
+                admin_id: data.user.id
+              });
+              
+            if (companyError) {
+              console.error("Error creating company:", companyError);
+            }
+          } catch (companyError) {
+            console.error("Error creating company:", companyError);
+          }
+        }
+        
+        setRegistrationSuccess(true);
+        
+        toast({
+          title: "Inscription réussie",
+          description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
+          variant: "success"
+        });
+        
+        // Reset form
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setAcceptTerms(false);
+        setCompany("");
+        setJobTitle("");
+        setSpecialization("");
+        setBio("");
       }
-      
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully"
-      });
-      
-      // We don't call register() from useAuth because signUp already did the registration
       
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
-        title: "Registration error",
-        description: error.message || "An error occurred during registration",
+        title: "Erreur d'inscription",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
         variant: "destructive"
       });
     } finally {
@@ -177,8 +211,11 @@ export const useRegisterForm = (profileType: ProfileType = "student") => {
     setJobTitle,
     specialization,
     setSpecialization,
+    bio,
+    setBio,
     isLoading: isLoading || isLoggingIn,
     isPasswordMatch,
+    registrationSuccess,
     handleRegister,
     isFormValid: isFormValid()
   };
