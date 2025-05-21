@@ -146,49 +146,65 @@ export const handleLoginWithDemo = async (
   try {
     console.log(`🎭 Connexion avec compte démo: ${account.email}`);
 
-    // Login with Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: account.email,
-      password: account.password,
+    // Set a 30-second timeout for the login operation
+    const loginPromise = new Promise<User>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error("Délai de connexion dépassé"));
+      }, 30000); // 30 seconds timeout
+      
+      // Login with Supabase
+      supabase.auth.signInWithPassword({
+        email: account.email,
+        password: account.password,
+      }).then(({ data, error }) => {
+        clearTimeout(timeoutId);
+        
+        if (error) {
+          console.error(`❌ Erreur de connexion démo (${account.email}):`, error.message);
+          reject(error);
+          return;
+        }
+  
+        if (!data || !data.user) {
+          console.error("❌ Données utilisateur manquantes");
+          reject(new Error("Une erreur s'est produite lors de la connexion."));
+          return;
+        }
+  
+        // Create user object for demo account
+        const user: User = {
+          id: data.user.id,
+          email: account.email,
+          name: account.name,
+          roles: [account.role], // Convert single role to array
+          is_demo: true,
+          avatar: account.avatar
+        };
+  
+        // Update state
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        
+        console.log(`✅ Connexion démo réussie pour: ${account.email} (${account.role})`);
+        
+        toast({
+          title: "Connexion démo réussie",
+          description: `Connecté en tant que ${account.name} (${account.role})`,
+        });
+        
+        // Execute callback
+        if (callback) {
+          callback();
+        }
+        
+        resolve(user);
+      }).catch(error => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
     });
 
-    if (error) {
-      console.error(`❌ Erreur de connexion démo (${account.email}):`, error.message);
-      throw new Error(error.message);
-    }
-
-    if (!data || !data.user) {
-      console.error("❌ Données utilisateur manquantes");
-      throw new Error("Une erreur s'est produite lors de la connexion.");
-    }
-
-    // Create user object for demo account
-    const user: User = {
-      id: data.user.id,
-      email: account.email,
-      name: account.name,
-      roles: [account.role], // Convert single role to array
-      is_demo: true,
-      avatar: account.avatar
-    };
-
-    // Update state
-    setCurrentUser(user);
-    setIsAuthenticated(true);
-    
-    // Execute callback
-    if (callback) {
-      callback();
-    }
-
-    console.log(`✅ Connexion démo réussie pour: ${account.email} (${account.role})`);
-    
-    toast({
-      title: "Connexion démo réussie",
-      description: `Connecté en tant que ${account.name} (${account.role})`,
-    });
-
-    return user;
+    return await loginPromise;
   } catch (error) {
     console.error("❌ Erreur de connexion démo:", error);
     throw error;

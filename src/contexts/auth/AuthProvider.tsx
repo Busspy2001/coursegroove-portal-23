@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { authService } from '@/services/auth-service';
 import { toast } from '@/hooks/use-toast';
 import { executeLogout, resetLogoutStatus } from './logout';
+import { handleLogin, handleLoginWithDemo, handleRegister, handleResetPassword } from './auth-functions';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -98,19 +99,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggingIn(true);
       console.log("🔄 Login attempt:", email);
       
-      const user = await authService.login(email, password);
+      const user = await handleLogin(
+        email, 
+        password, 
+        setCurrentUser, 
+        setIsAuthenticated, 
+        setIsLoggingIn, 
+        callback
+      );
       
       console.log("✅ Login successful:", email);
-      
-      // Execute callback if provided
-      if (callback) callback();
-      
       return user;
     } catch (error) {
       console.error("❌ Login exception:", error);
-      throw error;
-    } finally {
       setIsLoggingIn(false);
+      throw error;
     }
   };
 
@@ -120,20 +123,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggingIn(true);
       console.log("🎭 Demo login attempt:", account.email);
       
-      // For demo accounts, just use normal login
-      const user = await authService.login(account.email, account.password || 'password123');
+      // Use the dedicated demo login handler
+      const user = await handleLoginWithDemo(
+        account, 
+        setCurrentUser, 
+        setIsAuthenticated, 
+        setIsLoggingIn, 
+        callback
+      );
       
       console.log("✅ Demo login successful:", account.email);
-      
-      // Execute callback if provided
-      if (callback) callback();
-      
       return user;
     } catch (error) {
       console.error("❌ Demo login exception:", error);
-      throw error;
-    } finally {
       setIsLoggingIn(false);
+      throw error;
     }
   };
 
@@ -143,16 +147,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggingIn(true);
       console.log("🔄 Registration attempt:", email);
       
-      const user = await authService.register(email, password, name);
+      const user = await handleRegister(
+        email,
+        password,
+        name,
+        setCurrentUser,
+        setIsAuthenticated,
+        callback
+      );
       
       console.log("✅ Registration successful:", email);
-      
-      // Execute callback if provided
-      if (callback) callback();
-      
       return user;
     } catch (error) {
       console.error("❌ Registration exception:", error);
+      setIsLoggingIn(false);
       throw error;
     } finally {
       setIsLoggingIn(false);
@@ -182,30 +190,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Reset password
   const resetPassword = async (email: string): Promise<void> => {
     try {
-      console.log("🔄 Password reset attempt:", email);
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password'
-      });
-      
-      if (error) {
-        console.error("❌ Password reset error:", error.message);
-        throw error;
-      }
-      
-      console.log("✅ Password reset email sent to:", email);
-      
-      toast({
-        title: "Email de réinitialisation envoyé",
-        description: "Consultez votre boîte mail pour réinitialiser votre mot de passe"
-      });
-    } catch (error: any) {
-      console.error("❌ Password reset exception:", error);
-      toast({
-        title: "Erreur de réinitialisation",
-        description: error.message || "Une erreur s'est produite lors de l'envoi de l'email",
-        variant: "destructive"
-      });
+      await handleResetPassword(email);
+    } catch (error) {
       throw error;
     }
   };

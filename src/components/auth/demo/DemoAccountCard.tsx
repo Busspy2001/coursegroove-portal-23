@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 export interface DemoAccountCardProps {
   account: DemoAccount;
   isLoading: boolean;
+  isCurrentLoginAttempt?: boolean;
   icon?: React.ReactNode;
   onLogin: (account: DemoAccount) => void;
 }
@@ -17,6 +19,7 @@ export interface DemoAccountCardProps {
 export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({ 
   account, 
   isLoading, 
+  isCurrentLoginAttempt = false,
   icon,
   onLogin 
 }) => {
@@ -80,6 +83,9 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
       }
     }
   };
+
+  // Determine if this particular button should show loading
+  const showLoading = isLoading && (isCurrentLoginAttempt || (!isCurrentLoginAttempt && !account.email));
 
   // Initialize default features if they don't exist
   const features = account.features || [
@@ -155,7 +161,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         disabled={isLoading}
         className="min-w-24 bg-schoolier-teal hover:bg-schoolier-dark-teal text-white font-medium"
       >
-        {isLoading ? (
+        {showLoading ? (
           <span className="flex items-center">
             <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
             Connexion...
@@ -170,3 +176,4 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
     </div>
   );
 };
+

@@ -63,6 +63,7 @@ const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
   const { loginWithDemo, isLoggingIn } = useAuth();
   const [accounts, setAccounts] = React.useState<DemoAccount[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [currentAttemptEmail, setCurrentAttemptEmail] = React.useState<string | null>(null);
   
   // Get the appropriate demo accounts for the selected profile
   React.useEffect(() => {
@@ -85,6 +86,16 @@ const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
   
   const ProfileIcon = profileIcons[profileType];
   
+  // Handle login with tracking current attempt
+  const handleLogin = (account: DemoAccount) => {
+    setCurrentAttemptEmail(account.email);
+    loginWithDemo(account)
+      .catch(error => {
+        console.error("Erreur lors de la connexion démo:", error);
+        setCurrentAttemptEmail(null);
+      });
+  };
+  
   if (loading) {
     return <div className="text-center py-4">Chargement des comptes de démonstration...</div>;
   }
@@ -98,9 +109,10 @@ const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
           <DemoAccountCard
             key={index}
             account={account}
-            onLogin={() => loginWithDemo(account)}
+            onLogin={() => handleLogin(account)}
             icon={<ProfileIcon className="h-5 w-5" />}
             isLoading={isLoggingIn}
+            isCurrentLoginAttempt={currentAttemptEmail === account.email}
           />
         ))}
         {accounts.length === 0 && (
@@ -114,3 +126,4 @@ const DemoAccounts = ({ profileType = "student" }: DemoAccountsProps) => {
 };
 
 export default DemoAccounts;
+
