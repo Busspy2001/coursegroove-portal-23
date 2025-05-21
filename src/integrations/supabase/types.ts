@@ -33,6 +33,191 @@ export type Database = {
         }
         Relationships: []
       }
+      assessment_questions: {
+        Row: {
+          assessment_id: string
+          correct_answer: string | null
+          created_at: string
+          id: string
+          options: Json | null
+          points: number | null
+          position: number
+          question_text: string
+          question_type: string
+        }
+        Insert: {
+          assessment_id: string
+          correct_answer?: string | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          points?: number | null
+          position: number
+          question_text: string
+          question_type: string
+        }
+        Update: {
+          assessment_id?: string
+          correct_answer?: string | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          points?: number | null
+          position?: number
+          question_text?: string
+          question_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "employee_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_responses: {
+        Row: {
+          id: string
+          is_correct: boolean | null
+          points_earned: number | null
+          question_id: string
+          response: string | null
+          response_time: number | null
+          submission_id: string
+        }
+        Insert: {
+          id?: string
+          is_correct?: boolean | null
+          points_earned?: number | null
+          question_id: string
+          response?: string | null
+          response_time?: number | null
+          submission_id: string
+        }
+        Update: {
+          id?: string
+          is_correct?: boolean | null
+          points_earned?: number | null
+          question_id?: string
+          response?: string | null
+          response_time?: number | null
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_responses_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_submissions: {
+        Row: {
+          assessment_id: string
+          completion_time: number | null
+          employee_id: string
+          id: string
+          passed: boolean | null
+          score: number | null
+          status: string | null
+          submitted_at: string
+        }
+        Insert: {
+          assessment_id: string
+          completion_time?: number | null
+          employee_id: string
+          id?: string
+          passed?: boolean | null
+          score?: number | null
+          status?: string | null
+          submitted_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          completion_time?: number | null
+          employee_id?: string
+          id?: string
+          passed?: boolean | null
+          score?: number | null
+          status?: string | null
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_submissions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "employee_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_submissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_types: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_mandatory: boolean | null
+          name: string
+          passing_score: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          name: string
+          passing_score?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          name?: string
+          passing_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_types_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -572,6 +757,196 @@ export type Database = {
           },
         ]
       }
+      employee_assessments: {
+        Row: {
+          assessment_type_id: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+        }
+        Insert: {
+          assessment_type_id: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+        }
+        Update: {
+          assessment_type_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_assessments_assessment_type_id_fkey"
+            columns: ["assessment_type_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_assessments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_assessments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "company_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_certifications: {
+        Row: {
+          certification_data: Json | null
+          company_id: string
+          description: string | null
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          issue_date: string
+          issued_by: string | null
+          name: string
+          related_courses: Json | null
+          status: string | null
+        }
+        Insert: {
+          certification_data?: Json | null
+          company_id: string
+          description?: string | null
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          name: string
+          related_courses?: Json | null
+          status?: string | null
+        }
+        Update: {
+          certification_data?: Json | null
+          company_id?: string
+          description?: string | null
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          name?: string
+          related_courses?: Json | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_certifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certifications_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_skills: {
+        Row: {
+          acquired_date: string
+          employee_id: string
+          id: string
+          proficiency_level: number | null
+          skill_id: string
+          source: string | null
+          source_id: string | null
+          verified: boolean | null
+          verified_by: string | null
+        }
+        Insert: {
+          acquired_date?: string
+          employee_id: string
+          id?: string
+          proficiency_level?: number | null
+          skill_id: string
+          source?: string | null
+          source_id?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Update: {
+          acquired_date?: string
+          employee_id?: string
+          id?: string
+          proficiency_level?: number | null
+          skill_id?: string
+          source?: string | null
+          source_id?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_skills_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_skills_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -738,6 +1113,80 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles_unified"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_categories: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills: {
+        Row: {
+          category_id: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          category_id?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          category_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skills_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "skill_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

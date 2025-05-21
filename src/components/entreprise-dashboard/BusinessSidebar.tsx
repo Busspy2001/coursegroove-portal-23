@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -6,8 +7,8 @@ import {
   SidebarContent, 
   SidebarFooter, 
   SidebarGroup, 
-  SidebarGroupContent, 
   SidebarGroupLabel, 
+  SidebarGroupContent, 
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
@@ -31,7 +32,9 @@ import {
   Sun,
   PlusCircle,
   ClipboardList,
-  Loader2
+  Loader2,
+  ClipboardCheck,
+  Lightbulb
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/use-theme";
@@ -116,7 +119,7 @@ const BusinessSidebar = () => {
       ]
     },
     {
-      label: "Formations",
+      label: "Formations et Évaluations",
       items: [
         {
           title: "Formations",
@@ -135,6 +138,18 @@ const BusinessSidebar = () => {
               tooltip: "Attribuer des formations aux employés"
             }
           ]
+        },
+        {
+          title: "Évaluations",
+          path: "/entreprise/evaluations",
+          icon: ClipboardCheck,
+          tooltip: "Gérer les évaluations et tests de compétences"
+        },
+        {
+          title: "Compétences",
+          path: "/entreprise/competences",
+          icon: Lightbulb,
+          tooltip: "Gérer les compétences de vos équipes"
         }
       ]
     },

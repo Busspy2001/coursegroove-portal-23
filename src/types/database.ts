@@ -1,4 +1,3 @@
-
 // These types represent the database structures we've created
 // They're used as a workaround since we can't modify the auto-generated types.ts
 
@@ -156,4 +155,107 @@ export interface WishlistItem {
   student_id: string;
   course_id: string;
   created_at: string;
+}
+
+// Assessment Related Types
+export interface AssessmentType {
+  id: string;
+  name: string;
+  description: string | null;
+  company_id: string;
+  is_mandatory: boolean;
+  passing_score: number;
+  created_at: string;
+  created_by: string | null;
+}
+
+export interface EmployeeAssessment {
+  id: string;
+  assessment_type_id: string;
+  title: string;
+  description: string | null;
+  company_id: string;
+  department_id: string | null;
+  due_date: string | null;
+  created_at: string;
+  created_by: string | null;
+  is_active: boolean;
+}
+
+export interface AssessmentQuestion {
+  id: string;
+  assessment_id: string;
+  question_text: string;
+  question_type: 'multiple_choice' | 'true_false' | 'text';
+  options: any[] | null;
+  correct_answer: string | null;
+  points: number;
+  position: number;
+  created_at: string;
+}
+
+export interface AssessmentSubmission {
+  id: string;
+  assessment_id: string;
+  employee_id: string;
+  submitted_at: string;
+  score: number | null;
+  passed: boolean | null;
+  completion_time: number | null;
+  status: 'started' | 'submitted' | 'evaluated' | 'expired';
+}
+
+export interface AssessmentResponse {
+  id: string;
+  submission_id: string;
+  question_id: string;
+  response: string | null;
+  is_correct: boolean | null;
+  points_earned: number;
+  response_time: number | null;
+}
+
+// Skills Related Types
+export interface SkillCategory {
+  id: string;
+  company_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface Skill {
+  id: string;
+  category_id: string | null;
+  name: string;
+  description: string | null;
+  company_id: string;
+  created_at: string;
+}
+
+export interface EmployeeSkill {
+  id: string;
+  employee_id: string;
+  skill_id: string;
+  proficiency_level: number | null;
+  acquired_date: string;
+  verified: boolean;
+  verified_by: string | null;
+  source: string | null;
+  source_id: string | null;
+}
+
+// Certification Related Types
+export interface EmployeeCertification {
+  id: string;
+  employee_id: string;
+  name: string;
+  description: string | null;
+  issue_date: string;
+  expiry_date: string | null;
+  issued_by: string | null;
+  company_id: string;
+  certification_data: any | null;
+  status: 'active' | 'expired' | 'revoked';
+  related_courses: any[] | null;
 }

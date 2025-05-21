@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -18,7 +19,9 @@ import {
   Award, 
   User, 
   LogOut,
-  Loader2
+  Loader2,
+  ClipboardCheck,
+  GraduationCap
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -71,7 +74,12 @@ const EmployeeSidebar = () => {
     {
       title: "Catalogue",
       path: "/employee/catalogue",
-      icon: BookOpen
+      icon: GraduationCap
+    },
+    {
+      title: "Mes évaluations",
+      path: "/employee/evaluations",
+      icon: ClipboardCheck
     },
     {
       title: "Certifications",
