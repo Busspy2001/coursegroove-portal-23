@@ -274,11 +274,15 @@ export const skillsService = {
         return [];
       }
       
-      // Cast status to the correct type
-      const typedData = data?.map(cert => ({
-        ...cert,
-        status: cert.status as "active" | "expired" | "revoked"
-      })) as EmployeeCertification[];
+      // Transform the data to match our interface
+      const typedData = data?.map(cert => {
+        return {
+          ...cert,
+          status: cert.status as "active" | "expired" | "revoked",
+          related_courses: cert.related_courses || null,
+          issuer: cert.issuer as { full_name: string | null } | null
+        };
+      }) as EmployeeCertification[];
       
       return typedData || [];
     } catch (error) {
@@ -325,10 +329,11 @@ export const skillsService = {
         return null;
       }
       
-      // Cast status to the correct type
+      // Transform to match our interface
       return {
         ...data,
-        status: data.status as "active" | "expired" | "revoked"
+        status: data.status as "active" | "expired" | "revoked",
+        related_courses: data.related_courses || null
       };
     } catch (error) {
       console.error("Error in createCertification:", error);
