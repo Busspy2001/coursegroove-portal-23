@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import {
   SkillCategory,
@@ -264,7 +263,7 @@ export const skillsService = {
         .from('employee_certifications')
         .select(`
           *,
-          issuer:profiles_unified(full_name)
+          issuer:profiles_unified!issued_by(full_name)
         `)
         .eq('employee_id', employeeId)
         .order('issue_date', { ascending: false });
