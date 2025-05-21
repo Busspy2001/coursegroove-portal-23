@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Employee, Department, BusinessStatistics } from '@/services/supabase-business-data';
 
@@ -289,6 +288,237 @@ export const businessService = {
     } catch (error) {
       console.error("Error in getCourseAssignments:", error);
       return [];
+    }
+  },
+
+  /**
+   * Update company information
+   */
+  updateCompany: async (companyId: string, companyData: Partial<any>): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('companies')
+        .update(companyData)
+        .eq('id', companyId);
+        
+      if (error) {
+        console.error("Error updating company:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in updateCompany:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Add a new employee to the company
+   */
+  addEmployee: async (companyId: string, employeeData: Partial<Employee>): Promise<boolean> => {
+    try {
+      // First check if user exists
+      const userEmail = employeeData.email;
+      if (!userEmail) {
+        console.error("No email provided for the employee");
+        return false;
+      }
+      
+      const { data: userData, error: userError } = await supabase
+        .from('profiles_unified')
+        .select('id')
+        .eq('email', userEmail)
+        .maybeSingle();
+        
+      if (userError) {
+        console.error("Error finding user:", userError);
+        return false;
+      }
+      
+      // If user doesn't exist yet and this is a demo, we'll create a skeleton profile
+      let employeeId = userData?.id;
+      if (!employeeId) {
+        const { data: newUser, error: createError } = await supabase
+          .from('profiles_unified')
+          .insert({
+            email: userEmail,
+            full_name: employeeData.full_name || 'New Employee',
+            avatar_url: employeeData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeData.full_name || 'New Employee')}&background=0D9488&color=fff`
+          })
+          .select('id')
+          .single();
+          
+        if (createError) {
+          console.error("Error creating user profile:", createError);
+          return false;
+        }
+        
+        employeeId = newUser?.id;
+      }
+      
+      // Now create the employee record
+      const { error: employeeError } = await supabase
+        .from('company_employees')
+        .insert({
+          company_id: companyId,
+          employee_id: employeeId,
+          job_title: employeeData.job_title,
+          department_id: employeeData.department_id,
+          status: employeeData.status || 'active'
+        });
+        
+      if (employeeError) {
+        console.error("Error adding employee:", employeeError);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in addEmployee:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Update an existing employee
+   */
+  updateEmployee: async (companyId: string, employeeId: string, employeeData: Partial<Employee>): Promise<boolean> => {
+    try {
+      // Update company_employees table
+      const { error } = await supabase
+        .from('company_employees')
+        .update({
+          job_title: employeeData.job_title,
+          department_id: employeeData.department_id,
+          status: employeeData.status
+        })
+        .eq('company_id', companyId)
+        .eq('employee_id', employeeId);
+        
+      if (error) {
+        console.error("Error updating employee:", error);
+        return false;
+      }
+      
+      // Update profile if name is changed
+      if (employeeData.full_name) {
+        const { error: profileError } = await supabase
+          .from('profiles_unified')
+          .update({
+            full_name: employeeData.full_name,
+            avatar_url: employeeData.avatar_url
+          })
+          .eq('id', employeeId);
+          
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+          // Continue anyway, partial success
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in updateEmployee:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Remove an employee from the company
+   */
+  removeEmployee: async (companyId: string, employeeId: string, employeeName: string): Promise<boolean> => {
+    try {
+      // Remove from company_employees table
+      const { error } = await supabase
+        .from('company_employees')
+        .delete()
+        .eq('company_id', companyId)
+        .eq('employee_id', employeeId);
+        
+      if (error) {
+        console.error("Error removing employee:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in removeEmployee:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Create a new department
+   */
+  createDepartment: async (companyId: string, departmentData: Partial<Department>): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('company_departments')
+        .insert({
+          company_id: companyId,
+          name: departmentData.name,
+          description: departmentData.description,
+          manager_id: departmentData.manager_id
+        });
+        
+      if (error) {
+        console.error("Error creating department:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in createDepartment:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Update an existing department
+   */
+  updateDepartment: async (departmentId: string, departmentData: Partial<Department>): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('company_departments')
+        .update({
+          name: departmentData.name,
+          description: departmentData.description,
+          manager_id: departmentData.manager_id
+        })
+        .eq('id', departmentId);
+        
+      if (error) {
+        console.error("Error updating department:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in updateDepartment:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Delete a department
+   */
+  deleteDepartment: async (departmentId: string, departmentName: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('company_departments')
+        .delete()
+        .eq('id', departmentId);
+        
+      if (error) {
+        console.error("Error deleting department:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in deleteDepartment:", error);
+      return false;
     }
   }
 };

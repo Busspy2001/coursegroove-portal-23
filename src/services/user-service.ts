@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { EnrolledCourse, Achievement, UserStats } from "@/types/user-data";
 
@@ -201,5 +200,121 @@ export const userService = {
       console.error("Error in getProfile:", error);
       return null;
     }
+  },
+  
+  /**
+   * Update lesson progress for a user
+   */
+  updateLessonProgress: async (userId: string, courseId: string, lessonId: string, completed: boolean): Promise<boolean> => {
+    try {
+      // First, check if there's an existing progress record
+      const { data: existingProgress, error: checkError } = await supabase
+        .from('progress_tracking')
+        .select('id')
+        .eq('student_id', userId)
+        .eq('course_id', courseId)
+        .eq('lesson_id', lessonId)
+        .maybeSingle();
+        
+      if (checkError) {
+        console.error("Error checking progress:", checkError);
+        return false;
+      }
+      
+      // Timestamp for completion
+      const completedAt = completed ? new Date().toISOString() : null;
+      
+      if (existingProgress) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('progress_tracking')
+          .update({
+            completed,
+            completed_at: completedAt
+          })
+          .eq('id', existingProgress.id);
+          
+        if (updateError) {
+          console.error("Error updating progress:", updateError);
+          return false;
+        }
+      } else {
+        // Create new record
+        const { error: insertError } = await supabase
+          .from('progress_tracking')
+          .insert({
+            student_id: userId,
+            course_id: courseId,
+            lesson_id: lessonId,
+            completed,
+            completed_at: completedAt
+          });
+          
+        if (insertError) {
+          console.error("Error inserting progress:", insertError);
+          return false;
+        }
+      }
+      
+      // Update overall course progress
+      await updateCourseProgress(userId, courseId);
+      
+      return true;
+    } catch (error) {
+      console.error("Error in updateLessonProgress:", error);
+      return false;
+    }
   }
 };
+
+/**
+ * Helper function to update overall course progress
+ */
+async function updateCourseProgress(userId: string, courseId: string): Promise<void> {
+  try {
+    // Get all lessons for the course
+    const { data: allLessons, error: lessonsError } = await supabase
+      .from('course_lessons')
+      .select('id')
+      .eq('section_id', supabase.from('course_sections').select('id').eq('course_id', courseId));
+      
+    if (lessonsError) {
+      console.error("Error getting lessons:", lessonsError);
+      return;
+    }
+    
+    // Get completed lessons
+    const { data: completedLessons, error: completedError } = await supabase
+      .from('progress_tracking')
+      .select('id')
+      .eq('student_id', userId)
+      .eq('course_id', courseId)
+      .eq('completed', true);
+      
+    if (completedError) {
+      console.error("Error getting completed lessons:", completedError);
+      return;
+    }
+    
+    // Calculate progress percentage
+    const totalLessons = allLessons?.length || 0;
+    const completedCount = completedLessons?.length || 0;
+    const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+    
+    // Update the enrollment record
+    const { error: updateError } = await supabase
+      .from('course_enrollments')
+      .update({
+        progress: progressPercentage,
+        last_accessed_at: new Date().toISOString()
+      })
+      .eq('student_id', userId)
+      .eq('course_id', courseId);
+      
+    if (updateError) {
+      console.error("Error updating enrollment progress:", updateError);
+    }
+  } catch (error) {
+    console.error("Error in updateCourseProgress:", error);
+  }
+}

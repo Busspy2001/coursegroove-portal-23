@@ -14,6 +14,9 @@ export const courseService = {
     search?: string;
     limit?: number;
     page?: number;
+    sort?: 'newest' | 'popularity' | 'rating';
+    level?: 'débutant' | 'intermédiaire' | 'avancé';
+    price?: 'free' | 'paid' | 'all';
   } = {}) => {
     try {
       let query = supabase
@@ -221,6 +224,51 @@ export const courseService = {
     } catch (error) {
       console.error("Error in getInstructorCourses:", error);
       return [];
+    }
+  },
+  
+  /**
+   * Enroll a student in a course
+   */
+  enrollUserInCourse: async (userId: string, courseId: string) => {
+    try {
+      // Check if already enrolled
+      const { data: existingEnrollment, error: checkError } = await supabase
+        .from('course_enrollments')
+        .select('id')
+        .eq('student_id', userId)
+        .eq('course_id', courseId)
+        .maybeSingle();
+        
+      if (checkError) {
+        console.error("Error checking enrollment:", checkError);
+        return false;
+      }
+      
+      if (existingEnrollment) {
+        // Already enrolled
+        return true;
+      }
+      
+      // Create new enrollment
+      const { error } = await supabase
+        .from('course_enrollments')
+        .insert({
+          student_id: userId,
+          course_id: courseId,
+          progress: 0,
+          last_accessed_at: new Date().toISOString()
+        });
+        
+      if (error) {
+        console.error("Error enrolling user:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in enrollUserInCourse:", error);
+      return false;
     }
   },
   
