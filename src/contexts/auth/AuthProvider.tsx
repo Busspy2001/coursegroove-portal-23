@@ -5,6 +5,7 @@ import { User, UserRole } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { authService } from '@/services/auth-service';
 import { toast } from '@/hooks/use-toast';
+import { executeLogout, resetLogoutStatus } from './logout';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -158,31 +159,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Logout
+  // Logout with improved error handling
   const logout = async (callback?: () => void): Promise<void> => {
+    console.log("🔄 Logout called from AuthProvider");
+    setIsLoggingOut(true);
+    
     try {
-      setIsLoggingOut(true);
-      console.log("🔄 Logout attempt");
-      
-      await authService.logout();
-      
-      setCurrentUser(null);
-      setIsAuthenticated(false);
-      
-      // Execute callback if provided
-      if (callback) callback();
-      
-      console.log("✅ Logout successful");
+      // Use the dedicated logout function
+      await executeLogout(
+        setCurrentUser,
+        setIsAuthenticated,
+        setIsLoggingOut,
+        callback
+      );
     } catch (error) {
-      console.error("❌ Logout error:", error);
-      toast({
-        title: "Erreur de déconnexion",
-        description: "Une erreur s'est produite lors de la déconnexion",
-        variant: "destructive"
-      });
-      throw error;
-    } finally {
+      console.error("Error during logout:", error);
       setIsLoggingOut(false);
+      throw error;
     }
   };
 

@@ -36,11 +36,14 @@ const BusinessSidebar = () => {
     if (isLoggingOut) return;
     
     try {
+      // Afficher un toast pour informer l'utilisateur
+      toast({
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter..."
+      });
+      
       await logout(() => {
-        toast({
-          title: "Déconnexion réussie",
-          description: "Vous avez été déconnecté avec succès.",
-        });
+        console.log("Redirection vers la page de connexion après déconnexion");
         navigate("/login?logout=true", { replace: true });
       });
     } catch (error) {

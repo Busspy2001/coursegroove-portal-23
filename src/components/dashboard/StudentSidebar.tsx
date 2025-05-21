@@ -6,6 +6,7 @@ import { Home, BookOpen, Award, Star, TrendingUp, MessageSquare, Settings, LogOu
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const StudentSidebar = () => {
   const {
@@ -22,12 +23,26 @@ const StudentSidebar = () => {
     try {
       console.log("Déconnexion en cours depuis StudentSidebar...");
       
+      // Afficher un toast pour informer l'utilisateur
+      toast({
+        title: "Déconnexion en cours",
+        description: "Veuillez patienter..."
+      });
+      
       // Utiliser le callback pour rediriger après la déconnexion complète
       await logout(() => {
-        navigate("/login", { replace: true });
+        console.log("Redirection vers la page de connexion après déconnexion");
+        navigate("/login?logout=true", { replace: true });
       });
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
+      
+      // Afficher une erreur si la déconnexion échoue
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Un problème est survenu. Veuillez réessayer.",
+        variant: "destructive"
+      });
     }
   };
   

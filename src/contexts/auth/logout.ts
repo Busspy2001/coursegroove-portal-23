@@ -126,14 +126,16 @@ export const executeLogout = async (
       description: "Vous avez été déconnecté avec succès.",
     });
     
-    // Execute callback if provided
+    // Execute callback if provided - Important: Make this happen AFTER the logout is processed
     if (callback) {
-      try {
-        console.log("🔄 Exécution du callback de déconnexion");
-        callback();
-      } catch (callbackError) {
-        console.error("❌ Erreur dans le callback de déconnexion:", callbackError);
-      }
+      setTimeout(() => {
+        try {
+          console.log("🔄 Exécution du callback de déconnexion");
+          callback();
+        } catch (callbackError) {
+          console.error("❌ Erreur dans le callback de déconnexion:", callbackError);
+        }
+      }, 0);
     }
   } catch (error: any) {
     console.error("❌ Erreur critique de déconnexion:", error);
@@ -142,7 +144,6 @@ export const executeLogout = async (
       description: error.message || "Un problème est survenu lors de la déconnexion.",
       variant: "destructive",
     });
-    throw error;
   } finally {
     // Always ensure we reset the loading state, whether there was success or failure
     setIsLoggingOut(false);
