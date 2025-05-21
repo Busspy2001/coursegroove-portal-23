@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Employee, Department, BusinessStatistics } from '@/services/supabase-business-data';
 
@@ -339,22 +340,31 @@ export const businessService = {
       // If user doesn't exist yet and this is a demo, we'll create a skeleton profile
       let employeeId = userData?.id;
       if (!employeeId) {
-        const { data: newUser, error: createError } = await supabase
+        // Generate a UUID for the new user
+        const { data: uuid, error: uuidError } = await supabase.rpc('gen_random_uuid');
+        if (uuidError) {
+          console.error("Error generating UUID:", uuidError);
+          return false;
+        }
+        
+        const newUserId = uuid;
+        
+        // Create the profile with the required id field
+        const { error: createError } = await supabase
           .from('profiles_unified')
           .insert({
+            id: newUserId,
             email: userEmail,
             full_name: employeeData.full_name || 'New Employee',
             avatar_url: employeeData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeData.full_name || 'New Employee')}&background=0D9488&color=fff`
-          })
-          .select('id')
-          .single();
+          });
           
         if (createError) {
           console.error("Error creating user profile:", createError);
           return false;
         }
         
-        employeeId = newUser?.id;
+        employeeId = newUserId;
       }
       
       // Now create the employee record
@@ -522,3 +532,4 @@ export const businessService = {
     }
   }
 };
+

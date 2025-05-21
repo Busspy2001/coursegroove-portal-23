@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { EnrolledCourse, Achievement, UserStats } from "@/types/user-data";
 
@@ -54,7 +55,7 @@ export const userService = {
    */
   getAchievements: async (userId: string): Promise<Achievement[]> => {
     try {
-      const { data: userAchievements, error } = await supabase
+      const { data: userAchievements, error: achievementsError } = await supabase
         .from('user_achievements')
         .select(`
           id,
@@ -68,8 +69,8 @@ export const userService = {
         `)
         .eq('user_id', userId);
       
-      if (error) {
-        console.error("Error fetching user achievements:", error);
+      if (achievementsError) {
+        console.error("Error fetching user achievements:", achievementsError);
         return [];
       }
       
@@ -272,15 +273,38 @@ export const userService = {
  */
 async function updateCourseProgress(userId: string, courseId: string): Promise<void> {
   try {
-    // Get all lessons for the course
-    const { data: allLessons, error: lessonsError } = await supabase
-      .from('course_lessons')
+    // Get course sections first
+    const { data: sections, error: sectionsError } = await supabase
+      .from('course_sections')
       .select('id')
-      .eq('section_id', supabase.from('course_sections').select('id').eq('course_id', courseId));
+      .eq('course_id', courseId);
       
-    if (lessonsError) {
-      console.error("Error getting lessons:", lessonsError);
+    if (sectionsError) {
+      console.error("Error getting sections:", sectionsError);
       return;
+    }
+    
+    // If there are no sections, we can't calculate progress
+    if (!sections || sections.length === 0) {
+      return;
+    }
+    
+    // Get all lessons for those sections
+    let allLessons = [];
+    for (const section of sections) {
+      const { data: lessons, error: lessonsError } = await supabase
+        .from('course_lessons')
+        .select('id')
+        .eq('section_id', section.id);
+        
+      if (lessonsError) {
+        console.error("Error getting lessons:", lessonsError);
+        continue;
+      }
+      
+      if (lessons && lessons.length > 0) {
+        allLessons = [...allLessons, ...lessons];
+      }
     }
     
     // Get completed lessons
@@ -297,7 +321,7 @@ async function updateCourseProgress(userId: string, courseId: string): Promise<v
     }
     
     // Calculate progress percentage
-    const totalLessons = allLessons?.length || 0;
+    const totalLessons = allLessons.length;
     const completedCount = completedLessons?.length || 0;
     const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
     
@@ -318,3 +342,4 @@ async function updateCourseProgress(userId: string, courseId: string): Promise<v
     console.error("Error in updateCourseProgress:", error);
   }
 }
+
