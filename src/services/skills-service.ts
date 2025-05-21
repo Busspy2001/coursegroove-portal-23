@@ -176,6 +176,12 @@ export const skillsService = {
    */
   addEmployeeSkill: async (employeeSkill: Partial<EmployeeSkill>): Promise<EmployeeSkill | null> => {
     try {
+      // Ensure required fields are present
+      if (!employeeSkill.employee_id || !employeeSkill.skill_id) {
+        console.error("Missing required fields for employee skill");
+        return null;
+      }
+      
       // Check if the employee already has this skill
       const { data: existingSkill, error: checkError } = await supabase
         .from('employee_skills')
@@ -218,7 +224,16 @@ export const skillsService = {
         // Create a new skill for the employee
         const { data, error } = await supabase
           .from('employee_skills')
-          .insert(employeeSkill)
+          .insert({
+            employee_id: employeeSkill.employee_id,
+            skill_id: employeeSkill.skill_id,
+            proficiency_level: employeeSkill.proficiency_level,
+            verified: employeeSkill.verified || false,
+            verified_by: employeeSkill.verified_by,
+            source: employeeSkill.source,
+            source_id: employeeSkill.source_id,
+            acquired_date: employeeSkill.acquired_date || new Date().toISOString()
+          })
           .select()
           .single();
           
@@ -259,7 +274,13 @@ export const skillsService = {
         return [];
       }
       
-      return data || [];
+      // Cast status to the correct type
+      const typedData = data?.map(cert => ({
+        ...cert,
+        status: cert.status as "active" | "expired" | "revoked"
+      })) as EmployeeCertification[];
+      
+      return typedData || [];
     } catch (error) {
       console.error("Error in getEmployeeCertifications:", error);
       return [];
@@ -271,9 +292,26 @@ export const skillsService = {
    */
   createCertification: async (certification: Partial<EmployeeCertification>): Promise<EmployeeCertification | null> => {
     try {
+      // Ensure required fields are present
+      if (!certification.employee_id || !certification.company_id || !certification.name) {
+        console.error("Missing required fields for certification");
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('employee_certifications')
-        .insert(certification)
+        .insert({
+          employee_id: certification.employee_id,
+          company_id: certification.company_id,
+          name: certification.name,
+          description: certification.description,
+          issue_date: certification.issue_date || new Date().toISOString(),
+          expiry_date: certification.expiry_date,
+          issued_by: certification.issued_by,
+          certification_data: certification.certification_data,
+          status: certification.status || 'active',
+          related_courses: certification.related_courses
+        })
         .select()
         .single();
         
@@ -287,7 +325,11 @@ export const skillsService = {
         return null;
       }
       
-      return data;
+      // Cast status to the correct type
+      return {
+        ...data,
+        status: data.status as "active" | "expired" | "revoked"
+      };
     } catch (error) {
       console.error("Error in createCertification:", error);
       return null;

@@ -258,4 +258,7 @@ export interface EmployeeCertification {
   certification_data: any | null;
   status: 'active' | 'expired' | 'revoked';
   related_courses: any[] | null;
+  issuer?: {
+    full_name: string;
+  } | null;
 }
