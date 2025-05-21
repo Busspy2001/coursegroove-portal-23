@@ -5,8 +5,8 @@ import { authRoutes } from "./authRoutes";
 import { studentRoutes } from "./studentRoutes";
 import { instructorRoutes } from "./instructorRoutes";
 import { adminRoutes } from "./adminRoutes";
-import { businessRoutes } from "./businessRoutes";
-import { employeeRoutes } from "./employeeRoutes";
+import businessRoutes from "./businessRoutes";
+import employeeRoutes from "./employeeRoutes";
 
 export const appRoutes: RouteObject[] = [
   ...generalRoutes,
@@ -14,6 +14,6 @@ export const appRoutes: RouteObject[] = [
   ...studentRoutes,
   ...instructorRoutes,
   ...adminRoutes,
-  ...businessRoutes,
-  ...employeeRoutes
+  businessRoutes,
+  employeeRoutes
 ];

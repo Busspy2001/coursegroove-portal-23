@@ -40,9 +40,19 @@ export const skillsService = {
    */
   createSkillCategory: async (category: Partial<SkillCategory>): Promise<SkillCategory | null> => {
     try {
+      // Ensure required fields are present
+      if (!category.company_id || !category.name) {
+        console.error("Missing required fields for skill category");
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('skill_categories')
-        .insert(category)
+        .insert({
+          company_id: category.company_id,
+          name: category.name,
+          description: category.description
+        })
         .select()
         .single();
         
@@ -94,9 +104,20 @@ export const skillsService = {
    */
   createSkill: async (skill: Partial<Skill>): Promise<Skill | null> => {
     try {
+      // Ensure required fields are present
+      if (!skill.company_id || !skill.name) {
+        console.error("Missing required fields for skill");
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('skills')
-        .insert(skill)
+        .insert({
+          company_id: skill.company_id,
+          name: skill.name,
+          description: skill.description,
+          category_id: skill.category_id
+        })
         .select()
         .single();
         

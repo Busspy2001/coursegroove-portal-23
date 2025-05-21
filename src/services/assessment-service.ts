@@ -41,9 +41,22 @@ export const assessmentService = {
    */
   createAssessmentType: async (assessmentType: Partial<AssessmentType>): Promise<AssessmentType | null> => {
     try {
+      // Ensure required fields are present
+      if (!assessmentType.company_id || !assessmentType.name) {
+        console.error("Missing required fields for assessment type");
+        return null;
+      }
+      
       const { data, error } = await supabase
         .from('assessment_types')
-        .insert(assessmentType)
+        .insert({
+          company_id: assessmentType.company_id,
+          name: assessmentType.name,
+          description: assessmentType.description,
+          is_mandatory: assessmentType.is_mandatory,
+          passing_score: assessmentType.passing_score,
+          created_by: assessmentType.created_by
+        })
         .select()
         .single();
         
@@ -165,10 +178,25 @@ export const assessmentService = {
    */
   createAssessment: async (assessment: Partial<EmployeeAssessment>, questions: Partial<AssessmentQuestion>[]): Promise<EmployeeAssessment | null> => {
     try {
+      // Ensure required fields are present
+      if (!assessment.assessment_type_id || !assessment.company_id || !assessment.title) {
+        console.error("Missing required fields for assessment");
+        return null;
+      }
+      
       // First, create the assessment
       const { data: assessmentData, error: assessmentError } = await supabase
         .from('employee_assessments')
-        .insert(assessment)
+        .insert({
+          assessment_type_id: assessment.assessment_type_id,
+          title: assessment.title,
+          description: assessment.description,
+          company_id: assessment.company_id,
+          department_id: assessment.department_id,
+          due_date: assessment.due_date,
+          is_active: assessment.is_active,
+          created_by: assessment.created_by
+        })
         .select()
         .single();
         
@@ -184,23 +212,36 @@ export const assessmentService = {
       
       // Then, create the questions with positions
       if (assessmentData && questions.length > 0) {
-        const questionsWithAssessmentId = questions.map((q, index) => ({
-          ...q,
+        // Make sure all questions have the required fields
+        const validQuestions = questions.filter(q => q.question_text && q.question_type);
+        
+        if (validQuestions.length !== questions.length) {
+          console.error("Some questions are missing required fields");
+        }
+        
+        const questionsToInsert = validQuestions.map((q, index) => ({
           assessment_id: assessmentData.id,
+          question_text: q.question_text!,
+          question_type: q.question_type!,
+          options: q.options,
+          correct_answer: q.correct_answer,
+          points: q.points,
           position: index + 1
         }));
         
-        const { error: questionsError } = await supabase
-          .from('assessment_questions')
-          .insert(questionsWithAssessmentId);
-          
-        if (questionsError) {
-          console.error("Error creating assessment questions:", questionsError);
-          toast({
-            title: "Attention",
-            description: "L'évaluation a été créée mais certaines questions n'ont pas pu être ajoutées.",
-            variant: "warning",
-          });
+        if (questionsToInsert.length > 0) {
+          const { error: questionsError } = await supabase
+            .from('assessment_questions')
+            .insert(questionsToInsert);
+            
+          if (questionsError) {
+            console.error("Error creating assessment questions:", questionsError);
+            toast({
+              title: "Attention",
+              description: "L'évaluation a été créée mais certaines questions n'ont pas pu être ajoutées.",
+              variant: "warning",
+            });
+          }
         }
       }
       
