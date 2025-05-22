@@ -11,6 +11,31 @@ const DemoRedirect = () => {
   const navigate = useNavigate();
   const [redirectAttempt, setRedirectAttempt] = useState(0);
   const [redirectStarted, setRedirectStarted] = useState(false);
+  const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  // Set a timeout to prevent infinite loading
+  useEffect(() => {
+    // Set a failsafe timeout to force redirect after 5 seconds
+    const timeout = setTimeout(() => {
+      console.log("⚠️ DemoRedirect: Forcing redirect due to timeout");
+      
+      if (!isAuthenticated || !currentUser) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      
+      // Fallback to student dashboard if we can't determine where to redirect
+      navigate("/student", { replace: true });
+    }, 5000);
+    
+    setRedirectTimeout(timeout);
+    
+    return () => {
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
+    };
+  }, []);
   
   useEffect(() => {
     // Only proceed with redirection when auth state is ready
@@ -34,6 +59,11 @@ const DemoRedirect = () => {
     // Prevent multiple redirections
     if (redirectStarted) {
       return;
+    }
+    
+    // Clear the failsafe timeout since we're handling the redirect now
+    if (redirectTimeout) {
+      clearTimeout(redirectTimeout);
     }
     
     // Set a small delay before redirecting to ensure state is stable
@@ -89,7 +119,13 @@ const DemoRedirect = () => {
       
       // No role or special case - try to detect from email for demo accounts
       if (currentUser.is_demo) {
-        // Explicit redirection based on email patterns
+        // Explicit redirection based on email patterns - be more aggressive for business accounts
+        if (email.includes('business') || email.includes('entreprise')) {
+          console.log("🏢 Redirection par email vers le tableau de bord entreprise");
+          navigate("/entreprise", { replace: true });
+          return;
+        }
+        
         if (email.includes('prof') || email.includes('instructor')) {
           console.log("👨‍🏫 Redirection par email vers le tableau de bord instructeur");
           navigate("/instructor", { replace: true });
@@ -99,12 +135,6 @@ const DemoRedirect = () => {
         if (email.includes('admin')) {
           console.log("👑 Redirection par email vers le tableau de bord administrateur");
           navigate("/admin", { replace: true });
-          return;
-        } 
-        
-        if (email.includes('business') || email.includes('entreprise')) {
-          console.log("🏢 Redirection par email vers le tableau de bord entreprise");
-          navigate("/entreprise", { replace: true });
           return;
         } 
         
@@ -126,7 +156,7 @@ const DemoRedirect = () => {
     }, 500); // Delay for more stability
     
     return () => clearTimeout(redirectTimer);
-  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt, redirectStarted]);
+  }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt, redirectStarted, redirectTimeout]);
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
