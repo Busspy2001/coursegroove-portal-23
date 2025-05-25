@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -7,6 +6,7 @@ import { DemoAccount } from "./types";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export interface DemoAccountCardProps {
   account: DemoAccount;
@@ -23,6 +23,8 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
   icon,
   onLogin 
 }) => {
+  const navigate = useNavigate();
+
   // Gestion des couleurs et badges selon le rôle
   const getRoleBadgeStyles = () => {
     switch (account.role) {
@@ -71,8 +73,35 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         // Log pour débuggage
         console.log(`🔑 Tentative de connexion avec compte démo: ${account.email} (${account.role})`);
         
-        // Appel de la fonction de connexion
+        // Enhanced callback for instructor accounts to ensure proper redirection
+        const redirectCallback = () => {
+          console.log(`🎯 Redirection après connexion pour ${account.role}`);
+          
+          // Direct redirection based on account role
+          if (account.role === "instructor" || account.email.includes('prof')) {
+            console.log("👨‍🏫 Redirection directe vers /instructor");
+            navigate("/instructor", { replace: true });
+          } else if (account.role === "business_admin" || account.email.includes('business') || account.email.includes('entreprise')) {
+            console.log("🏢 Redirection directe vers /entreprise");
+            navigate("/entreprise", { replace: true });
+          } else if (account.role === "admin" || account.role === "super_admin") {
+            console.log("👑 Redirection directe vers /admin");
+            navigate("/admin", { replace: true });
+          } else if (account.role === "employee") {
+            console.log("👔 Redirection directe vers /employee");
+            navigate("/employee", { replace: true });
+          } else {
+            console.log("🎓 Redirection directe vers /student");
+            navigate("/student", { replace: true });
+          }
+        };
+        
+        // Appel de la fonction de connexion avec callback de redirection
         onLogin(account);
+        
+        // Set a timeout to ensure redirection happens even if the callback isn't called
+        setTimeout(redirectCallback, 1500);
+        
       } catch (error) {
         console.error("Erreur lors de la connexion:", error);
         toast({
@@ -176,4 +205,3 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
     </div>
   );
 };
-

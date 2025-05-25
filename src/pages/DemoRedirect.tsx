@@ -15,7 +15,7 @@ const DemoRedirect = () => {
   
   // Set a timeout to prevent infinite loading
   useEffect(() => {
-    // Set a failsafe timeout to force redirect after 5 seconds
+    // Set a failsafe timeout to force redirect after 3 seconds
     const timeout = setTimeout(() => {
       console.log("⚠️ DemoRedirect: Forcing redirect due to timeout");
       
@@ -24,9 +24,26 @@ const DemoRedirect = () => {
         return;
       }
       
-      // Fallback to student dashboard if we can't determine where to redirect
-      navigate("/student", { replace: true });
-    }, 5000);
+      // Enhanced fallback redirection based on email patterns
+      const email = currentUser.email?.toLowerCase() || '';
+      
+      if (email.includes('prof') || email.includes('instructor')) {
+        console.log("👨‍🏫 Timeout fallback: Redirecting to instructor");
+        navigate("/instructor", { replace: true });
+      } else if (email.includes('business') || email.includes('entreprise')) {
+        console.log("🏢 Timeout fallback: Redirecting to business");
+        navigate("/entreprise", { replace: true });
+      } else if (email.includes('admin')) {
+        console.log("👑 Timeout fallback: Redirecting to admin");
+        navigate("/admin", { replace: true });
+      } else if (email.includes('employee')) {
+        console.log("👔 Timeout fallback: Redirecting to employee");
+        navigate("/employee", { replace: true });
+      } else {
+        console.log("🎓 Timeout fallback: Redirecting to student");
+        navigate("/student", { replace: true });
+      }
+    }, 3000);
     
     setRedirectTimeout(timeout);
     
@@ -82,11 +99,39 @@ const DemoRedirect = () => {
       // Log information for debugging
       console.log(`🧭 Redirection intelligente pour: ${currentUser.email} (${currentUser.roles?.join(', ')})`);
       
-      // Email-based redirection for demo accounts
+      // Email-based redirection for demo accounts - prioritize email patterns
       const email = currentUser.email?.toLowerCase() || '';
       const roles = currentUser.roles || [];
       
-      // First try to redirect by role (most reliable way)
+      // Enhanced email-based detection for instructor accounts
+      if (email.includes('prof') || email.includes('instructor')) {
+        console.log("👨‍🏫 Redirection par email vers le tableau de bord instructeur");
+        navigate("/instructor", { replace: true });
+        return;
+      }
+      
+      // Enhanced email-based detection for business accounts
+      if (email.includes('business') || email.includes('entreprise')) {
+        console.log("🏢 Redirection par email vers le tableau de bord entreprise");
+        navigate("/entreprise", { replace: true });
+        return;
+      }
+      
+      // Admin detection
+      if (email.includes('admin')) {
+        console.log("👑 Redirection par email vers le tableau de bord administrateur");
+        navigate("/admin", { replace: true });
+        return;
+      }
+      
+      // Employee detection
+      if (email.includes('employee')) {
+        console.log("👔 Redirection par email vers le tableau de bord employé");
+        navigate("/employee", { replace: true });
+        return;
+      }
+      
+      // Fallback to role-based redirection if email patterns don't match
       if (roles.includes('instructor')) {
         console.log("👨‍🏫 Redirection par rôle vers le tableau de bord instructeur");
         navigate("/instructor", { replace: true });
@@ -117,43 +162,11 @@ const DemoRedirect = () => {
         return;
       }
       
-      // No role or special case - try to detect from email for demo accounts
-      if (currentUser.is_demo) {
-        // Explicit redirection based on email patterns - be more aggressive for business accounts
-        if (email.includes('business') || email.includes('entreprise')) {
-          console.log("🏢 Redirection par email vers le tableau de bord entreprise");
-          navigate("/entreprise", { replace: true });
-          return;
-        }
-        
-        if (email.includes('prof') || email.includes('instructor')) {
-          console.log("👨‍🏫 Redirection par email vers le tableau de bord instructeur");
-          navigate("/instructor", { replace: true });
-          return;
-        } 
-        
-        if (email.includes('admin')) {
-          console.log("👑 Redirection par email vers le tableau de bord administrateur");
-          navigate("/admin", { replace: true });
-          return;
-        } 
-        
-        if (email.includes('employee')) {
-          console.log("👔 Redirection par email vers le tableau de bord employé");
-          navigate("/employee", { replace: true });
-          return;
-        } 
-        
-        console.log("🎓 Redirection par défaut vers le tableau de bord étudiant");
-        navigate("/student", { replace: true });
-        return;
-      } 
-      
-      // Default fallback if nothing else matches
+      // Final fallback
       console.log("🎓 Redirection vers le tableau de bord par défaut (étudiant)");
       navigate("/student", { replace: true });
       
-    }, 500); // Delay for more stability
+    }, 300); // Reduced delay for faster redirection
     
     return () => clearTimeout(redirectTimer);
   }, [currentUser, isAuthenticated, isLoading, authStateReady, navigate, redirectAttempt, redirectStarted, redirectTimeout]);
