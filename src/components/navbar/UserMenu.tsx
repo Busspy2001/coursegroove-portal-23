@@ -36,6 +36,15 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const isDemoInstructor = currentUser?.is_demo && 
     currentUser?.email?.toLowerCase().includes('prof');
   
+  // Detect if user is a demo business account based on email
+  const isDemoBusinessAccount = currentUser?.is_demo && 
+    (currentUser?.email?.toLowerCase().includes('business') || 
+     currentUser?.email?.toLowerCase().includes('entreprise'));
+  
+  // Detect if user is a demo employee based on email
+  const isDemoEmployee = currentUser?.is_demo && 
+    currentUser?.email?.toLowerCase().includes('employee');
+  
   const handleLogout = async () => {
     try {
       if (isLoggingOut) return;
@@ -56,10 +65,19 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     }
   };
   
-  // Get primary role
-  const primaryRole = currentUser?.roles && currentUser.roles.length > 0
-    ? currentUser.roles[0]
-    : "student";
+  // Get primary role - enhanced with demo account detection
+  const getPrimaryRole = (): UserRole => {
+    if (isDemoInstructor) return "instructor";
+    if (isDemoBusinessAccount) return "business_admin";
+    if (isDemoEmployee) return "employee";
+    
+    if (currentUser?.roles && currentUser.roles.length > 0) {
+      return currentUser.roles[0];
+    }
+    return "student";
+  };
+  
+  const primaryRole = getPrimaryRole();
   
   // Function to get role badge color
   const getRoleBadgeColor = (role?: UserRole) => {
@@ -95,19 +113,58 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     }
   };
   
-  // Function to determine the correct dashboard path based on user role
+  // Function to determine the correct dashboard path based on user role - ENHANCED
   const getDashboardPath = () => {
-    if (currentUser?.roles?.includes("admin") || currentUser?.roles?.includes("super_admin")) {
-      return "/admin";
-    } else if (currentUser?.roles?.includes("instructor") || isDemoInstructor) {
+    console.log("🎯 Détermination du chemin du tableau de bord pour:", {
+      email: currentUser?.email,
+      roles: currentUser?.roles,
+      is_demo: currentUser?.is_demo,
+      isDemoInstructor,
+      isDemoBusinessAccount,
+      isDemoEmployee,
+      primaryRole
+    });
+    
+    // Priorité aux comptes démo basés sur l'email
+    if (isDemoInstructor) {
+      console.log("👨‍🏫 Redirection vers /instructor (compte démo instructeur)");
       return "/instructor";
-    } else if (currentUser?.roles?.includes("business_admin")) {
-      return "/entreprise";
-    } else if (currentUser?.roles?.includes("employee")) {
-      return "/employe"; // Changed from "/employee" to "/employe"
-    } else {
-      return "/student";
     }
+    
+    if (isDemoBusinessAccount) {
+      console.log("🏢 Redirection vers /entreprise (compte démo business)");
+      return "/entreprise";
+    }
+    
+    if (isDemoEmployee) {
+      console.log("👔 Redirection vers /employee (compte démo employé)");
+      return "/employee";
+    }
+    
+    // Puis vérifier les rôles standard
+    if (currentUser?.roles?.includes("admin") || currentUser?.roles?.includes("super_admin")) {
+      console.log("👑 Redirection vers /admin (rôle admin)");
+      return "/admin";
+    }
+    
+    if (currentUser?.roles?.includes("instructor")) {
+      console.log("👨‍🏫 Redirection vers /instructor (rôle instructeur)");
+      return "/instructor";
+    }
+    
+    if (currentUser?.roles?.includes("business_admin")) {
+      console.log("🏢 Redirection vers /entreprise (rôle business_admin)");
+      return "/entreprise";
+    }
+    
+    if (currentUser?.roles?.includes("employee")) {
+      console.log("👔 Redirection vers /employee (rôle employee)");
+      return "/employee";
+    }
+    
+    // Fallback vers étudiant
+    console.log("🎓 Redirection vers /student (par défaut)");
+    return "/student";
   };
   
   return (
@@ -195,14 +252,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
               Administration
             </DropdownMenuItem>
           )}
-          {currentUser?.roles?.includes("business_admin") && (
+          {(currentUser?.roles?.includes("business_admin") || isDemoBusinessAccount) && (
             <DropdownMenuItem onClick={() => navigate("/entreprise")} className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               Gestion d'entreprise
             </DropdownMenuItem>
           )}
-          {currentUser?.roles?.includes("employee") && (
-            <DropdownMenuItem onClick={() => navigate("/employe")} className="cursor-pointer">
+          {(currentUser?.roles?.includes("employee") || isDemoEmployee) && (
+            <DropdownMenuItem onClick={() => navigate("/employee")} className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               Espace employé
             </DropdownMenuItem>
