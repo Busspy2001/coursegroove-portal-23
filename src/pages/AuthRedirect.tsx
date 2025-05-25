@@ -19,18 +19,54 @@ const AuthRedirect: React.FC = () => {
       return;
     }
     
-    // Check for demo instructor account based on email or specific demo flag
-    const isDemoInstructor = currentUser.is_demo && 
-      currentUser.email?.toLowerCase().includes('prof');
+    // Enhanced demo account detection based on email patterns
+    const email = currentUser.email?.toLowerCase() || '';
+    const isDemoInstructor = currentUser.is_demo && email.includes('prof');
+    const isDemoBusinessAccount = currentUser.is_demo && 
+      (email.includes('business') || email.includes('entreprise'));
+    const isDemoEmployee = currentUser.is_demo && email.includes('employee');
     
-    console.log(`Redirecting based on role: ${JSON.stringify({
+    console.log(`🎯 AuthRedirect - Redirecting based on:`, {
       roles: currentUser.roles,
       isDemoInstructor,
+      isDemoBusinessAccount,
+      isDemoEmployee,
       email: currentUser.email,
       is_demo: currentUser.is_demo
-    })}`);
+    });
     
-    // Redirect based on user role with priority order
+    // Priority to demo accounts based on email
+    if (isDemoInstructor) {
+      console.log("👨‍🏫 AuthRedirect - Demo instructor redirection to /instructor");
+      navigate("/instructor", { replace: true });
+      toast({
+        title: "Bienvenue, Instructeur",
+        description: "Vous êtes connecté à votre tableau de bord instructeur."
+      });
+      return;
+    }
+    
+    if (isDemoBusinessAccount) {
+      console.log("🏢 AuthRedirect - Demo business redirection to /entreprise");
+      navigate("/entreprise", { replace: true });
+      toast({
+        title: "Bienvenue, Admin Entreprise",
+        description: "Vous êtes connecté à votre tableau de bord entreprise."
+      });
+      return;
+    }
+    
+    if (isDemoEmployee) {
+      console.log("👔 AuthRedirect - Demo employee redirection to /employee");
+      navigate("/employee", { replace: true });
+      toast({
+        title: "Bienvenue, Employé",
+        description: "Vous êtes connecté à votre tableau de bord employé."
+      });
+      return;
+    }
+    
+    // Then check standard roles
     if (hasRole("super_admin")) {
       navigate("/admin", { replace: true });
       toast({
@@ -43,8 +79,8 @@ const AuthRedirect: React.FC = () => {
         title: "Welcome, Administrator",
         description: "You are now logged in as an administrator."
       });
-    } else if (hasRole("instructor") || isDemoInstructor) {
-      console.log("Redirecting to /instructor");
+    } else if (hasRole("instructor")) {
+      console.log("👨‍🏫 AuthRedirect - Standard instructor redirection to /instructor");
       navigate("/instructor", { replace: true });
       toast({
         title: "Welcome, Instructor",
@@ -57,7 +93,7 @@ const AuthRedirect: React.FC = () => {
         description: "You are now logged in to your business dashboard."
       });
     } else if (hasRole("employee")) {
-      navigate("/employe", { replace: true });
+      navigate("/employee", { replace: true });
       toast({
         title: "Welcome, Employee",
         description: "You are now logged in to your learning dashboard."

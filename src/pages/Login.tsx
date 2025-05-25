@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -75,7 +76,7 @@ const profileConfig = {
 type ProfileType = "student" | "instructor" | "business" | "employee";
 
 const Login = () => {
-  const { currentUser, isAuthenticated, isLoading, getUserPrimaryRole } = useAuth();
+  const { currentUser, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -95,30 +96,63 @@ const Login = () => {
     ensureDemoAccountsExist();
   }, []);
 
-  // Redirect after login
+  // Enhanced redirect after login with demo account detection
   useEffect(() => {
     if (isLoading) return;
 
     if (currentUser && isAuthenticated) {
-      let destination = "/dashboard";
-      const primaryRole = getUserPrimaryRole();
+      console.log("🔄 Login page - User authenticated, determining redirect destination");
       
-      if (primaryRole === 'instructor') {
+      // Enhanced demo account detection based on email patterns
+      const email = currentUser.email?.toLowerCase() || '';
+      const isDemoInstructor = currentUser.is_demo && email.includes('prof');
+      const isDemoBusinessAccount = currentUser.is_demo && 
+        (email.includes('business') || email.includes('entreprise'));
+      const isDemoEmployee = currentUser.is_demo && email.includes('employee');
+      
+      let destination = "/student"; // Default
+      
+      console.log("🎯 Login page - User info:", {
+        email: currentUser.email,
+        roles: currentUser.roles,
+        is_demo: currentUser.is_demo,
+        isDemoInstructor,
+        isDemoBusinessAccount,
+        isDemoEmployee
+      });
+      
+      // Priority to demo accounts based on email
+      if (isDemoInstructor) {
         destination = "/instructor";
-        console.log("👨‍🏫 Redirection vers le tableau de bord instructeur");
-      } else if (primaryRole === 'super_admin') {
-        destination = "/admin";
-        console.log("👨‍💼 Redirection vers le tableau de bord administrateur");
-      } else if (primaryRole === 'business_admin') {
+        console.log("👨‍🏫 Login page - Demo instructor redirect to /instructor");
+      } else if (isDemoBusinessAccount) {
         destination = "/entreprise";
-        console.log("🏢 Redirection vers le tableau de bord entreprise");
+        console.log("🏢 Login page - Demo business redirect to /entreprise");
+      } else if (isDemoEmployee) {
+        destination = "/employee";
+        console.log("👔 Login page - Demo employee redirect to /employee");
+      } else if (currentUser.roles?.includes('super_admin')) {
+        destination = "/admin";
+        console.log("👑 Login page - Super admin redirect to /admin");
+      } else if (currentUser.roles?.includes('admin')) {
+        destination = "/admin";
+        console.log("👑 Login page - Admin redirect to /admin");
+      } else if (currentUser.roles?.includes('instructor')) {
+        destination = "/instructor";
+        console.log("👨‍🏫 Login page - Instructor redirect to /instructor");
+      } else if (currentUser.roles?.includes('business_admin')) {
+        destination = "/entreprise";
+        console.log("🏢 Login page - Business admin redirect to /entreprise");
+      } else if (currentUser.roles?.includes('employee')) {
+        destination = "/employee";
+        console.log("👔 Login page - Employee redirect to /employee");
       } else {
-        console.log("🎓 Redirection vers le tableau de bord étudiant");
+        console.log("🎓 Login page - Default redirect to /student");
       }
 
       navigate(destination, { replace: true });
     }
-  }, [currentUser, isAuthenticated, navigate, location, isLoading, getUserPrimaryRole]);
+  }, [currentUser, isAuthenticated, navigate, location, isLoading]);
 
   const handleTabChange = (value: string) => {
     if (value === "register") {

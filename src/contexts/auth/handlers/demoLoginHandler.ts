@@ -12,7 +12,7 @@ export const handleLoginWithDemo = async (
   callback?: () => void
 ) => {
   try {
-    console.log("🎭 Tentative de connexion avec le compte démo:", account.email);
+    console.log("🎭 Demo login attempt for:", account.email, "role:", account.role);
     
     // Sign in with demo account credentials 
     const { data, error } = await supabase.auth.signInWithPassword({ 
@@ -71,15 +71,42 @@ export const handleLoginWithDemo = async (
     // Ensure demo flag is set - this is important for redirection
     user.is_demo = true;
     
-    // Special handling for business accounts by email
-    if (account.email.includes('business') || account.email.includes('entreprise')) {
-      // Ensure business_admin role is included for business demo accounts
+    // Enhanced role assignment based on email patterns
+    const email = account.email.toLowerCase();
+    
+    if (email.includes('prof') || email.includes('instructor')) {
+      if (!user.roles || !user.roles.includes('instructor')) {
+        user.roles = user.roles || [];
+        if (!user.roles.includes('instructor')) {
+          user.roles.push('instructor');
+        }
+      }
+      console.log("👨‍🏫 Demo instructor role assigned");
+    } else if (email.includes('business') || email.includes('entreprise')) {
       if (!user.roles || !user.roles.includes('business_admin')) {
         user.roles = user.roles || [];
         if (!user.roles.includes('business_admin')) {
           user.roles.push('business_admin');
         }
       }
+      console.log("🏢 Demo business admin role assigned");
+    } else if (email.includes('employee')) {
+      if (!user.roles || !user.roles.includes('employee')) {
+        user.roles = user.roles || [];
+        if (!user.roles.includes('employee')) {
+          user.roles.push('employee');
+        }
+      }
+      console.log("👔 Demo employee role assigned");
+    } else {
+      // Default to student
+      if (!user.roles || !user.roles.includes('student')) {
+        user.roles = user.roles || [];
+        if (!user.roles.includes('student')) {
+          user.roles.push('student');
+        }
+      }
+      console.log("🎓 Demo student role assigned");
     }
     
     // Update auth state
@@ -98,7 +125,7 @@ export const handleLoginWithDemo = async (
       }, 100);
     }
     
-    console.log("✅ Demo login successful for:", account.email, user);
+    console.log("✅ Demo login successful for:", account.email, "with user data:", user);
     return user;
   } catch (error) {
     throw error;
