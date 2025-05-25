@@ -1,7 +1,7 @@
 
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { getCurrentUser } from './authUtils';
+import { mapSupabaseUser } from './authUtils';
 
 // Authentication function for handling login
 export const handleLogin = async (
@@ -37,8 +37,8 @@ export const handleLogin = async (
       throw new Error(errorMsg);
     }
 
-    // Get user profile
-    const user = await getCurrentUser();
+    // Get user profile using the correct function
+    const user = await mapSupabaseUser(data.user);
     
     if (!user) {
       const errorMsg = "Impossible de récupérer le profil utilisateur après connexion";
@@ -111,7 +111,6 @@ export const handleLoginWithDemo = async (
     }
     
     // Force indicate this is a demo account in metadata if possible
-    const userId = data.user?.id;
     try {
       const { error: metadataError } = await supabase.auth.updateUser({
         data: { is_demo: true }
@@ -124,8 +123,8 @@ export const handleLoginWithDemo = async (
       console.warn("⚠️ Error updating user metadata:", err);
     }
     
-    // Get full user profile with metadata and role info
-    const user = await getCurrentUser();
+    // Get full user profile with metadata and role info using the correct function
+    const user = await mapSupabaseUser(data.user);
     
     if (!user) {
       const errorMsg = "Impossible de récupérer le profil du compte démo";
@@ -221,8 +220,8 @@ export const handleRegister = async (
       throw new Error(errorMsg);
     }
 
-    // Get user profile
-    const user = await getCurrentUser();
+    // Get user profile using the correct function
+    const user = await mapSupabaseUser(data.user);
     
     if (!user) {
       const errorMsg = "Impossible de récupérer le profil après inscription";
