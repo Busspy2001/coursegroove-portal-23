@@ -5,6 +5,26 @@ import { mapSupabaseUser } from '../authUtils';
 import { determineUserDashboard } from '../redirectionUtils';
 import { UserRole } from '../types';
 
+// Map our UserRole types to database-compatible types
+const mapRoleForDatabase = (role: UserRole) => {
+  switch (role) {
+    case "admin":
+      return "super_admin"; // Database uses super_admin instead of admin
+    case "super_admin":
+      return "super_admin";
+    case "student":
+      return "student";
+    case "instructor":
+      return "instructor";
+    case "business_admin":
+      return "business_admin";
+    case "employee":
+      return "employee";
+    default:
+      return "student"; // Default fallback
+  }
+};
+
 // Enhanced demo account login handler with improved role assignment
 export const handleLoginWithDemo = async (
   account: any,
@@ -47,12 +67,14 @@ export const handleLoginWithDemo = async (
     try {
       console.log(`🔧 Ensuring role ${account.role} exists in user_roles for ${data.user.id}`);
       
+      const dbRole = mapRoleForDatabase(account.role);
+      
       // Check if role exists in user_roles
       const { data: existingRole, error: checkError } = await supabase
         .from('user_roles')
         .select('id')
         .eq('user_id', data.user.id)
-        .eq('role', account.role)
+        .eq('role', dbRole)
         .maybeSingle();
         
       if (checkError) {
@@ -65,16 +87,16 @@ export const handleLoginWithDemo = async (
           .from('user_roles')
           .insert({
             user_id: data.user.id,
-            role: account.role as UserRole
+            role: dbRole
           });
           
         if (insertError) {
           console.warn("⚠️ Could not create role in user_roles:", insertError);
         } else {
-          console.log(`✅ Created role ${account.role} in user_roles for demo user`);
+          console.log(`✅ Created role ${dbRole} in user_roles for demo user`);
         }
       } else {
-        console.log(`✅ Role ${account.role} already exists in user_roles`);
+        console.log(`✅ Role ${dbRole} already exists in user_roles`);
       }
     } catch (err) {
       console.warn("⚠️ Error managing user roles:", err);

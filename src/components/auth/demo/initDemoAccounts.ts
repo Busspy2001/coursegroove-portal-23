@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/contexts/auth/types";
 
@@ -13,7 +12,7 @@ export interface DemoAccount {
   features?: string[];
 }
 
-// List of demo accounts
+// List of demo accounts with corrected role mapping
 export const demoAccounts: DemoAccount[] = [
   {
     email: "etudiant@schoolier.com",
@@ -44,7 +43,7 @@ export const demoAccounts: DemoAccount[] = [
   {
     email: "admin@schoolier.com",
     password: "demo123",
-    role: "admin",
+    role: "super_admin", // Changed from "admin" to "super_admin"
     name: "Admin Système",
     description: "Compte administrateur",
     features: [
@@ -110,15 +109,38 @@ export const getDemoAccountInfo = (email: string): DemoAccount | null => {
   return demoAccounts.find(account => account.email.toLowerCase() === email.toLowerCase()) || null;
 };
 
+// Map our UserRole types to database-compatible types
+const mapRoleForDatabase = (role: UserRole) => {
+  // Map our UserRole to the exact types expected by the database
+  switch (role) {
+    case "admin":
+      return "super_admin"; // Database uses super_admin instead of admin
+    case "super_admin":
+      return "super_admin";
+    case "student":
+      return "student";
+    case "instructor":
+      return "instructor";
+    case "business_admin":
+      return "business_admin";
+    case "employee":
+      return "employee";
+    default:
+      return "student"; // Default fallback
+  }
+};
+
 // Enhanced function to ensure user roles exist in user_roles table
 const ensureUserRoleExists = async (userId: string, role: UserRole): Promise<void> => {
   try {
+    const dbRole = mapRoleForDatabase(role);
+    
     // Check if role already exists in user_roles
     const { data: existingRole, error: checkError } = await supabase
       .from('user_roles')
       .select('id')
       .eq('user_id', userId)
-      .eq('role', role)
+      .eq('role', dbRole)
       .maybeSingle();
       
     if (checkError) {
@@ -132,16 +154,16 @@ const ensureUserRoleExists = async (userId: string, role: UserRole): Promise<voi
         .from('user_roles')
         .insert({
           user_id: userId,
-          role: role
+          role: dbRole
         });
         
       if (insertError) {
-        console.error(`Error creating role ${role} for user ${userId}:`, insertError);
+        console.error(`Error creating role ${dbRole} for user ${userId}:`, insertError);
       } else {
-        console.log(`✅ Created role ${role} for user ${userId}`);
+        console.log(`✅ Created role ${dbRole} for user ${userId}`);
       }
     } else {
-      console.log(`Role ${role} already exists for user ${userId}`);
+      console.log(`Role ${dbRole} already exists for user ${userId}`);
     }
   } catch (error) {
     console.error(`Error ensuring role exists for ${userId}:`, error);
@@ -186,6 +208,9 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
             // Generate a deterministic UUID from the email to avoid duplicates across retries
             const tempId = crypto.randomUUID();
             
+            // Map role for profiles_unified (use original role for display)
+            const profileRole = mapRoleForDatabase(account.role);
+            
             // Create entry in profiles_unified
             const { data, error } = await supabase
               .from('profiles_unified')
@@ -193,7 +218,7 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
                 id: tempId,
                 email: account.email,
                 full_name: account.name,
-                role: account.role as UserRole,
+                role: profileRole,
                 is_demo: true,
                 avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
               })
@@ -216,12 +241,13 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
             console.log(`Demo account for ${account.email} already exists (ID: ${userId})`);
             
             // Update the existing account if needed
-            if (!existingUser.is_demo || existingUser.role !== account.role) {
+            const profileRole = mapRoleForDatabase(account.role);
+            if (!existingUser.is_demo || existingUser.role !== profileRole) {
               await supabase
                 .from('profiles_unified')
                 .update({
                   is_demo: true,
-                  role: account.role as UserRole
+                  role: profileRole
                 })
                 .eq('id', existingUser.id);
                 
