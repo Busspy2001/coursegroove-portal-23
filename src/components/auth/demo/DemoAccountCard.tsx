@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { determineUserDashboard } from "@/contexts/auth/redirectionUtils";
 
 export interface DemoAccountCardProps {
   account: DemoAccount;
@@ -83,7 +84,6 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
             navigate(targetDashboard, { replace: true });
           } else {
             // Fallback redirection based on account role
-            const { determineUserDashboard } = require("@/contexts/auth/redirectionUtils");
             const fallbackDashboard = determineUserDashboard({ 
               email: account.email, 
               roles: [account.role], 

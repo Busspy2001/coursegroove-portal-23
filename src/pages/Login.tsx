@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { ensureDemoAccountsExist } from "@/components/auth/demo/initDemoAccounts";
 import { Button } from "@/components/ui/button";
 import { MobileProfileSelector } from "@/components/auth/MobileProfileSelector";
+import { determineUserDashboard } from "@/contexts/auth/redirectionUtils";
 
 // Define the profile types and their properties
 const profileConfig = {
@@ -103,7 +104,6 @@ const Login = () => {
       console.log("🔄 Login page - User authenticated, determining redirect destination");
       
       // Use centralized redirection logic
-      const { determineUserDashboard } = require("@/contexts/auth/redirectionUtils");
       const destination = determineUserDashboard(currentUser);
       
       console.log("🎯 Login page - Redirecting to:", destination);
