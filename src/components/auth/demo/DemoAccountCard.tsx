@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -83,8 +82,9 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
             console.log(`🎯 Redirection directe vers ${targetDashboard}`);
             navigate(targetDashboard, { replace: true });
           } else {
-            // Fallback redirection based on account role
+            // Fallback redirection based on account role - provide all required User properties
             const fallbackDashboard = determineUserDashboard({ 
+              id: 'demo-user', // Mock ID for demo accounts
               email: account.email, 
               roles: [account.role], 
               is_demo: true 
