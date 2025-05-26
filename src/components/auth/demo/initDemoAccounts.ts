@@ -110,6 +110,44 @@ export const getDemoAccountInfo = (email: string): DemoAccount | null => {
   return demoAccounts.find(account => account.email.toLowerCase() === email.toLowerCase()) || null;
 };
 
+// Enhanced function to ensure user roles exist in user_roles table
+const ensureUserRoleExists = async (userId: string, role: UserRole): Promise<void> => {
+  try {
+    // Check if role already exists in user_roles
+    const { data: existingRole, error: checkError } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('role', role)
+      .maybeSingle();
+      
+    if (checkError) {
+      console.error(`Error checking existing role for ${userId}:`, checkError);
+      return;
+    }
+    
+    // If role doesn't exist, create it
+    if (!existingRole) {
+      const { error: insertError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: userId,
+          role: role
+        });
+        
+      if (insertError) {
+        console.error(`Error creating role ${role} for user ${userId}:`, insertError);
+      } else {
+        console.log(`✅ Created role ${role} for user ${userId}`);
+      }
+    } else {
+      console.log(`Role ${role} already exists for user ${userId}`);
+    }
+  } catch (error) {
+    console.error(`Error ensuring role exists for ${userId}:`, error);
+  }
+};
+
 // Make sure the demo accounts exist in the database
 export const ensureDemoAccountsExist = async (): Promise<void> => {
   // If initialization is already in progress, return the existing promise
@@ -139,21 +177,23 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
             continue;
           }
 
-          // If account doesn't exist or needs updating
+          let userId: string;
+
+          // If account doesn't exist, create it
           if (!existingUser) {
             console.log(`Creating demo account for ${account.email}`);
             
             // Generate a deterministic UUID from the email to avoid duplicates across retries
             const tempId = crypto.randomUUID();
             
-            // For simplicity in a demo, we're directly creating entries in profiles_unified
+            // Create entry in profiles_unified
             const { data, error } = await supabase
               .from('profiles_unified')
               .insert({
                 id: tempId,
                 email: account.email,
                 full_name: account.name,
-                role: account.role as UserRole, // Explicitly cast to UserRole
+                role: account.role as UserRole,
                 is_demo: true,
                 avatar_url: account.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(account.name)}&background=0D9488&color=fff`
               })
@@ -161,16 +201,19 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
               
             if (error) {
               console.error(`Error creating demo account for ${account.email}:`, error);
-            } else if (data && data[0]) {
-              console.log(`Demo account created for ${account.email} with ID: ${data[0].id}`);
-              
-              // If it's a business admin, create a company for them
-              if (account.role === 'business_admin') {
-                await createCompanyForDemoUser(data[0].id, account.name);
-              }
+              continue;
             }
+            
+            if (!data || !data[0]) {
+              console.error(`No data returned when creating demo account for ${account.email}`);
+              continue;
+            }
+            
+            userId = data[0].id;
+            console.log(`Demo account created for ${account.email} with ID: ${userId}`);
           } else {
-            console.log(`Demo account for ${account.email} already exists (ID: ${existingUser.id})`);
+            userId = existingUser.id;
+            console.log(`Demo account for ${account.email} already exists (ID: ${userId})`);
             
             // Update the existing account if needed
             if (!existingUser.is_demo || existingUser.role !== account.role) {
@@ -178,18 +221,22 @@ export const ensureDemoAccountsExist = async (): Promise<void> => {
                 .from('profiles_unified')
                 .update({
                   is_demo: true,
-                  role: account.role as UserRole // Explicitly cast to UserRole
+                  role: account.role as UserRole
                 })
                 .eq('id', existingUser.id);
                 
               console.log(`Updated demo status for ${account.email}`);
             }
-            
-            // If it's a business admin, ensure they have a company
-            if (account.role === 'business_admin') {
-              await ensureCompanyForBusinessAdmin(existingUser.id, account.name);
-            }
           }
+          
+          // Ensure the role exists in user_roles table
+          await ensureUserRoleExists(userId, account.role);
+          
+          // Handle business-specific setup
+          if (account.role === 'business_admin') {
+            await createCompanyForDemoUser(userId, account.name);
+          }
+          
         } catch (error) {
           console.error(`Error processing demo account ${account.email}:`, error);
         }

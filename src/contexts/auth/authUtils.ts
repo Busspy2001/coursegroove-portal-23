@@ -1,7 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "./types";
 import { userCache } from "@/integrations/supabase/client";
+import { getDemoAccountInfo } from "@/components/auth/demo/initDemoAccounts";
 
 // User cache management functions
 export const getUserFromCache = (userId?: string): User | null => {
@@ -42,16 +42,43 @@ export const cacheUser = (user: User): void => {
   }
 };
 
-// Fetch user roles with the new system
-export const fetchUserRoles = async (userId: string): Promise<UserRole[]> => {
+// Enhanced fetch user roles with demo account fallback
+export const fetchUserRoles = async (userId: string, email?: string): Promise<UserRole[]> => {
   try {
+    // For demo accounts, prioritize the account's designated role
+    if (email) {
+      const demoInfo = getDemoAccountInfo(email);
+      if (demoInfo) {
+        console.log(`🎭 Demo account detected: ${email}, designated role: ${demoInfo.role}`);
+        // Still try to get roles from user_roles but fallback to demo role
+        const { data: roles, error } = await supabase
+          .rpc('get_user_roles', { _user_id: userId });
+          
+        if (!error && roles && roles.length > 0) {
+          console.log(`✅ Found roles in user_roles for demo account: ${roles.join(', ')}`);
+          return roles as UserRole[];
+        } else {
+          console.log(`⚠️ No roles in user_roles for demo account, using designated role: ${demoInfo.role}`);
+          return [demoInfo.role];
+        }
+      }
+    }
+    
     // First try to use our new security definer function that prevents RLS recursion
     const { data: roles, error } = await supabase
       .rpc('get_user_roles', { _user_id: userId });
       
     if (error) {
       console.error("Error fetching user roles:", error);
-      return [];
+      // Fallback to demo info if available
+      if (email) {
+        const demoInfo = getDemoAccountInfo(email);
+        if (demoInfo) {
+          console.log(`🔄 Fallback to demo role for ${email}: ${demoInfo.role}`);
+          return [demoInfo.role];
+        }
+      }
+      return ['student']; // Default fallback
     }
     
     if (roles && roles.length > 0) {
@@ -59,7 +86,6 @@ export const fetchUserRoles = async (userId: string): Promise<UserRole[]> => {
     }
     
     // Fallback to the old method (profiles_unified) if no roles found
-    // This is transitional code during migration
     const { data: profile, error: profileError } = await supabase
       .from('profiles_unified')
       .select('role')
@@ -68,6 +94,14 @@ export const fetchUserRoles = async (userId: string): Promise<UserRole[]> => {
       
     if (profileError) {
       console.error("Error in fallback role fetch:", profileError);
+      // Final fallback to demo info
+      if (email) {
+        const demoInfo = getDemoAccountInfo(email);
+        if (demoInfo) {
+          console.log(`🔄 Final fallback to demo role for ${email}: ${demoInfo.role}`);
+          return [demoInfo.role];
+        }
+      }
       return ['student']; // Default to student as fallback
     }
     
@@ -78,11 +112,19 @@ export const fetchUserRoles = async (userId: string): Promise<UserRole[]> => {
     return ['student']; // Default to student if all else fails
   } catch (error) {
     console.error("Error in fetchUserRoles:", error);
+    // Final fallback to demo info
+    if (email) {
+      const demoInfo = getDemoAccountInfo(email);
+      if (demoInfo) {
+        console.log(`🔄 Exception fallback to demo role for ${email}: ${demoInfo.role}`);
+        return [demoInfo.role];
+      }
+    }
     return ['student']; // Default to student as fallback
   }
 };
 
-// Mapping Supabase user to our app's user model
+// Enhanced mapping with better demo support
 export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> => {
   try {
     if (!supabaseUser) return null;
@@ -102,8 +144,8 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       .eq('id', supabaseUser.id)
       .single();
     
-    // Get the user's roles using our new system
-    const roles = await fetchUserRoles(supabaseUser.id);
+    // Get the user's roles using our enhanced system
+    const roles = await fetchUserRoles(supabaseUser.id, supabaseUser.email);
     
     // If there's an error with profiles_unified (likely RLS policy issue)
     if (error) {
@@ -114,7 +156,6 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
                    supabaseUser.user_metadata?.full_name || 
                    'User';
       
-      // Default roles already set from fetchUserRoles
       // Construct user from auth data as fallback
       const user: User = {
         id: supabaseUser.id,

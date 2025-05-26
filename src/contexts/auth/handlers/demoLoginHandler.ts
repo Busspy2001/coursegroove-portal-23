@@ -3,8 +3,9 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { mapSupabaseUser } from '../authUtils';
 import { determineUserDashboard } from '../redirectionUtils';
+import { UserRole } from '../types';
 
-// Demo account login handler with centralized redirection
+// Enhanced demo account login handler with improved role assignment
 export const handleLoginWithDemo = async (
   account: any,
   setCurrentUser: Function,
@@ -42,7 +43,44 @@ export const handleLoginWithDemo = async (
       throw new Error(errorMsg);
     }
     
-    // Force indicate this is a demo account in metadata
+    // Enhanced role assignment in user_roles table
+    try {
+      console.log(`🔧 Ensuring role ${account.role} exists in user_roles for ${data.user.id}`);
+      
+      // Check if role exists in user_roles
+      const { data: existingRole, error: checkError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', data.user.id)
+        .eq('role', account.role)
+        .maybeSingle();
+        
+      if (checkError) {
+        console.warn("⚠️ Error checking existing role:", checkError);
+      }
+      
+      // If role doesn't exist, create it
+      if (!existingRole) {
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: data.user.id,
+            role: account.role as UserRole
+          });
+          
+        if (insertError) {
+          console.warn("⚠️ Could not create role in user_roles:", insertError);
+        } else {
+          console.log(`✅ Created role ${account.role} in user_roles for demo user`);
+        }
+      } else {
+        console.log(`✅ Role ${account.role} already exists in user_roles`);
+      }
+    } catch (err) {
+      console.warn("⚠️ Error managing user roles:", err);
+    }
+    
+    // Force update user metadata to ensure demo flag
     try {
       const { error: metadataError } = await supabase.auth.updateUser({
         data: { is_demo: true }
@@ -55,7 +93,7 @@ export const handleLoginWithDemo = async (
       console.warn("⚠️ Error updating user metadata:", err);
     }
     
-    // Get full user profile with metadata and role info
+    // Get full user profile with enhanced metadata and role info
     const user = await mapSupabaseUser(data.user);
     
     if (!user) {
@@ -69,54 +107,19 @@ export const handleLoginWithDemo = async (
       throw new Error(errorMsg);
     }
     
-    // Ensure demo flag is set - this is critical for redirection
+    // Force ensure demo flag and correct role
     user.is_demo = true;
     
-    // Enhanced role assignment based on email patterns and account role
-    const email = account.email.toLowerCase();
-    
-    if (email.includes('prof') || email.includes('instructor') || account.role === 'instructor') {
-      if (!user.roles || !user.roles.includes('instructor')) {
-        user.roles = user.roles || [];
-        if (!user.roles.includes('instructor')) {
-          user.roles.push('instructor');
-        }
+    // Enhanced role verification and assignment
+    if (!user.roles || !user.roles.includes(account.role)) {
+      console.log(`🔧 Forcing role assignment: ${account.role} for demo user`);
+      user.roles = user.roles || [];
+      if (!user.roles.includes(account.role)) {
+        user.roles.push(account.role);
       }
-      console.log("👨‍🏫 Demo instructor role assigned");
-    } else if (email.includes('business') || email.includes('entreprise') || account.role === 'business_admin') {
-      if (!user.roles || !user.roles.includes('business_admin')) {
-        user.roles = user.roles || [];
-        if (!user.roles.includes('business_admin')) {
-          user.roles.push('business_admin');
-        }
-      }
-      console.log("🏢 Demo business admin role assigned");
-    } else if (email.includes('employee') || account.role === 'employee') {
-      if (!user.roles || !user.roles.includes('employee')) {
-        user.roles = user.roles || [];
-        if (!user.roles.includes('employee')) {
-          user.roles.push('employee');
-        }
-      }
-      console.log("👔 Demo employee role assigned");
-    } else if (email.includes('admin') || account.role === 'admin') {
-      if (!user.roles || !user.roles.includes('admin')) {
-        user.roles = user.roles || [];
-        if (!user.roles.includes('admin')) {
-          user.roles.push('admin');
-        }
-      }
-      console.log("👑 Demo admin role assigned");
-    } else {
-      // Default to student
-      if (!user.roles || !user.roles.includes('student')) {
-        user.roles = user.roles || [];
-        if (!user.roles.includes('student')) {
-          user.roles.push('student');
-        }
-      }
-      console.log("🎓 Demo student role assigned");
     }
+    
+    console.log(`✅ Demo user final roles: ${user.roles.join(', ')}`);
     
     // Update auth state
     setCurrentUser(user);
