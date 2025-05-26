@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { determineUserDashboard } from "@/contexts/auth/redirectionUtils";
 
 const AuthRedirect: React.FC = () => {
-  const { currentUser, hasRole, isAuthenticated, isLoading } = useAuth();
+  const { currentUser, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -19,94 +20,36 @@ const AuthRedirect: React.FC = () => {
       return;
     }
     
-    // Enhanced demo account detection based on email patterns
-    const email = currentUser.email?.toLowerCase() || '';
-    const isDemoInstructor = currentUser.is_demo && email.includes('prof');
-    const isDemoBusinessAccount = currentUser.is_demo && 
-      (email.includes('business') || email.includes('entreprise'));
-    const isDemoEmployee = currentUser.is_demo && email.includes('employee');
+    // Use centralized redirection logic
+    const targetDashboard = determineUserDashboard(currentUser);
     
-    console.log(`🎯 AuthRedirect - Redirecting based on:`, {
-      roles: currentUser.roles,
-      isDemoInstructor,
-      isDemoBusinessAccount,
-      isDemoEmployee,
-      email: currentUser.email,
-      is_demo: currentUser.is_demo
+    console.log(`🎯 AuthRedirect - Redirecting to: ${targetDashboard}`);
+    
+    // Navigate to the determined dashboard
+    navigate(targetDashboard, { replace: true });
+    
+    // Show appropriate welcome message
+    const roleInfo = currentUser.is_demo ? "Compte Démo" : "Bienvenue";
+    let welcomeMessage = "Vous êtes connecté à votre tableau de bord.";
+    
+    if (targetDashboard === "/instructor") {
+      welcomeMessage = "Bienvenue sur votre tableau de bord instructeur.";
+    } else if (targetDashboard === "/entreprise") {
+      welcomeMessage = "Bienvenue sur votre tableau de bord entreprise.";
+    } else if (targetDashboard === "/admin") {
+      welcomeMessage = "Bienvenue sur votre tableau de bord administrateur.";
+    } else if (targetDashboard === "/employee") {
+      welcomeMessage = "Bienvenue sur votre tableau de bord employé.";
+    } else {
+      welcomeMessage = "Bienvenue sur votre tableau de bord étudiant.";
+    }
+    
+    toast({
+      title: roleInfo,
+      description: welcomeMessage
     });
     
-    // Priority to demo accounts based on email
-    if (isDemoInstructor) {
-      console.log("👨‍🏫 AuthRedirect - Demo instructor redirection to /instructor");
-      navigate("/instructor", { replace: true });
-      toast({
-        title: "Bienvenue, Instructeur",
-        description: "Vous êtes connecté à votre tableau de bord instructeur."
-      });
-      return;
-    }
-    
-    if (isDemoBusinessAccount) {
-      console.log("🏢 AuthRedirect - Demo business redirection to /entreprise");
-      navigate("/entreprise", { replace: true });
-      toast({
-        title: "Bienvenue, Admin Entreprise",
-        description: "Vous êtes connecté à votre tableau de bord entreprise."
-      });
-      return;
-    }
-    
-    if (isDemoEmployee) {
-      console.log("👔 AuthRedirect - Demo employee redirection to /employee");
-      navigate("/employee", { replace: true });
-      toast({
-        title: "Bienvenue, Employé",
-        description: "Vous êtes connecté à votre tableau de bord employé."
-      });
-      return;
-    }
-    
-    // Then check standard roles
-    if (hasRole("super_admin")) {
-      navigate("/admin", { replace: true });
-      toast({
-        title: "Welcome, Super Administrator",
-        description: "You are now logged in with full administrative privileges."
-      });
-    } else if (hasRole("admin")) {
-      navigate("/admin", { replace: true });
-      toast({
-        title: "Welcome, Administrator",
-        description: "You are now logged in as an administrator."
-      });
-    } else if (hasRole("instructor")) {
-      console.log("👨‍🏫 AuthRedirect - Standard instructor redirection to /instructor");
-      navigate("/instructor", { replace: true });
-      toast({
-        title: "Welcome, Instructor",
-        description: "You are now logged in to your instructor dashboard."
-      });
-    } else if (hasRole("business_admin")) {
-      navigate("/entreprise", { replace: true });
-      toast({
-        title: "Welcome, Business Admin",
-        description: "You are now logged in to your business dashboard."
-      });
-    } else if (hasRole("employee")) {
-      navigate("/employee", { replace: true });
-      toast({
-        title: "Welcome, Employee",
-        description: "You are now logged in to your learning dashboard."
-      });
-    } else {
-      // Default to student dashboard
-      navigate("/student", { replace: true });
-      toast({
-        title: "Welcome to Schoolier",
-        description: "You are now logged in to your learning dashboard."
-      });
-    }
-  }, [currentUser, hasRole, isAuthenticated, isLoading, navigate, toast]);
+  }, [currentUser, isAuthenticated, isLoading, navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

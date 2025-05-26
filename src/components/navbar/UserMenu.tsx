@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/contexts/auth/types";
+import { determineUserDashboard, getRoleInfo } from "@/contexts/auth/redirectionUtils";
 
 interface User {
   name?: string;
@@ -65,27 +65,15 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
     }
   };
   
-  // Get primary role - enhanced with demo account detection
-  const getPrimaryRole = (): UserRole => {
-    if (isDemoInstructor) return "instructor";
-    if (isDemoBusinessAccount) return "business_admin";
-    if (isDemoEmployee) return "employee";
-    
-    if (currentUser?.roles && currentUser.roles.length > 0) {
-      return currentUser.roles[0];
-    }
-    return "student";
-  };
-  
-  const primaryRole = getPrimaryRole();
+  // Get role info using centralized logic
+  const roleInfo = getRoleInfo(currentUser);
   
   // Function to get role badge color
-  const getRoleBadgeColor = (role?: UserRole) => {
+  const getRoleBadgeColor = (role?: string) => {
     switch (role) {
       case "instructor":
         return "bg-schoolier-teal hover:bg-schoolier-dark-teal";
       case "admin":
-      case "super_admin":
         return "bg-schoolier-blue hover:bg-schoolier-dark-blue";
       case "business_admin":
         return "bg-amber-500 hover:bg-amber-600";
@@ -95,76 +83,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         return "bg-schoolier-gray hover:bg-schoolier-dark-gray";
     }
   };
-
-  // Function to get role display name
-  const getRoleDisplayName = (role?: UserRole) => {
-    switch (role) {
-      case "instructor":
-        return "Instructeur";
-      case "admin":
-      case "super_admin":
-        return "Admin";
-      case "business_admin":
-        return "Admin Entreprise";
-      case "employee":
-        return "Employé";
-      default:
-        return "Étudiant";
-    }
-  };
   
-  // Function to determine the correct dashboard path based on user role - ENHANCED
+  // Function to determine the correct dashboard path using centralized logic
   const getDashboardPath = () => {
-    console.log("🎯 Détermination du chemin du tableau de bord pour:", {
-      email: currentUser?.email,
-      roles: currentUser?.roles,
-      is_demo: currentUser?.is_demo,
-      isDemoInstructor,
-      isDemoBusinessAccount,
-      isDemoEmployee,
-      primaryRole
-    });
-    
-    // Priorité aux comptes démo basés sur l'email
-    if (isDemoInstructor) {
-      console.log("👨‍🏫 Redirection vers /instructor (compte démo instructeur)");
-      return "/instructor";
-    }
-    
-    if (isDemoBusinessAccount) {
-      console.log("🏢 Redirection vers /entreprise (compte démo business)");
-      return "/entreprise";
-    }
-    
-    if (isDemoEmployee) {
-      console.log("👔 Redirection vers /employee (compte démo employé)");
-      return "/employee";
-    }
-    
-    // Puis vérifier les rôles standard
-    if (currentUser?.roles?.includes("admin") || currentUser?.roles?.includes("super_admin")) {
-      console.log("👑 Redirection vers /admin (rôle admin)");
-      return "/admin";
-    }
-    
-    if (currentUser?.roles?.includes("instructor")) {
-      console.log("👨‍🏫 Redirection vers /instructor (rôle instructeur)");
-      return "/instructor";
-    }
-    
-    if (currentUser?.roles?.includes("business_admin")) {
-      console.log("🏢 Redirection vers /entreprise (rôle business_admin)");
-      return "/entreprise";
-    }
-    
-    if (currentUser?.roles?.includes("employee")) {
-      console.log("👔 Redirection vers /employee (rôle employee)");
-      return "/employee";
-    }
-    
-    // Fallback vers étudiant
-    console.log("🎓 Redirection vers /student (par défaut)");
-    return "/student";
+    const dashboardPath = determineUserDashboard(currentUser);
+    console.log("🎯 UserMenu - Dashboard path determined:", dashboardPath);
+    return dashboardPath;
   };
   
   return (
@@ -227,8 +151,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-spartan flex items-center justify-between">
             <span>Mon compte</span>
-            <Badge className={`text-xs ${getRoleBadgeColor(primaryRole)}`}>
-              {getRoleDisplayName(primaryRole)}
+            <Badge className={`text-xs ${getRoleBadgeColor(roleInfo.role)}`}>
+              {roleInfo.displayName}
             </Badge>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -240,7 +164,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
             <User className="mr-2 h-4 w-4" />
             Mon profil
           </DropdownMenuItem>
-          {(currentUser?.roles?.includes("instructor") || isDemoInstructor) && (
+          {(currentUser?.roles?.includes("instructor") || (currentUser?.is_demo && currentUser?.email?.includes('prof'))) && (
             <DropdownMenuItem onClick={() => navigate("/instructor")} className="cursor-pointer">
               <Book className="mr-2 h-4 w-4" />
               Espace instructeur
@@ -252,13 +176,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
               Administration
             </DropdownMenuItem>
           )}
-          {(currentUser?.roles?.includes("business_admin") || isDemoBusinessAccount) && (
+          {(currentUser?.roles?.includes("business_admin") || (currentUser?.is_demo && (currentUser?.email?.includes('business') || currentUser?.email?.includes('entreprise')))) && (
             <DropdownMenuItem onClick={() => navigate("/entreprise")} className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               Gestion d'entreprise
             </DropdownMenuItem>
           )}
-          {(currentUser?.roles?.includes("employee") || isDemoEmployee) && (
+          {(currentUser?.roles?.includes("employee") || (currentUser?.is_demo && currentUser?.email?.includes('employee'))) && (
             <DropdownMenuItem onClick={() => navigate("/employee")} className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               Espace employé

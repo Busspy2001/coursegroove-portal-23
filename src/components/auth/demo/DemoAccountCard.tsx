@@ -13,7 +13,7 @@ export interface DemoAccountCardProps {
   isLoading: boolean;
   isCurrentLoginAttempt?: boolean;
   icon?: React.ReactNode;
-  onLogin: (account: DemoAccount) => void;
+  onLogin: (account: DemoAccount, redirectCallback: (targetDashboard?: string) => void) => void;
 }
 
 export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({ 
@@ -57,7 +57,7 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
     }
   };
   
-  // Gestionnaire de clic optimisé avec retour d'état et notification
+  // Enhanced click handler with centralized redirection
   const handleLogin = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -73,34 +73,28 @@ export const DemoAccountCard: React.FC<DemoAccountCardProps> = ({
         // Log pour débuggage
         console.log(`🔑 Tentative de connexion avec compte démo: ${account.email} (${account.role})`);
         
-        // Enhanced callback for instructor accounts to ensure proper redirection
-        const redirectCallback = () => {
-          console.log(`🎯 Redirection après connexion pour ${account.role}`);
+        // Enhanced callback that receives redirection info from the login handler
+        const redirectCallback = (targetDashboard?: string) => {
+          console.log(`🎯 Demo login callback - Target dashboard: ${targetDashboard}`);
           
-          // Direct redirection based on account role
-          if (account.role === "instructor" || account.email.includes('prof')) {
-            console.log("👨‍🏫 Redirection directe vers /instructor");
-            navigate("/instructor", { replace: true });
-          } else if (account.role === "business_admin" || account.email.includes('business') || account.email.includes('entreprise')) {
-            console.log("🏢 Redirection directe vers /entreprise");
-            navigate("/entreprise", { replace: true });
-          } else if (account.role === "admin" || account.role === "super_admin") {
-            console.log("👑 Redirection directe vers /admin");
-            navigate("/admin", { replace: true });
-          } else if (account.role === "employee") {
-            console.log("👔 Redirection directe vers /employee");
-            navigate("/employee", { replace: true });
+          if (targetDashboard) {
+            console.log(`🎯 Redirection directe vers ${targetDashboard}`);
+            navigate(targetDashboard, { replace: true });
           } else {
-            console.log("🎓 Redirection directe vers /student");
-            navigate("/student", { replace: true });
+            // Fallback redirection based on account role
+            const { determineUserDashboard } = require("@/contexts/auth/redirectionUtils");
+            const fallbackDashboard = determineUserDashboard({ 
+              email: account.email, 
+              roles: [account.role], 
+              is_demo: true 
+            });
+            console.log(`🎯 Fallback redirection vers ${fallbackDashboard}`);
+            navigate(fallbackDashboard, { replace: true });
           }
         };
         
-        // Appel de la fonction de connexion avec callback de redirection
-        onLogin(account);
-        
-        // Set a timeout to ensure redirection happens even if the callback isn't called
-        setTimeout(redirectCallback, 1500);
+        // Call the login function with the enhanced callback
+        onLogin(account, redirectCallback);
         
       } catch (error) {
         console.error("Erreur lors de la connexion:", error);
