@@ -10,7 +10,7 @@ export const handleLoginWithDemo = async (
   setCurrentUser: Function,
   setIsAuthenticated: Function,
   setIsLoggingIn: Function,
-  callback?: () => void
+  callback?: (targetDashboard?: string) => void
 ) => {
   try {
     console.log("🎭 Demo login attempt for:", account.email, "role:", account.role);
@@ -139,7 +139,7 @@ export const handleLoginWithDemo = async (
     }
     
     console.log("✅ Demo login successful for:", account.email, "redirecting to:", targetDashboard);
-    return { user, targetDashboard };
+    return user;
   } catch (error) {
     throw error;
   } finally {

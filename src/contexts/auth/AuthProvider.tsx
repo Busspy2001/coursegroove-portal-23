@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Login with demo account
-  const loginWithDemo = async (account: any, callback?: () => void): Promise<User> => {
+  const loginWithDemo = async (account: any, callback?: (targetDashboard?: string) => void): Promise<User> => {
     try {
       setIsLoggingIn(true);
       console.log("🎭 Demo login attempt:", account.email);

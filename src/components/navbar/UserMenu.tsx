@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Home, Book, Settings, User, LogOut, Loader2 } from "lucide-react";
@@ -12,38 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { UserRole } from "@/contexts/auth/types";
+import { User as AuthUser, UserRole } from "@/contexts/auth/types";
 import { determineUserDashboard, getRoleInfo } from "@/contexts/auth/redirectionUtils";
 
-interface User {
-  name?: string;
-  email?: string;
-  avatar?: string;
-  roles?: UserRole[];
-  is_demo?: boolean;
-}
-
 interface UserMenuProps {
-  currentUser: User | null;
+  currentUser: AuthUser | null;
   onLogout: () => Promise<void>;
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
-  // Detect if user is a demo instructor based on email
-  const isDemoInstructor = currentUser?.is_demo && 
-    currentUser?.email?.toLowerCase().includes('prof');
-  
-  // Detect if user is a demo business account based on email
-  const isDemoBusinessAccount = currentUser?.is_demo && 
-    (currentUser?.email?.toLowerCase().includes('business') || 
-     currentUser?.email?.toLowerCase().includes('entreprise'));
-  
-  // Detect if user is a demo employee based on email
-  const isDemoEmployee = currentUser?.is_demo && 
-    currentUser?.email?.toLowerCase().includes('employee');
   
   const handleLogout = async () => {
     try {
