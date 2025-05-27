@@ -13,10 +13,11 @@ const isDemoInstructor = (user: User): boolean => {
           user.roles?.includes('instructor'));
 };
 
-// Enhanced demo business admin detection function  
+// Enhanced demo business admin detection function with improved patterns
 const isDemoBusinessAdmin = (user: User): boolean => {
   const email = user.email?.toLowerCase() || '';
   
+  // Enhanced detection for business admin accounts
   return (user.is_demo || email.includes('@schoolier.com')) && 
          (email === 'business@schoolier.com' || 
           email === 'entreprise@schoolier.com' || 
@@ -63,14 +64,15 @@ export const determineUserDashboard = (user: User | null): string => {
   if (user.is_demo || user.email?.toLowerCase().includes('@schoolier.com')) {
     console.log("🎭 Demo account detected, using enhanced detection functions");
     
-    if (isDemoInstructor(user)) {
-      console.log("👨‍🏫 Demo instructor detected, redirecting to /instructor");
-      return "/instructor";
-    }
-    
+    // Check business admin FIRST to ensure proper redirection
     if (isDemoBusinessAdmin(user)) {
       console.log("🏢 Demo business admin detected, redirecting to /entreprise");
       return "/entreprise";
+    }
+    
+    if (isDemoInstructor(user)) {
+      console.log("👨‍🏫 Demo instructor detected, redirecting to /instructor");
+      return "/instructor";
     }
     
     if (isDemoAdmin(user)) {
@@ -96,14 +98,14 @@ export const determineUserDashboard = (user: User | null): string => {
     return "/admin";
   }
   
-  if (roles.includes('instructor')) {
-    console.log("👨‍🏫 Instructor role detected, redirecting to /instructor");
-    return "/instructor";
-  }
-  
   if (roles.includes('business_admin')) {
     console.log("🏢 Business admin role detected, redirecting to /entreprise");
     return "/entreprise";
+  }
+  
+  if (roles.includes('instructor')) {
+    console.log("👨‍🏫 Instructor role detected, redirecting to /instructor");
+    return "/instructor";
   }
   
   if (roles.includes('employee')) {
@@ -120,13 +122,13 @@ export const determineUserDashboard = (user: User | null): string => {
 export const getRoleInfo = (user: User | null) => {
   if (!user) return { role: 'student', displayName: 'Étudiant' };
 
-  // Demo account detection with enhanced logic
+  // Demo account detection with enhanced logic - prioritize business detection
   if (user.is_demo || user.email?.toLowerCase().includes('@schoolier.com')) {
-    if (isDemoInstructor(user)) {
-      return { role: 'instructor', displayName: 'Instructeur' };
-    }
     if (isDemoBusinessAdmin(user)) {
       return { role: 'business_admin', displayName: 'Admin Entreprise' };
+    }
+    if (isDemoInstructor(user)) {
+      return { role: 'instructor', displayName: 'Instructeur' };
     }
     if (isDemoAdmin(user)) {
       return { role: 'admin', displayName: 'Admin' };
@@ -142,11 +144,11 @@ export const getRoleInfo = (user: User | null) => {
   if (roles.includes('super_admin') || roles.includes('admin')) {
     return { role: 'admin', displayName: 'Admin' };
   }
-  if (roles.includes('instructor')) {
-    return { role: 'instructor', displayName: 'Instructeur' };
-  }
   if (roles.includes('business_admin')) {
     return { role: 'business_admin', displayName: 'Admin Entreprise' };
+  }
+  if (roles.includes('instructor')) {
+    return { role: 'instructor', displayName: 'Instructeur' };
   }
   if (roles.includes('employee')) {
     return { role: 'employee', displayName: 'Employé' };

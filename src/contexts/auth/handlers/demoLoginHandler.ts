@@ -103,10 +103,15 @@ export const handleLoginWithDemo = async (
       console.warn("⚠️ Error managing user roles:", err);
     }
     
-    // Force update user metadata to ensure demo flag
+    // Force update user metadata to ensure demo flag and correct role info
     try {
       const { error: metadataError } = await supabase.auth.updateUser({
-        data: { is_demo: true, demo_role: account.role }
+        data: { 
+          is_demo: true, 
+          demo_role: account.role,
+          // Add specific flags for business accounts
+          is_business_admin: account.role === 'business_admin'
+        }
       });
       
       if (metadataError) {
@@ -135,13 +140,22 @@ export const handleLoginWithDemo = async (
     // Force ensure demo flag and correct role
     user.is_demo = true;
     
-    // Enhanced role verification and assignment - force the correct role
+    // Enhanced role verification and assignment - force the correct role for business accounts
     console.log(`🔧 Original user roles: ${user.roles?.join(', ') || 'none'}`);
     
-    // Force the role to match the demo account's designated role
+    // Force the role to match the demo account's designated role, especially for business accounts
     if (!user.roles || !user.roles.includes(account.role)) {
       console.log(`🔧 Forcing role assignment: ${account.role} for demo user`);
       user.roles = [account.role]; // Set it as the primary role
+    }
+    
+    // Extra logging for business accounts
+    if (account.role === 'business_admin') {
+      console.log(`🏢 Business admin demo account configured:`, {
+        email: user.email,
+        roles: user.roles,
+        is_demo: user.is_demo
+      });
     }
     
     console.log(`✅ Demo user final roles: ${user.roles.join(', ')}`);
