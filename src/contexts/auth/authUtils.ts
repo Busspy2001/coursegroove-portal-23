@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "./types";
 import { userCache } from "@/integrations/supabase/client";
@@ -42,7 +43,7 @@ export const cacheUser = (user: User): void => {
   }
 };
 
-// Enhanced fetch user roles with demo account fallback
+// Enhanced fetch user roles with demo account priority
 export const fetchUserRoles = async (userId: string, email?: string): Promise<UserRole[]> => {
   try {
     // For demo accounts, prioritize the account's designated role
@@ -50,13 +51,20 @@ export const fetchUserRoles = async (userId: string, email?: string): Promise<Us
       const demoInfo = getDemoAccountInfo(email);
       if (demoInfo) {
         console.log(`🎭 Demo account detected: ${email}, designated role: ${demoInfo.role}`);
-        // Still try to get roles from user_roles but fallback to demo role
+        
+        // For demo accounts, always return the designated role first
+        // Still check user_roles but prioritize the demo role
         const { data: roles, error } = await supabase
           .rpc('get_user_roles', { _user_id: userId });
           
         if (!error && roles && roles.length > 0) {
           console.log(`✅ Found roles in user_roles for demo account: ${roles.join(', ')}`);
-          return roles as UserRole[];
+          // Ensure the demo role is included and prioritized
+          const userRoles = roles as UserRole[];
+          if (!userRoles.includes(demoInfo.role)) {
+            userRoles.unshift(demoInfo.role); // Add demo role as primary
+          }
+          return userRoles;
         } else {
           console.log(`⚠️ No roles in user_roles for demo account, using designated role: ${demoInfo.role}`);
           return [demoInfo.role];
@@ -124,7 +132,7 @@ export const fetchUserRoles = async (userId: string, email?: string): Promise<Us
   }
 };
 
-// Enhanced mapping with better demo support
+// Enhanced mapping with better demo support and role priority
 export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> => {
   try {
     if (!supabaseUser) return null;
@@ -135,7 +143,11 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       return userCache.get(supabaseUser.id);
     }
     
-    console.log("👤 Récupération du profil utilisateur");
+    console.log("👤 Récupération du profil utilisateur pour:", supabaseUser.email);
+    
+    // Get the user's roles using our enhanced system
+    const roles = await fetchUserRoles(supabaseUser.id, supabaseUser.email);
+    console.log(`🎯 Roles récupérés pour ${supabaseUser.email}:`, roles);
     
     // First attempt to get the user's profile from profiles_unified
     let { data: profile, error } = await supabase
@@ -144,8 +156,9 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       .eq('id', supabaseUser.id)
       .single();
     
-    // Get the user's roles using our enhanced system
-    const roles = await fetchUserRoles(supabaseUser.id, supabaseUser.email);
+    // Check if this is a demo account
+    const demoInfo = getDemoAccountInfo(supabaseUser.email);
+    const isDemoAccount = !!demoInfo || supabaseUser.user_metadata?.is_demo;
     
     // If there's an error with profiles_unified (likely RLS policy issue)
     if (error) {
@@ -154,6 +167,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       // Fallback: Use metadata from the auth user
       const name = supabaseUser.user_metadata?.name || 
                    supabaseUser.user_metadata?.full_name || 
+                   demoInfo?.name ||
                    'User';
       
       // Construct user from auth data as fallback
@@ -165,7 +179,7 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
         avatar: supabaseUser.user_metadata?.avatar_url,
         avatar_url: supabaseUser.user_metadata?.avatar_url,
         roles: roles,
-        is_demo: supabaseUser.user_metadata?.is_demo || false
+        is_demo: isDemoAccount
       };
       
       // Cache the user
@@ -179,16 +193,22 @@ export const mapSupabaseUser = async (supabaseUser: any): Promise<User | null> =
       const user: User = {
         id: profile.id,
         email: profile.email || supabaseUser.email || '',
-        name: profile.full_name || supabaseUser.user_metadata?.name || 'User',
-        full_name: profile.full_name,
+        name: profile.full_name || demoInfo?.name || supabaseUser.user_metadata?.name || 'User',
+        full_name: profile.full_name || demoInfo?.name,
         avatar: profile.avatar_url,
         avatar_url: profile.avatar_url,
         roles: roles,
         bio: profile.bio,
         phone: profile.phone || undefined,
-        is_demo: profile.is_demo || false,
+        is_demo: isDemoAccount || profile.is_demo || false,
         company_id: profile.company_id
       };
+      
+      console.log(`✅ User mapped successfully:`, {
+        email: user.email,
+        roles: user.roles,
+        is_demo: user.is_demo
+      });
       
       // Cache the user
       cacheUser(user);

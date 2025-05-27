@@ -63,11 +63,12 @@ export const handleLoginWithDemo = async (
       throw new Error(errorMsg);
     }
     
+    console.log(`🔧 Processing demo account: ${account.email} with role: ${account.role}`);
+    
     // Enhanced role assignment in user_roles table
     try {
-      console.log(`🔧 Ensuring role ${account.role} exists in user_roles for ${data.user.id}`);
-      
       const dbRole = mapRoleForDatabase(account.role);
+      console.log(`🔧 Mapped role ${account.role} to database role: ${dbRole}`);
       
       // Check if role exists in user_roles
       const { data: existingRole, error: checkError } = await supabase
@@ -105,11 +106,13 @@ export const handleLoginWithDemo = async (
     // Force update user metadata to ensure demo flag
     try {
       const { error: metadataError } = await supabase.auth.updateUser({
-        data: { is_demo: true }
+        data: { is_demo: true, demo_role: account.role }
       });
       
       if (metadataError) {
         console.warn("⚠️ Could not update user metadata for demo flag:", metadataError);
+      } else {
+        console.log(`✅ Updated user metadata with demo flag and role: ${account.role}`);
       }
     } catch (err) {
       console.warn("⚠️ Error updating user metadata:", err);
@@ -132,16 +135,18 @@ export const handleLoginWithDemo = async (
     // Force ensure demo flag and correct role
     user.is_demo = true;
     
-    // Enhanced role verification and assignment
+    // Enhanced role verification and assignment - force the correct role
+    console.log(`🔧 Original user roles: ${user.roles?.join(', ') || 'none'}`);
+    
+    // Force the role to match the demo account's designated role
     if (!user.roles || !user.roles.includes(account.role)) {
       console.log(`🔧 Forcing role assignment: ${account.role} for demo user`);
-      user.roles = user.roles || [];
-      if (!user.roles.includes(account.role)) {
-        user.roles.push(account.role);
-      }
+      user.roles = [account.role]; // Set it as the primary role
     }
     
     console.log(`✅ Demo user final roles: ${user.roles.join(', ')}`);
+    console.log(`✅ Demo user is_demo flag: ${user.is_demo}`);
+    console.log(`✅ Demo user email: ${user.email}`);
     
     // Update auth state
     setCurrentUser(user);

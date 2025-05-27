@@ -17,28 +17,50 @@ export const determineUserDashboard = (user: User | null): string => {
   const email = user.email?.toLowerCase() || '';
   const roles = user.roles || [];
 
-  // Priority 1: Demo account detection with enhanced logic
-  if (user.is_demo) {
-    console.log("🎭 Demo account detected, using email pattern detection");
+  // Priority 1: Enhanced demo account detection with email pattern priority
+  if (user.is_demo || email.includes('@schoolier.com')) {
+    console.log("🎭 Demo account detected, using enhanced email pattern detection");
     
-    // Enhanced email pattern detection for demo accounts
-    if (email.includes('prof') || email.includes('instructor') || roles.includes('instructor')) {
-      console.log("👨‍🏫 Demo instructor detected, redirecting to /instructor");
+    // Enhanced email pattern detection for demo accounts - be more specific
+    if (email === 'prof@schoolier.com' || email.includes('prof') || email.includes('instructor')) {
+      console.log("👨‍🏫 Demo instructor detected by email, redirecting to /instructor");
       return "/instructor";
     }
     
-    if (email.includes('business') || email.includes('entreprise') || roles.includes('business_admin')) {
-      console.log("🏢 Demo business admin detected, redirecting to /entreprise");
+    if (email === 'business@schoolier.com' || email === 'entreprise@schoolier.com' || 
+        email.includes('business') || email.includes('entreprise')) {
+      console.log("🏢 Demo business admin detected by email, redirecting to /entreprise");
       return "/entreprise";
     }
     
-    if (email.includes('admin') || roles.includes('admin') || roles.includes('super_admin')) {
-      console.log("👑 Demo admin detected, redirecting to /admin");
+    if (email === 'admin@schoolier.com' || email.includes('admin')) {
+      console.log("👑 Demo admin detected by email, redirecting to /admin");
       return "/admin";
     }
     
-    if (email.includes('employee') || roles.includes('employee')) {
-      console.log("👔 Demo employee detected, redirecting to /employee");
+    if (email === 'employee@schoolier.com' || email.includes('employee')) {
+      console.log("👔 Demo employee detected by email, redirecting to /employee");
+      return "/employee";
+    }
+    
+    // Also check roles for demo accounts
+    if (roles.includes('instructor')) {
+      console.log("👨‍🏫 Demo instructor detected by role, redirecting to /instructor");
+      return "/instructor";
+    }
+    
+    if (roles.includes('business_admin')) {
+      console.log("🏢 Demo business admin detected by role, redirecting to /entreprise");
+      return "/entreprise";
+    }
+    
+    if (roles.includes('super_admin') || roles.includes('admin')) {
+      console.log("👑 Demo admin detected by role, redirecting to /admin");
+      return "/admin";
+    }
+    
+    if (roles.includes('employee')) {
+      console.log("👔 Demo employee detected by role, redirecting to /employee");
       return "/employee";
     }
     
@@ -81,17 +103,18 @@ export const getRoleInfo = (user: User | null) => {
   const roles = user.roles || [];
 
   // Demo account detection with enhanced logic
-  if (user.is_demo) {
-    if (email.includes('prof') || email.includes('instructor') || roles.includes('instructor')) {
+  if (user.is_demo || email.includes('@schoolier.com')) {
+    if (email === 'prof@schoolier.com' || email.includes('prof') || email.includes('instructor') || roles.includes('instructor')) {
       return { role: 'instructor', displayName: 'Instructeur' };
     }
-    if (email.includes('business') || email.includes('entreprise') || roles.includes('business_admin')) {
+    if (email === 'business@schoolier.com' || email === 'entreprise@schoolier.com' || 
+        email.includes('business') || email.includes('entreprise') || roles.includes('business_admin')) {
       return { role: 'business_admin', displayName: 'Admin Entreprise' };
     }
-    if (email.includes('admin') || roles.includes('admin') || roles.includes('super_admin')) {
+    if (email === 'admin@schoolier.com' || email.includes('admin') || roles.includes('admin') || roles.includes('super_admin')) {
       return { role: 'admin', displayName: 'Admin' };
     }
-    if (email.includes('employee') || roles.includes('employee')) {
+    if (email === 'employee@schoolier.com' || email.includes('employee') || roles.includes('employee')) {
       return { role: 'employee', displayName: 'Employé' };
     }
   }
