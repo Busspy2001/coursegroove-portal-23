@@ -24,34 +24,47 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Detect demo instructor account based on email
+  // Enhanced demo instructor detection
   const isDemoInstructor = currentUser?.is_demo && 
-    currentUser?.email?.toLowerCase().includes('prof');
+    (currentUser?.email?.toLowerCase().includes('prof') || 
+     currentUser?.email?.toLowerCase() === 'prof@schoolier.com');
   
-  // Check if user has instructor role or is a demo instructor
-  const hasInstructorAccess = hasRole("instructor") || isDemoInstructor;
+  // Enhanced instructor access check - prioritize demo detection
+  const hasInstructorAccess = isDemoInstructor || hasRole("instructor");
   
   // States for authentication and role warnings
   const [showAuthWarning, setShowAuthWarning] = useState(false);
   const [showRoleWarning, setShowRoleWarning] = useState(false);
   const [isLayoutLoading, setIsLayoutLoading] = useState(true);
 
-  // Show warnings instead of redirecting
+  // Enhanced access control logic
   useEffect(() => {
+    console.log("🔍 InstructorLayout - User check:", {
+      email: currentUser?.email,
+      is_demo: currentUser?.is_demo,
+      roles: currentUser?.roles,
+      isDemoInstructor,
+      hasInstructorAccess,
+      isAuthenticated
+    });
+
     if (!isAuthenticated) {
+      console.log("❌ InstructorLayout - Not authenticated");
       setShowAuthWarning(true);
       setShowRoleWarning(false);
       setIsLayoutLoading(false);
     } else if (!hasInstructorAccess) {
+      console.log("❌ InstructorLayout - No instructor access");
       setShowAuthWarning(false);
       setShowRoleWarning(true);
       setIsLayoutLoading(false);
     } else {
+      console.log("✅ InstructorLayout - Access granted");
       setShowAuthWarning(false);
       setShowRoleWarning(false);
       setIsLayoutLoading(false);
     }
-  }, [isAuthenticated, hasInstructorAccess]);
+  }, [isAuthenticated, hasInstructorAccess, currentUser, isDemoInstructor]);
 
   const handleLogin = () => {
     navigate("/login");
@@ -94,6 +107,11 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
             <p className="text-muted-foreground mb-6">
               Cette section est réservée aux utilisateurs ayant le rôle d'instructeur.
             </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Utilisateur actuel: {currentUser?.email} <br />
+              Rôles: {currentUser?.roles?.join(', ') || 'aucun'} <br />
+              Compte démo: {currentUser?.is_demo ? 'Oui' : 'Non'}
+            </p>
             <Button 
               onClick={handleGoToDashboard}
               className="bg-schoolier-teal hover:bg-schoolier-dark-teal"
@@ -123,6 +141,7 @@ const InstructorLayout: React.FC<InstructorLayoutProps> = ({
     );
   }
 
+  // Main instructor layout - only shown when access is granted
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full">
