@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import InstructorLayout from "@/components/instructor/InstructorLayout";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,55 +24,12 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip as RechartsTooltip,
-  LineChart,
-  Line
 } from "recharts";
-import InstructorLayout from "@/components/instructor/InstructorLayout";
 import ResponsiveChartContainer from "@/components/instructor/ResponsiveChartContainer";
-import { Course } from "@/components/instructor/InstructorCoursesList";
-
-// Function to adapt instructor courses to Course interface
-const adaptCourses = (instructorCourses: any[]): Course[] => {
-  return instructorCourses.map(course => ({
-    id: course.id,
-    title: course.title,
-    description: course.title || "", // Using title as fallback description
-    thumbnail_url: course.thumbnail || "/placeholder.svg",
-    status: course.status === "published" ? "published" : "draft",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    total_students: course.total_students || 0,
-    average_rating: course.rating || 0,
-    total_lessons: 10, // Default value
-    duration: "8h", // Default value
-    price: course.price || 0
-  }));
-};
 
 const InstructorDashboard = () => {
-  const { loading, stats, courses, refetch } = useInstructorData();
+  const { loading, stats, courses } = useInstructorData();
   const navigate = useNavigate();
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  
-  // Ensure we don't get stuck in a loading state
-  useEffect(() => {
-    // Set a timeout to force load completion after 3 seconds if still loading
-    const timer = setTimeout(() => {
-      if (!initialLoadComplete) {
-        setInitialLoadComplete(true);
-        console.log("Force-completing instructor dashboard load after timeout");
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [initialLoadComplete]);
-  
-  // Mark load as complete when data arrives
-  useEffect(() => {
-    if (!loading && stats && courses) {
-      setInitialLoadComplete(true);
-    }
-  }, [loading, stats, courses]);
   
   // Mock data for charts
   const revenueData = [
@@ -89,14 +47,8 @@ const InstructorDashboard = () => {
     { id: 3, type: "revenue", message: "Paiement de 920€ reçu", time: "Il y a 2 jours" }
   ];
 
-  // Convert InstructorCourse[] to Course[]
-  const adaptedCourses = adaptCourses(courses);
-
-  // Use either the actual loading state or our safety timeout state
-  const effectiveLoading = loading && !initialLoadComplete;
-
   return (
-    <InstructorLayout loading={effectiveLoading}>
+    <InstructorLayout loading={loading}>
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Tableau de bord</h1>
         <p className="text-muted-foreground">
@@ -113,8 +65,8 @@ const InstructorDashboard = () => {
                 <h3 className="text-2xl md:text-3xl font-bold mt-1">{stats?.totalCourses || 0}</h3>
                 <div className="flex items-center mt-1">
                   <span className="text-xs text-muted-foreground">
-                    {adaptedCourses?.filter(c => c.status === "published").length || 0} publiés,{" "}
-                    {adaptedCourses?.filter(c => c.status === "draft").length || 0} brouillons
+                    {courses?.filter(c => c.status === "published").length || 0} publiés,{" "}
+                    {courses?.filter(c => c.status === "draft").length || 0} brouillons
                   </span>
                 </div>
               </div>
@@ -271,83 +223,6 @@ const InstructorDashboard = () => {
               Voir toutes les notifications
             </Button>
           </CardFooter>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <Card className="order-2 lg:order-1">
-          <CardHeader className="pb-3">
-            <div className="flex justify-between items-center">
-              <CardTitle>Tâches à faire</CardTitle>
-              <Button variant="ghost" size="sm" className="gap-1">
-                <span className="hidden sm:inline">Tout voir</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="px-6">
-            <ul className="space-y-4">
-              <li className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                <span className="text-sm">Répondre aux 3 avis en attente</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-amber-500"></div>
-                <span className="text-sm">Finaliser le cours "Python pour débutants"</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span className="text-sm">Créer un quiz pour le module 3</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <span className="text-sm">Mettre à jour la description du cours</span>
-              </li>
-            </ul>
-          </CardContent>
-          <CardFooter className="pt-0 pb-6 px-6">
-            <Button variant="outline" className="w-full">
-              Créer une tâche
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card className="order-1 lg:order-2 col-span-1 lg:col-span-2">
-          <CardHeader className="pb-3">
-            <div className="flex justify-between items-center">
-              <CardTitle>Cours populaires</CardTitle>
-              <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate("/instructor/courses")}>
-                <span className="hidden sm:inline">Voir tous</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="px-6">
-            <div className="space-y-4">
-              {adaptedCourses.slice(0, 3).map((course, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 rounded bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold"
-                  >
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm truncate">{course.title}</h4>
-                    <p className="text-xs text-muted-foreground">{course.total_students} étudiants</p>
-                  </div>
-                  <div>
-                    <Badge variant="outline" className={
-                      course.status === "published" 
-                        ? "bg-green-50 text-green-700 border-green-200" 
-                        : "bg-amber-50 text-amber-700 border-amber-200"
-                    }>
-                      {course.status === "published" ? "Publié" : "Brouillon"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
         </Card>
       </div>
     </InstructorLayout>
